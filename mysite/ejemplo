@@ -1,0 +1,55 @@
+if code:
+          especimenes_list = especimenes_list.filter(code__exact= code)
+      if label:
+          especimenes_list = especimenes_list.filter(label__icontains= label)
+      if notes:
+          especimenes_list = especimenes_list.filter(notes__icontains=notes )
+      if old_code:
+          especimenes_list = especimenes_list.filter(old_code__icontains=old_code )
+      if collection_day:
+          especimenes_list = especimenes_list.filter(collection_day__icontains=collection_day )
+      if collection_year:
+          especimenes_list = especimenes_list.filter(collection_year__icontains=collection_year )
+      if death_date:
+          especimenes_list = especimenes_list.filter(death_date__icontains=death_date )
+      if sex_code:
+          especimenes_list = especimenes_list.filter(sex_code__icontains=sex_code )
+      if refrigerator:
+          especimenes_list = especimenes_list.filter(refrigerator__icontains=refrigerator)
+      if tray:
+          especimenes_list = especimenes_list.filter(tray__icontains= tray)
+      if row:
+          especimenes_list = especimenes_list.filter(row__icontains=row )
+      if location:
+          especimenes_list = especimenes_list.filter(location__icontains= location)
+      if location_code:
+          especimenes_list = especimenes_list.filter(location_code__icontains=location_code )
+
+      if column:
+          especimenes_list = especimenes_list.filter(column__icontains=column)
+      if genus:
+          especimenes_list = especimenes_list.filter(genus__icontains= genus)
+      if species:
+          especimenes_list = especimenes_list.filter(species__icontains= species)
+
+      if country:
+          especimenes_list = especimenes_list.filter(country__icontains=country)
+      if province:
+          especimenes_list = especimenes_list.filter(province__icontains=province)
+      if latitude:
+          especimenes_list = especimenes_list.filter(latitude__icontains=latitude)
+      if longitude:
+          especimenes_list = especimenes_list.filter(longitude__icontains=longitude)
+      if elevation:
+          especimenes_list = especimenes_list.filter(elevation__icontains=elevation)
+      if light_dark:
+          especimenes_list = especimenes_list.filter(light_dark__icontains=light_dark)
+      if histology_location:
+          especimenes_list = especimenes_list.filter(histology_location__icontains=histology_location)
+      if histology_stage_next_up:
+          especimenes_list = especimenes_list.filter(histology_stage_next_up__icontains=histology_stage_next_up)
+      if histology_stage_performed:
+          especimenes_list = especimenes_list.filter(histology_stage_performed__icontains=histology_stage_performed)
+      if purpose:
+          especimenes_list = especimenes_list.filter(purpose__icontains=purpose)
+      
