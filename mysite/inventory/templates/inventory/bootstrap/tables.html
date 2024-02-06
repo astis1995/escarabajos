@@ -413,7 +413,7 @@
 
                     <!-- Page Heading -->
                     <h1 class="h3 mb-2 text-gray-800">Inventory</h1>
-                    <p class="mb-4">CICIMA-UCR Biomaterials and Biomimesis Laboratory's General Beetle Inventory</a>.</p>
+                    <p class="mb-4">CICIMA-UCR Biomaterials and Biomimicry Laboratory's General Beetle Inventory</a>.</p>
 
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
@@ -494,7 +494,8 @@
                                     <tbody>
                                       {% for especimen in especimenes_list %}
                                           <tr>
-                                          <td>{{ especimen.code }}</td>
+
+                                          <td> <a href="{% url "inventory:specimen" especimen.code %}">{{ especimen.code }}</a> </td>
                                           <td>{{ especimen.genus }}</td>
                                           <td>{{ especimen.species }}</td>
                                           <td>{{ especimen.label }}</td>

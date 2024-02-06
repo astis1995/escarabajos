@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse,HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
 from .models import Specimen
 from django.template import loader
 from django.views import generic
@@ -28,7 +29,10 @@ def index(request):
             #if :
             #    especimenes_list = especimenes_list.filter(__icontains=)
           if form.cleaned_data["code"]:
-              especimenes_list = especimenes_list.filter(code__exact= form.cleaned_data["code"])
+              try:
+                  especimenes_list = especimenes_list.filter(code__exact= form.cleaned_data["code"])
+              except:
+                  print("Invalid code")
           if form.cleaned_data["label"]:
               especimenes_list = especimenes_list.filter(label__icontains= form.cleaned_data["label"] )
           if form.cleaned_data["notes"] :
@@ -38,7 +42,11 @@ def index(request):
           if form.cleaned_data["collection_day"]:
               especimenes_list = especimenes_list.filter(collection_day__icontains= form.cleaned_data["collection_day"] )
           if form.cleaned_data["collection_year"]:
-              especimenes_list = especimenes_list.filter(collection_year__icontains= form.cleaned_data["collection_year"] )
+              try:
+                  especimenes_list = especimenes_list.filter(collection_year__exact= form.cleaned_data["collection_year"] )
+              except:
+                  print("Invalid code")
+
           if form.cleaned_data["death_date"]:
               especimenes_list = especimenes_list.filter(death_date__icontains= form.cleaned_data["death_date"] )
           if form.cleaned_data["sex_code"]:
@@ -111,3 +119,22 @@ def results(request):
         "especimenes_list": especimenes_list,
     }
     return HttpResponse(template.render(context, request))
+
+def specimen(request, specimen_code):
+    especimenes_list = Specimen.objects.filter(code__exact = specimen_code)
+    specimen = get_object_or_404(Specimen, pk=specimen_code)
+    template = loader.get_template("inventory/bootstrap/specimen.html")
+
+    if specimen:
+        try:
+
+            context = {
+                "specimen": specimen,
+            }
+            return HttpResponse(template.render(context, request))
+        except (KeyError, Specimen.DoesNotExist):
+            # Redisplay the question voting form.
+            context = {
+                "error_message": "Specimen does not exist",
+            }
+            return HttpResponse(template.render(context, request))
