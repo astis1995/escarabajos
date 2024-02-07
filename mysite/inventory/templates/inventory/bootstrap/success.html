@@ -1,5 +1,4 @@
-{% load static %}
-
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -10,22 +9,16 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>CICIMA General Beetle Inventory</title>
+    <title>SB Admin 2 - Blank</title>
 
-    <!-- Custom fonts for this template -->
-    <link rel="stylesheet" href="{% static 'inventory/bootstrap/vendor/fontawesome-free/css/all.min.css' %}">
+    <!-- Custom fonts for this template-->
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
 
-    <!-- Custom styles for this template -->
-    <link rel="stylesheet" href="{% static 'inventory/bootstrap/css/sb-admin-2.min.css' %}">
-
-    <!link href="css/sb-admin-2.min.css" rel="stylesheet">
-
-    <!-- Custom styles for this page -->
-    <!link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'inventory/bootstrap/vendor/datatables/dataTables.bootstrap4.min.css' %}">
+    <!-- Custom styles for this template-->
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
 
 </head>
 
@@ -34,55 +27,11 @@
     <!-- Page Wrapper -->
     <div id="wrapper">
 
-      <!-- Sidebar -->
-<nav id="sidebarMenu" class="collapse d-lg-block sidebar collapse bg-white">
-  <div class="position-sticky">
-    <div class="list-group list-group-flush mx-3 mt-4">
-
-      <!-- Collapsed content -->
-      <ul id="collapseExample1" class="collapse show list-group list-group-flush">
-        <li class="list-group-item py-1">
-
-          <div class="input-group">
-            <div class="form-outline" data-mdb-input-init>
-
-              <div>
-              <label >Search</label>
-
-              </div>
-              <form id="search-form" action="{% url "inventory:results" %}" method="post">
-              {% csrf_token %}
-              {% for field in field_names %}
-              <input id="{{field}}" type="search" name="{{field}}" class="form-control" placeholder="{{field}}"/>
-              {% endfor %}
-              <button id="search-button" type="submit" class="btn btn-primary">
-                <i class="fas fa-search"></i>
-              </button>
-
-              </form>
-
-
-            </div>
-
-          </div>
-
-        </li>
-
-
-
-
-      </ul>
-
-    </div>
-  </div>
-</nav>
-<!-- Sidebar -->
-
-        <!-- Sidebar >
+        <!-- Sidebar -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-            <! Sidebar - Brand -->
-            <!--a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-laugh-wink"></i>
                 </div>
@@ -90,25 +39,25 @@
             </a>
 
             <!-- Divider -->
-            <!--hr class="sidebar-divider my-0">
+            <hr class="sidebar-divider my-0">
 
             <!-- Nav Item - Dashboard -->
-            <!--li class="nav-item">
+            <li class="nav-item">
                 <a class="nav-link" href="index.html">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
 
             <!-- Divider -->
-            <!--hr class="sidebar-divider">
+            <hr class="sidebar-divider">
 
             <!-- Heading -->
-            <!--div class="sidebar-heading">
+            <div class="sidebar-heading">
                 Interface
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
-            <!--li class="nav-item">
+            <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
                     aria-expanded="true" aria-controls="collapseTwo">
                     <i class="fas fa-fw fa-cog"></i>
@@ -124,7 +73,7 @@
             </li>
 
             <!-- Nav Item - Utilities Collapse Menu -->
-            <!--li class="nav-item">
+            <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
                     aria-expanded="true" aria-controls="collapseUtilities">
                     <i class="fas fa-fw fa-wrench"></i>
@@ -143,21 +92,22 @@
             </li>
 
             <!-- Divider -->
-            <!--hr class="sidebar-divider">
+            <hr class="sidebar-divider">
 
             <!-- Heading -->
-            <!--div class="sidebar-heading">
+            <div class="sidebar-heading">
                 Addons
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
-            <!--li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
-                    aria-expanded="true" aria-controls="collapsePages">
+            <li class="nav-item active">
+                <a class="nav-link" href="#" data-toggle="collapse" data-target="#collapsePages" aria-expanded="true"
+                    aria-controls="collapsePages">
                     <i class="fas fa-fw fa-folder"></i>
                     <span>Pages</span>
                 </a>
-                <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+                <div id="collapsePages" class="collapse show" aria-labelledby="headingPages"
+                    data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Login Screens:</h6>
                         <a class="collapse-item" href="login.html">Login</a>
@@ -166,20 +116,20 @@
                         <div class="collapse-divider"></div>
                         <h6 class="collapse-header">Other Pages:</h6>
                         <a class="collapse-item" href="404.html">404 Page</a>
-                        <a class="collapse-item" href="blank.html">Blank Page</a>
+                        <a class="collapse-item active" href="blank.html">Blank Page</a>
                     </div>
                 </div>
             </li>
 
             <!-- Nav Item - Charts -->
-            <!--li class="nav-item">
+            <li class="nav-item">
                 <a class="nav-link" href="charts.html">
                     <i class="fas fa-fw fa-chart-area"></i>
                     <span>Charts</span></a>
             </li>
 
             <!-- Nav Item - Tables -->
-            <!--li class="nav-item active">
+            <li class="nav-item">
                 <a class="nav-link" href="tables.html">
                     <i class="fas fa-fw fa-table"></i>
                     <span>Tables</span></a>
@@ -206,11 +156,9 @@
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
                     <!-- Sidebar Toggle (Topbar) -->
-                    <form class="form-inline">
-                        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                            <i class="fa fa-bars"></i>
-                        </button>
-                    </form>
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
 
                     <!-- Topbar Search -->
                     <form
@@ -374,15 +322,9 @@
 
                         <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="/accounts/login" id="userDropdown" role="button"
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">
-                                  {% if user %}
-                                  {{user}}
-                                  {% else %}
-                                  Login
-                                  {% endif %}
-                                </span>
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Douglas McGee</span>
                                 <img class="img-profile rounded-circle"
                                     src="img/undraw_profile.svg">
                             </a>
@@ -418,132 +360,8 @@
                 <div class="container-fluid">
 
                     <!-- Page Heading -->
-                    <h1 class="h3 mb-2 text-gray-800">Inventory</h1>
-                    <p class="mb-4">CICIMA-UCR Biomaterials and Biomimicry Laboratory's General Beetle Inventory</a>.</p>
-                    <a href="{% url "inventory:upload" %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                            class="fas fa-upload fa-sm text-white-50"></i> Upload specimens</a>
-                    <a href="./download" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                                    class="fas fa-download fa-sm text-white-50"></i> Download catalog</a>
-                    <!-- DataTales Example -->
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">General Inventory</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                          <th>CODE</th>
-                                          <th>GENUS</th>
-                                          <th>SPECIES</th>
-                                          <th>LABEL</th>
-                                          <th>NOTES</th>
-                                          <th>OLD_CODE</th>
-                                          <th>COLLECTION_DAY</th>
-                                          <th>COLLECTION_MONTH</th>
-                                          <th>COLLECTION_YEAR</th>
-                                          <th>DEATH_DATE</th>
-                                          <th>SEX_CODE</th>
-                                          <th>REFRIGERATOR</th>
-                                          <th>TRAY_NUMBER</th>
-                                          <th>ROW_NUMBER</th>
-                                          <th>COLUMN_NUMBER</th>
-                                          <th>LOCATION_CODE</th>
-                                          <th>LOCATION</th>
-                                          <th>COUNTRY</th>
-                                          <th>PROVINCE</th>
-                                          <th>LATITUDE</th>
-                                          <th>LONGITUDE</th>
-                                          <th>ELEVATION</th>
-                                          <th>LIGHT_DARK</th>
-                                          <th>HISTOLOGY_LOCATION</th>
-                                          <th>HISTOLOGY_STAGED_PERFORMED</th>
-                                          <th>HISTOLOGY_STAGE_NEXT_UP</th>
-                                          <th>RNA_LOCATION</th>
-                                          <th>ETOH_VOUCHER</th>
-                                          <th>ELYTRON</th>
-                                          <th>PURPOSE</th>
-                                        </tr>
-                                    </thead>
-                                    <tfoot>
-                                        <tr>
-                                          <th>CODE</th>
-                                          <th>GENUS</th>
-                                          <th>SPECIES</th>
-                                          <th>LABEL</th>
-                                          <th>NOTES</th>
-                                          <th>OLD_CODE</th>
-                                          <th>COLLECTION_DAY</th>
-                                          <th>COLLECTION_MONTH</th>
-                                          <th>COLLECTION_YEAR</th>
-                                          <th>DEATH_DATE</th>
-                                          <th>SEX_CODE</th>
-                                          <th>REFRIGERATOR</th>
-                                          <th>TRAY_NUMBER</th>
-                                          <th>ROW_NUMBER</th>
-                                          <th>COLUMN_NUMBER</th>
-                                          <th>LOCATION_CODE</th>
-                                          <th>LOCATION</th>
-                                          <th>COUNTRY</th>
-                                          <th>PROVINCE</th>
-                                          <th>LATITUDE</th>
-                                          <th>LONGITUDE</th>
-                                          <th>ELEVATION</th>
-                                          <th>LIGHT_DARK</th>
-                                          <th>HISTOLOGY_LOCATION</th>
-                                          <th>HISTOLOGY_STAGED_PERFORMED</th>
-                                          <th>HISTOLOGY_STAGE_NEXT_UP</th>
-                                          <th>RNA_LOCATION</th>
-                                          <th>ETOH_VOUCHER</th>
-                                          <th>ELYTRON</th>
-                                          <th>PURPOSE</th>
-                                        </tr>
-                                    </tfoot>
-                                    <tbody>
-                                      {% for especimen in especimenes_list %}
-                                          <tr>
-
-                                          <td> <a href="{% url "inventory:specimen" especimen.code %}">{{ especimen.code }}</a> </td>
-                                          <td>{{ especimen.genus }}</td>
-                                          <td>{{ especimen.species }}</td>
-                                          <td>{{ especimen.label }}</td>
-                                          <td>{{ especimen.notes }}</td>
-                                          <td>{{ especimen.old_code }}</td>
-                                          <td>{{ especimen.collection_day }}</td>
-                                          <td>{{ especimen.collection_month }}</td>
-                                          <td>{{ especimen.collection_year }}</td>
-                                          <td>{{ especimen.death_date }}</td>
-                                          <td>{{ especimen.sex_code }}</td>
-                                          <td>{{ especimen.refrigerator }}</td>
-                                          <td>{{ especimen.tray }}</td>
-                                          <td>{{ especimen.row }}</td>
-                                          <td>{{ especimen.column }}</td>
-                                          <td>{{ especimen.location_code }}</td>
-                                          <td>{{ especimen.location }}</td>
-                                          <td>{{ especimen.country }}</td>
-                                          <td>{{ especimen.province }}</td>
-                                          <td>{{ especimen.latitude }}</td>
-                                          <td>{{ especimen.longitude }}</td>
-                                          <td>{{ especimen.elevation }}</td>
-                                          <td>{{ especimen.light_dark }}</td>
-                                          <td>{{ especimen.histology_location }}</td>
-                                          <td>{{ especimen.histology_stage_performed }}</td>
-                                          <td>{{ especimen.histology_stage_next_up }}</td>
-                                          <td>{{ especimen.rna_location }}</td>
-                                          <td>{{ especimen.etoh_voucher }}</td>
-                                          <td>{{ especimen.elytron }}</td>
-                                          <td>{{ especimen.purpose }}</td>
-
-                                          </tr>
-                                          {% endfor %}
-
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
+                    <h1 class="h3 mb-4 text-gray-800">Success</h1>
+                    <a class="h3 mb-4 text-gray-800">Click here to go back to the main page</a>
                 </div>
                 <!-- /.container-fluid -->
 
@@ -600,13 +418,6 @@
 
     <!-- Custom scripts for all pages-->
     <script src="js/sb-admin-2.min.js"></script>
-
-    <!-- Page level plugins -->
-    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
-    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
-
-    <!-- Page level custom scripts -->
-    <script src="js/demo/datatables-demo.js"></script>
 
 </body>
 

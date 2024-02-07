@@ -4,7 +4,44 @@ from django.shortcuts import get_object_or_404, render
 from .models import Specimen
 from django.template import loader
 from django.views import generic
-from .forms import SpecimenSearchForm
+from .forms import *
+from django.contrib.auth.decorators import login_required
+import pandas as pd
+
+#constants
+
+columns_names = [
+"code",
+"label",
+"notes",
+"old_code",
+"collection_day",
+"collection_month",
+"collection_year",
+"death_date",
+"sex_code",
+"refrigerator",
+"tray",
+"row" ,
+"column",
+"location_code",
+"location",
+"genus",
+"species",
+"country",
+"province",
+"latitude",
+"longitude",
+"elevation",
+"light_dark",
+"histology_location" ,
+"histology_stage_performed",
+"histology_stage_next_up",
+"rna_location" ,
+"etoh_voucher" ,
+"elytron",
+"purpose"
+]
 #import HttpRequest
 
 def index(request):
@@ -28,6 +65,7 @@ def index(request):
 
             #if :
             #    especimenes_list = especimenes_list.filter(__icontains=)
+
           if form.cleaned_data["code"]:
               try:
                   especimenes_list = especimenes_list.filter(code__exact= form.cleaned_data["code"])
@@ -98,7 +136,7 @@ def index(request):
           return HttpResponse(template.render(context, request))
 
         print(request.POST.get("csrfmiddlewaretoken"))
-        print("aylmaaaaaaoooooPOST")
+
 
 
     return HttpResponse(template.render(context, request))
@@ -119,6 +157,71 @@ def results(request):
         "especimenes_list": especimenes_list,
     }
     return HttpResponse(template.render(context, request))
+
+def handle_uploaded_file(f):
+    with open("temp.txt", "wb+") as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+    df = pd.read_csv("temp.txt", sep="\t", header=0, names = columns_names)
+    for index, row in df.iterrows():
+        dict = {}
+        for name in columns_names:
+            #print(name)
+            #print(row[name])
+            dict[name] = row[name]
+        print("dict")
+        print(dict)
+
+        if Specimen.objects.filter(code__exact = dict["code"]):
+            pass
+        else:
+            new_specimen = Specimen.objects.create(**dict)
+            new_specimen.save()
+
+def upload(request):
+    template = loader.get_template("inventory/bootstrap/upload.html")
+    context = {}
+    if request.method == "POST":
+
+        form= UploadFileForm(request.POST, request.FILES)
+        print("°°°°°°°°°°°|||°°°°°°°°°°°°°°°°°°°°")
+
+        if form.is_valid():
+            print("****************************************************")
+
+            handle_uploaded_file(request.FILES["file"])
+    else:
+        form = UploadFileForm()
+
+
+    return render(request,"inventory/bootstrap/upload.html", {"form":form} )
+
+import csv
+
+@login_required
+def download(request):
+    template = loader.get_template("inventory/bootstrap/download.html")
+    specimens = Specimen.objects.all()
+
+    response = HttpResponse(
+        content_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="catalog.txt"'},
+    )
+
+    writer = csv.writer(response, delimiter="\t")
+
+    row_data_header = []
+    for name in columns_names:
+        row_data_header.append(name)
+    writer.writerow(row_data_header)
+
+    for specimen in specimens:
+        row_data = [specimen.code, specimen.label, specimen.notes, specimen.old_code, specimen.collection_day, specimen.collection_month, specimen.collection_year , specimen.death_date, specimen.sex_code, specimen.refrigerator, specimen.tray, specimen.row, specimen.column, specimen.location_code, specimen.location, specimen.genus, specimen.species, specimen.country, specimen.province, specimen.latitude, specimen.longitude, specimen.elevation, specimen.light_dark, specimen.histology_location, specimen.histology_stage_performed, specimen.histology_stage_next_up, specimen.rna_location, specimen.etoh_voucher, specimen.elytron, specimen.purpose.rstrip()]
+        writer.writerow(row_data)
+
+
+    return response
+
 
 def specimen(request, specimen_code):
     especimenes_list = Specimen.objects.filter(code__exact = specimen_code)
