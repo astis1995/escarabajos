@@ -4,7 +4,7 @@ from django.utils import timezone
 
 
 class Specimen(models.Model):
-    code = models.IntegerField(max_length=150, primary_key=True)
+    code = models.CharField(max_length=150, primary_key=True)
     label  = models.CharField(max_length=150, blank=True)
     notes = models.CharField(max_length=500, blank=True)
     old_code  = models.CharField(max_length=150, blank=True)

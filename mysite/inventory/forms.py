@@ -41,3 +41,7 @@ class SpecimenSearchForm(forms.Form):
     etoh_voucher = forms.CharField(label="etoh_voucher", required=False)
     elytron = forms.CharField(label="elytron", required=False)
     purpose= forms.CharField(label="purpose", required=False)
+
+class UploadFileForm(forms.Form):
+    #title = forms.CharField(max_length=50)
+    file = forms.FileField()
