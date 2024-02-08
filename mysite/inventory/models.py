@@ -35,4 +35,4 @@ class Specimen(models.Model):
     elytron = models.CharField(max_length=150, blank=True)
     purpose= models.CharField(max_length=150, blank=True)
     def __str__(self):
-        return self.code
+        return str(self.code)

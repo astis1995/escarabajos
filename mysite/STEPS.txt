@@ -8,6 +8,14 @@ create database in pythonanywhere, estebanvsotom$inventory
 user: estebanvsotom
 password: CICIMAroot
 database: estebanvsotom$inventory
+    "default2": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "estebanvsotom$inventory",
+        "USER": "estebanvsotom",
+        "PASSWORD": "CICIMAroot",
+        "HOST": "estebanvsotom.mysql.pythonanywhere-services.com",
+        "PORT": "3306",
+    }
 crear tabla
 CREATE TABLE your_table_name (
     ->     code INT PRIMARY KEY,
