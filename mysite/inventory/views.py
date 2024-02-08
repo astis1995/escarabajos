@@ -167,7 +167,38 @@ def handle_uploaded_file(f, request):
     with open("temp.txt", "wb+") as destination:
         for chunk in f.chunks():
             destination.write(chunk)
-    df = pd.read_csv("temp.txt", sep="\t", header=0, names = columns_names)
+    df = pd.read_csv("temp.txt", sep="\t", header=0, names = columns_names, dtype={
+    "code": "string",
+    "label": "string",
+    "notes": "string",
+    "old_code": "string",
+    "collection_day": "string",
+    "collection_month": "string",
+    "collection_year": "string",
+    "death_date": "string",
+    "sex_code": "string",
+    "refrigerator": "string",
+    "tray": "string",
+    "row": "string",
+    "column": "string",
+    "location_code": "string",
+    "location": "string",
+    "genus": "string",
+    "species": "string",
+    "country": "string",
+    "province": "string",
+    "latitude": "string",
+    "longitude": "string",
+    "elevation": "string",
+    "light_dark": "string",
+    "histology_location": "string",
+    "histology_stage_performed": "string",
+    "histology_stage_next_up": "string",
+    "rna_location": "string",
+    "etoh_voucher": "string",
+    "elytron": "string",
+    "purpose": "string"
+    })
     total = 0
     #print("°°°°°°°°°°°Dataframe°°°°°°°°°°°°°°°°°°°°")
     #print(df)
