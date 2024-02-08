@@ -169,8 +169,8 @@ def handle_uploaded_file(f, request):
             destination.write(chunk)
     df = pd.read_csv("temp.txt", sep="\t", header=0, names = columns_names)
     total = 0
-    print("°°°°°°°°°°°Dataframe°°°°°°°°°°°°°°°°°°°°")
-    print(df)
+    #print("°°°°°°°°°°°Dataframe°°°°°°°°°°°°°°°°°°°°")
+    #print(df)
     for index, row in df.iterrows():
         dict = {}
         for name in columns_names:
