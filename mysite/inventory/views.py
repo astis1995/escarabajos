@@ -182,8 +182,12 @@ def handle_uploaded_file(f, request):
         print(dict)
 
         if Specimen.objects.filter(code__exact = dict["code"]):
+            print("Already there")
+            print(dict["code"])
             pass
         else:
+            print("creating new with info ")
+            print(dict)
             new_specimen = Specimen.objects.create(**dict)
             new_specimen.save()
             total = total+1
