@@ -181,7 +181,7 @@ def handle_uploaded_file(f, request):
         print("dict")
         print(dict)
 
-        if Specimen.objects.filter(code__exact = dict["code"]):
+        if Specimen.objects.get(code = dict["code"]):
             print("Already there")
             print(dict["code"])
             pass
