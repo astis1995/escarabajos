@@ -1,11 +1,12 @@
 from django.shortcuts import render
 from django.http import HttpResponse,HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render , redirect
 from .models import Specimen
 from django.template import loader
 from django.views import generic
 from .forms import *
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
 import pandas as pd
 
 #constants
@@ -177,7 +178,7 @@ def handle_uploaded_file(f):
         else:
             new_specimen = Specimen.objects.create(**dict)
             new_specimen.save()
-
+@login_required
 def upload(request):
     template = loader.get_template("inventory/bootstrap/upload.html")
     context = {}
@@ -241,3 +242,39 @@ def specimen(request, specimen_code):
                 "error_message": "Specimen does not exist",
             }
             return HttpResponse(template.render(context, request))
+
+def login_view(request):
+    template_path = "inventory/bootstrap/login.html"
+    template = loader.get_template(template_path)
+    context = {
+    }
+    if request.method == "POST" :
+        form = LoginForm(request.POST)
+        print(request.POST)
+        #dir(request.POST)
+        print("lol")
+        username = request.POST["username"]
+        password = request.POST["password"]
+        next = ""
+        try:
+            next = request.GET["next"]
+        except:
+            pass
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+
+            login(request, user)
+            print("Next value: ")
+            print(next)
+            if next == "":
+                return redirect("/")
+            return redirect(next)
+
+        return render(request, template_path, {"form":form} )
+    else:
+        form = LoginForm()
+        return render(request, template_path, {"form":form} )
+
+def logout_view(request):
+    logout(request)
+    return redirect("/")
