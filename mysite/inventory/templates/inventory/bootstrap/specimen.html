@@ -285,9 +285,13 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Douglas McGee</span>
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{% if user %}
+                                {{user}}
+                                {% else %}
+                                Please Log In
+                                {% endif %}</span>
                                 <img class="img-profile rounded-circle"
-                                    src="img/undraw_profile.svg">
+                                    src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp">
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
@@ -329,10 +333,7 @@
                         Specimen {{specimen.code}}: {{specimen.genus}} {{specimen.species}}
                         </h1>
 
-                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
-                        <a href="{% url "admin:inventory_specimen_change" specimen.code %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                                        class="fas fa-download fa-sm text-white-50"></i> Edit Entry</a>
+
                     </div>
 
                     <!-- Content Row -->
@@ -344,11 +345,19 @@
                       <div class="card shadow mb-4">
                           <div class="card-header py-3">
                               <h6 class="m-0 font-weight-bold text-primary">Specimen Information</h6>
+
+
                           </div>
+
                           <div class="card-body">
                               <div class="text-center">
                                   <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 25rem;"
                                       src="img/undraw_posting_photo.svg" alt="...">
+
+                              <div>
+                                <a href="{% url "admin:inventory_specimen_change" specimen.code %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                                                class="fas fa-download fa-sm text-white-50"></i> Edit Entry</a>
+                              </div>
                               </div>
 
                               <strong>Code</strong> <p>{{ specimen.code }}</p>
