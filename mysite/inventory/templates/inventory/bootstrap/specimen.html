@@ -1,7 +1,5 @@
 {% load static %}
 
-
-<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -14,15 +12,21 @@
 
     <title>CICIMA General Beetle Inventory</title>
 
-    <!-- Custom fonts for this template-->
-  <link rel="stylesheet" href="{% static 'inventory/bootstrap/vendor/fontawesome-free/css/all.min.css' %}">
+    <!-- Custom fonts for this template -->
+    <link rel="stylesheet" href="{% static 'inventory/bootstrap/vendor/fontawesome-free/css/all.min.css' %}">
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
 
-    <!-- Custom styles for this template-->
-    <!link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
     <link rel="stylesheet" href="{% static 'inventory/bootstrap/css/sb-admin-2.min.css' %}">
+
+
+
+    <!-- Custom styles for this page -->
+
+    <link rel="stylesheet" href="{% static 'inventory/bootstrap/vendor/datatables/dataTables.bootstrap4.min.css' %}">
+
 </head>
 
 <body id="page-top">
@@ -30,16 +34,7 @@
     <!-- Page Wrapper -->
     <div id="wrapper">
       <!-- Messages -->
-      {% if messages %}
-      <ul class="messages">
-        {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
-            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-            {{ message }}
-        </li>
-        {% endfor %}
-      </ul>
-      {% endif %}
+
         <!-- Sidebar -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
@@ -62,7 +57,7 @@
             </li>
 
             <!-- Divider -->
-            <hr class="sidebar-divider">
+            <!--hr class="sidebar-divider">
 
             <!-- Heading -->
             <!--div class="sidebar-heading">
@@ -116,13 +111,15 @@
                 <!-- Topbar -->
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
-                    <!-- Sidebar Toggle (Topbar) -->
-                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                        <i class="fa fa-bars"></i>
-                    </button>
+                  <!-- Sidebar Toggle (Topbar) -->
+                  <form class="form-inline">
+                      <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                          <i class="fa fa-bars"></i>
+                      </button>
+                  </form>
 
                     <!-- Topbar Search -->
-                    <form
+                    <!--form
                         class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
                         <div class="input-group">
                             <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..."
@@ -140,10 +137,10 @@
 
                         <!-- Nav Item - Search Dropdown (Visible Only XS) -->
                         <li class="nav-item dropdown no-arrow d-sm-none">
-                            <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
+                            <!--a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-search fa-fw"></i>
-                            </a>
+                            </a-->
                             <!-- Dropdown - Messages -->
                             <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
                                 aria-labelledby="searchDropdown">
@@ -285,31 +282,34 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{% if user %}
-                                {{user}}
-                                {% else %}
-                                Please Log In
-                                {% endif %}</span>
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                                  {% if user %}
+                                  {{user}}
+                                  {% else %}
+                                  Please Log In
+                                  {% endif %}
+                                </span>
                                 <img class="img-profile rounded-circle"
                                     src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp">
                             </a>
+
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="{% url "inventory:login_view"%}">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Profile
                                 </a>
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="{% url 'admin:index' %}">
                                     <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Settings
+                                    Admin
                                 </a>
                                 <a class="dropdown-item" href="#">
                                     <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Activity Log
                                 </a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                <a class="dropdown-item" href="" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout
                                 </a>
@@ -338,15 +338,10 @@
 
                     <!-- Content Row -->
                     <div class="row">
-
-
-
                       <!-- Illustrations -->
                       <div class="card shadow mb-4">
                           <div class="card-header py-3">
                               <h6 class="m-0 font-weight-bold text-primary">Specimen Information</h6>
-
-
                           </div>
 
                           <div class="card-body">
@@ -663,28 +658,26 @@
     <link src="{% static 'inventory/bootstrap/css/sb-admin-2.min.css' %}">
 
     <!-- Bootstrap core JavaScript-->
-    <!script src="vendor/jquery/jquery.min.js"></script>
+
     <script src="{% static 'inventory/bootstrap/vendor/jquery/jquery.min.js' %}"></script>
 
-    <!script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'inventory/bootstrap/' %}"></script>
     <!-- Core plugin JavaScript-->
-    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-    <script src="{% static 'inventory/bootstrap/' %}"></script>
+    <!--script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="{% static 'inventory/bootstrap/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
 
     <!-- Custom scripts for all pages-->
-    <script src="js/sb-admin-2.min.js"></script>
-    <script src="{% static 'inventory/bootstrap/' %}"></script>
+    <!--script src="js/sb-admin-2.min.js"></script-->
+    <script src="{% static 'inventory/bootstrap/js/sb-admin-2.min.js' %}"></script>
 
     <!-- Page level plugins -->
-    <script src="vendor/chart.js/Chart.min.js"></script>
-    <script src="{% static 'inventory/bootstrap/' %}"></script>
+    <!--script src="vendor/chart.js/Chart.min.js"></script-->
+    <script src="{% static 'inventory/bootstrap/vendor/chart.js/Chart.min.js' %}"></script>
 
     <!-- Page level custom scripts -->
-    <script src="js/demo/chart-area-demo.js"></script>
-    <script src="{% static 'inventory/bootstrap/' %}"></script>
-    <script src="js/demo/chart-pie-demo.js"></script>
-    <script src="{% static 'inventory/bootstrap/' %}"></script>
+    <!--script src="js/demo/chart-area-demo.js"></script-->
+    <script src="{% static 'inventory/bootstrap/js/demo/chart-area-demo.js' %}"></script>
+    <!--script src="js/demo/chart-pie-demo.js"></script-->
+    <script src="{% static 'inventory/bootstrap/js/demo/chart-pie-demo.js' %}"></script>
 
 </body>
 
