@@ -181,7 +181,7 @@ def handle_uploaded_file(f, request):
         print("dict")
         print(dict)
 
-        if Specimen.objects.get(code = dict["code"]):
+        if len(Specimen.objects.filter(code__iexact = dict["code"])) != 0 :
             print("Already there")
             print(dict["code"])
             pass
