@@ -1,7 +1,9 @@
 clone repository https://github.com/astis1995/escarabajos
 export inventory_species data in mysql by going to MySQL Workbench, opening inventory schema, open inventory_species and selecting the option Server Data Export, self-contained-file
 Follow the django tutorial in https://help.pythonanywhere.com/pages/FollowingTheDjangoTutorial
+workon django4
 Install mysqlclient: pip install mysqlclient
+Intall pandas: pip install pandas
 create database in pythonanywhere, estebanvsotom$inventory
 user: estebanvsotom
 password: CICIMAroot

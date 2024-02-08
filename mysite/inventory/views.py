@@ -8,6 +8,9 @@ from .forms import *
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 import pandas as pd
+from django.contrib import messages
+
+
 
 #constants
 
@@ -159,11 +162,12 @@ def results(request):
     }
     return HttpResponse(template.render(context, request))
 
-def handle_uploaded_file(f):
+def handle_uploaded_file(f, request):
     with open("temp.txt", "wb+") as destination:
         for chunk in f.chunks():
             destination.write(chunk)
     df = pd.read_csv("temp.txt", sep="\t", header=0, names = columns_names)
+    total = 0
     for index, row in df.iterrows():
         dict = {}
         for name in columns_names:
@@ -178,6 +182,11 @@ def handle_uploaded_file(f):
         else:
             new_specimen = Specimen.objects.create(**dict)
             new_specimen.save()
+            total = total+1
+    if total ==0:
+        messages.add_message(request, messages.INFO, f"Attention! No specimens were added")
+    else:
+        messages.add_message(request, messages.INFO, f"Success! {total} specimen(s) were added")
 @login_required
 def upload(request):
     template = loader.get_template("inventory/bootstrap/upload.html")
@@ -190,7 +199,7 @@ def upload(request):
         if form.is_valid():
             print("****************************************************")
 
-            handle_uploaded_file(request.FILES["file"])
+            handle_uploaded_file(request.FILES["file"],request)
     else:
         form = UploadFileForm()
 
