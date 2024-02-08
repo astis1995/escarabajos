@@ -29,6 +29,7 @@
     <!-- Page Wrapper -->
     <div id="wrapper">
 
+
         <!-- Sidebar -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
@@ -150,6 +151,8 @@
 
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
+
+
 
             <!-- Main Content -->
             <div id="content">
@@ -424,7 +427,7 @@
                             </div>
 
                             <!-- Basic Card Example -->
-                            <div class="card shadow mb-4">
+                            <!--div class="card shadow mb-4">
                                 <div class="card-header py-3">
                                     <h6 class="m-0 font-weight-bold text-primary">Basic Card Example</h6>
                                 </div>
@@ -433,7 +436,7 @@
                                     utility classes. By using utility classes, the style of the card component can be
                                     easily modified with no need for any custom CSS!
                                 </div>
-                            </div>
+                            </div-->
 
                         </div>
 
@@ -475,14 +478,24 @@
                                 <!-- Card Header - Accordion -->
                                 <a href="#collapseCardExample" class="d-block card-header py-3" data-toggle="collapse"
                                     role="button" aria-expanded="true" aria-controls="collapseCardExample">
-                                    <h6 class="m-0 font-weight-bold text-primary">Collapsable Card Example</h6>
+                                    <h6 class="m-0 font-weight-bold text-primary">Upload Status</h6>
                                 </a>
                                 <!-- Card Content - Collapse -->
                                 <div class="collapse show" id="collapseCardExample">
                                     <div class="card-body">
-                                        This is a collapsable card example using Bootstrap's built in collapse
-                                        functionality. <strong>Click on the card header</strong> to see the card body
-                                        collapse and expand!
+                                      <!-- Messages -->
+                                      {% if messages %}
+                                      <ul class="messages">
+                                        {% for message in messages %}
+                                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                                            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
+                                            {{ message }}
+                                        </li>
+                                        {% endfor %}
+                                      </ul>
+                                      {% else %}
+                                      Waiting for upload
+                                      {% endif %}
                                     </div>
                                 </div>
                             </div>
