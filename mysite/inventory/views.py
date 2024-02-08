@@ -163,16 +163,20 @@ def results(request):
     return HttpResponse(template.render(context, request))
 
 def handle_uploaded_file(f, request):
+    print("°°°°°°°°°°°file is being handled°°°°°°°°°°°°°°°°°°°°")
     with open("temp.txt", "wb+") as destination:
         for chunk in f.chunks():
             destination.write(chunk)
     df = pd.read_csv("temp.txt", sep="\t", header=0, names = columns_names)
     total = 0
+    print("°°°°°°°°°°°Dataframe°°°°°°°°°°°°°°°°°°°°")
+    print(df)
     for index, row in df.iterrows():
         dict = {}
         for name in columns_names:
-            #print(name)
-            #print(row[name])
+            print("°°°°°°°°°°° print name and row name°°°°°°°°°°°°°°°°°°°°")
+            print(name)
+            print(row[name])
             dict[name] = row[name]
         print("dict")
         print(dict)
@@ -192,12 +196,12 @@ def upload(request):
     template = loader.get_template("inventory/bootstrap/upload.html")
     context = {}
     if request.method == "POST":
-
+        print("°°°°°°°°°°°Method is post°°°°°°°°°°°°°°°°°°°°")
         form= UploadFileForm(request.POST, request.FILES)
-        print("°°°°°°°°°°°|||°°°°°°°°°°°°°°°°°°°°")
+
 
         if form.is_valid():
-            print("****************************************************")
+            print("°°°°°°°°°°°form is valid°°°°°°°°°°°°°°°°°°°°")
 
             handle_uploaded_file(request.FILES["file"],request)
     else:
@@ -259,9 +263,8 @@ def login_view(request):
     }
     if request.method == "POST" :
         form = LoginForm(request.POST)
-        print(request.POST)
         #dir(request.POST)
-        print("lol")
+        print("Login succesful")
         username = request.POST["username"]
         password = request.POST["password"]
         next = ""
