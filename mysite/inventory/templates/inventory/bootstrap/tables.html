@@ -35,66 +35,26 @@
     <div id="wrapper">
 
       <!-- Sidebar -->
-<nav id="sidebarMenu" class="collapse d-lg-block sidebar collapse bg-white">
-  <div class="position-sticky">
-    <div class="list-group list-group-flush mx-3 mt-4">
 
-      <!-- Collapsed content -->
-      <ul id="collapseExample1" class="collapse show list-group list-group-flush">
-        <li class="list-group-item py-1">
-
-          <div class="input-group">
-            <div class="form-outline" data-mdb-input-init>
-
-              <div>
-              <label >Search</label>
-
-              </div>
-              <form id="search-form" action="{% url "inventory:results" %}" method="post">
-              {% csrf_token %}
-              {% for field in field_names %}
-              <input id="{{field}}" type="search" name="{{field}}" class="form-control" placeholder="{{field}}"/>
-              {% endfor %}
-              <button id="search-button" type="submit" class="btn btn-primary">
-                <i class="fas fa-search"></i>
-              </button>
-
-              </form>
-
-
-            </div>
-
-          </div>
-
-        </li>
-
-
-
-
-      </ul>
-
-    </div>
-  </div>
-</nav>
 <!-- Sidebar -->
 
-        <!-- Sidebar >
+        <!-- Sidebar -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-            <! Sidebar - Brand -->
-            <!--a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url "inventory:index"%}">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-laugh-wink"></i>
                 </div>
-                <div class="sidebar-brand-text mx-3">SB Admin <sup>2</sup></div>
+                <div class="sidebar-brand-text mx-3">Inventory</div>
             </a>
 
             <!-- Divider -->
-            <!--hr class="sidebar-divider my-0">
+            <hr class="sidebar-divider my-0">
 
             <!-- Nav Item - Dashboard -->
-            <!--li class="nav-item">
-                <a class="nav-link" href="index.html">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url "inventory:index" %}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
@@ -148,9 +108,9 @@
             <!-- Heading -->
             <!--div class="sidebar-heading">
                 Addons
-            </div>
+            <div>
 
-            <!-- Nav Item - Pages Collapse Menu -->
+            <!--Nav Item - Pages Collapse Menu -->
             <!--li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
                     aria-expanded="true" aria-controls="collapsePages">
@@ -189,9 +149,54 @@
             <hr class="sidebar-divider d-none d-md-block">
 
             <!-- Sidebar Toggler (Sidebar) -->
-            <div class="text-center d-none d-md-inline">
+            <!--div class="text-center d-none d-md-inline">
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
-            </div>
+            </div-->
+
+            <!-- Searchbar -->
+
+            <nav id="sidebarMenu" class="collapse d-lg-block sidebar collapse bg-white">
+
+              <div class="position-sticky">
+
+                <div class="list-group list-group-flush mx-3 mt-4">
+
+                  <!-- Collapsed content -->
+                  <ul id="collapseExample1" class="collapse show list-group list-group-flush">
+                    <li class="list-group-item py-1">
+
+                      <div class="input-group">
+                        <div class="form-outline" data-mdb-input-init>
+
+                          <div>
+                          </div>
+                          <form id="search-form" action="{% url "inventory:results" %}" method="post">
+                          <label >Search</label>
+                          {% csrf_token %}
+                          {% for field in field_names %}
+                          <input id="{{field}}" type="search" name="{{field}}" class="form-control" placeholder="{{field}}"/>
+                          {% endfor %}
+                          <button id="search-button" type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                          </button>
+
+                          </form>
+
+
+                        </div>
+
+                      </div>
+
+                    </li>
+
+
+
+
+                  </ul>
+
+                </div>
+              </div>
+            </nav> <!-- End of Searchbar -->
 
         </ul>
         <!-- End of Sidebar -->
@@ -213,7 +218,7 @@
                     </form>
 
                     <!-- Topbar Search -->
-                    <form
+                    <!--form
                         class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
                         <div class="input-group">
                             <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..."
@@ -374,13 +379,13 @@
 
                         <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="/accounts/login" id="userDropdown" role="button"
+                            <a class="nav-link dropdown-toggle" href="{% url "inventory:login_view"%}" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">
                                   {% if user %}
                                   {{user}}
                                   {% else %}
-                                  Login
+                                  Please Log In
                                   {% endif %}
                                 </span>
                                 <img class="img-profile rounded-circle"
@@ -389,20 +394,20 @@
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="{% url "inventory:login_view"%}">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Profile
                                 </a>
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="{% url 'admin:index' %}">
                                     <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Settings
+                                    Admin
                                 </a>
                                 <a class="dropdown-item" href="#">
                                     <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Activity Log
                                 </a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                <a class="dropdown-item" href="" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout
                                 </a>
@@ -585,28 +590,28 @@
                 <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="login.html">Logout</a>
+                    <a class="btn btn-primary" href="{% url "inventory:logout_view" %}">Logout</a>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Bootstrap core JavaScript-->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static "inventory/bootstrap/vendor/jquery/jquery.min.js" %}"></script>
+    <script src="{% static "inventory/bootstrap/vendor/bootstrap/js/bootstrap.bundle.min.js" %}" ></script>
 
     <!-- Core plugin JavaScript-->
-    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="{% static "inventory/bootstrap/vendor/jquery-easing/jquery.easing.min.js" %}"></script>
 
     <!-- Custom scripts for all pages-->
-    <script src="js/sb-admin-2.min.js"></script>
+    <script src="{% static "inventory/bootstrap/js/sb-admin-2.min.js" %}"></script>
 
     <!-- Page level plugins -->
-    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
-    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="{% static "inventory/bootstrap/vendor/datatables/jquery.dataTables.min.js" %}"></script>
+    <script src="{% static "inventory/bootstrap/vendor/datatables/dataTables.bootstrap4.min.js" %}"></script>
 
     <!-- Page level custom scripts -->
-    <script src="js/demo/datatables-demo.js"></script>
+    <script src="{% static "inventory/bootstrap/js/demo/datatables-demo.js" %}"></script>
 
 </body>
 

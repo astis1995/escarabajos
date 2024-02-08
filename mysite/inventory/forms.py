@@ -45,3 +45,7 @@ class SpecimenSearchForm(forms.Form):
 class UploadFileForm(forms.Form):
     #title = forms.CharField(max_length=50)
     file = forms.FileField()
+
+class LoginForm(forms.Form):
+    username = forms.CharField(label= "username", max_length=65)
+    password = forms.CharField(label = "password", max_length=65, widget=forms.PasswordInput)
