@@ -87,6 +87,14 @@ DATABASES = {
         "PASSWORD": "CICIMAroot",
         "HOST": "127.0.0.1",
         "PORT": "3306",
+    },
+    "default2": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "estebanvsotom$inventory",
+        "USER": "estebanvsotom",
+        "PASSWORD": "CICIMAroot",
+        "HOST": "estebanvsotom.mysql.pythonanywhere-services.com",
+        "PORT": "3306",
     }
 }
 
