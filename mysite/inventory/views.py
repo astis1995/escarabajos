@@ -275,7 +275,7 @@ def download(request):
 def specimen(request, specimen_code):
     especimenes_list = Specimen.objects.filter(code__exact = specimen_code)
     specimen = get_object_or_404(Specimen, pk=specimen_code)
-    template = loader.get_template("inventory/bootstrap/specimen.html")
+    template = loader.get_template("inventory/bootstrap/specimen2.html")
 
     if specimen:
         try:
