@@ -50,9 +50,9 @@ columns_names = [
 
 def index(request):
     template = loader.get_template("inventory/bootstrap/tables.html")
-    especimenes_list = Specimen.objects.order_by("code")[:]
+    specimen_list = Specimen.objects.order_by("code")[:]
     context = {
-        "especimenes_list": especimenes_list,
+        "specimen_list": specimen_list,
     }
 
     if request.method == "POST":
@@ -65,74 +65,74 @@ def index(request):
             #genus = form.cleaned_data["genus"]
             #species = form.cleaned_data["species"]
             #collection_year = form.cleaned_data["collection_year"]
-            #especimenes_list = Specimen.objects.all()
+            #specimen_list = Specimen.objects.all()
 
             #if :
-            #    especimenes_list = especimenes_list.filter(__icontains=)
+            #    specimen_list = specimen_list.filter(__icontains=)
 
           if form.cleaned_data["code"]:
               try:
-                  especimenes_list = especimenes_list.filter(code__exact= form.cleaned_data["code"])
+                  specimen_list = specimen_list.filter(code__icontains= form.cleaned_data["code"])
               except:
                   print("Invalid code")
           if form.cleaned_data["label"]:
-              especimenes_list = especimenes_list.filter(label__icontains= form.cleaned_data["label"] )
+              specimen_list = specimen_list.filter(label__icontains= form.cleaned_data["label"] )
           if form.cleaned_data["notes"] :
-              especimenes_list = especimenes_list.filter(notes__icontains= form.cleaned_data["notes"] )
+              specimen_list = specimen_list.filter(notes__icontains= form.cleaned_data["notes"] )
           if form.cleaned_data["old_code"]:
-              especimenes_list = especimenes_list.filter(old_code__icontains= form.cleaned_data["old_code"] )
+              specimen_list = specimen_list.filter(old_code__icontains= form.cleaned_data["old_code"] )
           if form.cleaned_data["collection_day"]:
-              especimenes_list = especimenes_list.filter(collection_day__icontains= form.cleaned_data["collection_day"] )
+              specimen_list = specimen_list.filter(collection_day__icontains= form.cleaned_data["collection_day"] )
           if form.cleaned_data["collection_year"]:
               try:
-                  especimenes_list = especimenes_list.filter(collection_year__exact= form.cleaned_data["collection_year"] )
+                  specimen_list = specimen_list.filter(collection_year__exact= form.cleaned_data["collection_year"] )
               except:
                   print("Invalid code")
 
           if form.cleaned_data["death_date"]:
-              especimenes_list = especimenes_list.filter(death_date__icontains= form.cleaned_data["death_date"] )
+              specimen_list = specimen_list.filter(death_date__icontains= form.cleaned_data["death_date"] )
           if form.cleaned_data["sex_code"]:
-              especimenes_list = especimenes_list.filter(sex_code__icontains= form.cleaned_data["sex_code"] )
+              specimen_list = specimen_list.filter(sex_code__icontains= form.cleaned_data["sex_code"] )
           if form.cleaned_data["refrigerator"]:
-              especimenes_list = especimenes_list.filter(refrigerator__icontains=form.cleaned_data["refrigerator"])
+              specimen_list = specimen_list.filter(refrigerator__icontains=form.cleaned_data["refrigerator"])
           if form.cleaned_data["tray"]:
-              especimenes_list = especimenes_list.filter(tray__icontains= form.cleaned_data["tray"])
+              specimen_list = specimen_list.filter(tray__icontains= form.cleaned_data["tray"])
           if form.cleaned_data["row"]:
-              especimenes_list = especimenes_list.filter(row__icontains= form.cleaned_data["row"] )
+              specimen_list = specimen_list.filter(row__icontains= form.cleaned_data["row"] )
           if form.cleaned_data["location"]:
-              especimenes_list = especimenes_list.filter(location__icontains= form.cleaned_data["location"])
+              specimen_list = specimen_list.filter(location__icontains= form.cleaned_data["location"])
           if form.cleaned_data["location_code"]:
-              especimenes_list = especimenes_list.filter(location_code__icontains= form.cleaned_data["location_code"] )
+              specimen_list = specimen_list.filter(location_code__icontains= form.cleaned_data["location_code"] )
 
           if form.cleaned_data["column"]:
-              especimenes_list = especimenes_list.filter(column__icontains= form.cleaned_data["column"])
+              specimen_list = specimen_list.filter(column__icontains= form.cleaned_data["column"])
           if form.cleaned_data["genus"]:
-              especimenes_list = especimenes_list.filter(genus__icontains= form.cleaned_data["genus"])
+              specimen_list = specimen_list.filter(genus__icontains= form.cleaned_data["genus"])
           if form.cleaned_data["species"]:
-              especimenes_list = especimenes_list.filter(species__icontains= form.cleaned_data["species"])
+              specimen_list = specimen_list.filter(species__icontains= form.cleaned_data["species"])
 
           if form.cleaned_data["country"]:
-              especimenes_list = especimenes_list.filter(country__icontains= form.cleaned_data["country"])
+              specimen_list = specimen_list.filter(country__icontains= form.cleaned_data["country"])
           if form.cleaned_data["province"]:
-              especimenes_list = especimenes_list.filter(province__icontains= form.cleaned_data["province"])
+              specimen_list = specimen_list.filter(province__icontains= form.cleaned_data["province"])
           if form.cleaned_data["latitude"]:
-              especimenes_list = especimenes_list.filter(latitude__icontains= form.cleaned_data["latitude"])
+              specimen_list = specimen_list.filter(latitude__icontains= form.cleaned_data["latitude"])
           if form.cleaned_data["longitude"]:
-              especimenes_list = especimenes_list.filter(longitude__icontains= form.cleaned_data["longitude"])
+              specimen_list = specimen_list.filter(longitude__icontains= form.cleaned_data["longitude"])
           if form.cleaned_data["elevation"]:
-              especimenes_list = especimenes_list.filter(elevation__icontains= form.cleaned_data["elevation"])
+              specimen_list = specimen_list.filter(elevation__icontains= form.cleaned_data["elevation"])
           if form.cleaned_data["light_dark"]:
-              especimenes_list = especimenes_list.filter(light_dark__icontains= form.cleaned_data["light_dark"])
+              specimen_list = specimen_list.filter(light_dark__icontains= form.cleaned_data["light_dark"])
           if form.cleaned_data["histology_location"]:
-              especimenes_list = especimenes_list.filter(histology_location__icontains= form.cleaned_data["histology_location"])
+              specimen_list = specimen_list.filter(histology_location__icontains= form.cleaned_data["histology_location"])
           if form.cleaned_data["histology_stage_next_up"]:
-              especimenes_list = especimenes_list.filter(histology_stage_next_up__icontains= form.cleaned_data["histology_stage_next_up"])
+              specimen_list = specimen_list.filter(histology_stage_next_up__icontains= form.cleaned_data["histology_stage_next_up"])
           if form.cleaned_data["histology_stage_performed"]:
-              especimenes_list = especimenes_list.filter(histology_stage_performed__icontains= form.cleaned_data["histology_stage_performed"])
+              specimen_list = specimen_list.filter(histology_stage_performed__icontains= form.cleaned_data["histology_stage_performed"])
           if form.cleaned_data["purpose"]:
-              especimenes_list = especimenes_list.filter(purpose__icontains= form.cleaned_data["purpose"])
+              specimen_list = specimen_list.filter(purpose__icontains= form.cleaned_data["purpose"])
           context = {
-                "especimenes_list": especimenes_list,
+                "specimen_list": specimen_list,
                 "field_names": field_names
             }
           template = loader.get_template("inventory/bootstrap/tables.html")
@@ -141,24 +141,22 @@ def index(request):
 
         print(request.POST.get("csrfmiddlewaretoken"))
 
-
-
     return HttpResponse(template.render(context, request))
 
 
 def results(request):
-    especimenes_list = {}
+    specimen_list = {}
     if request.method == "POST":
 
         code_string= SpecimenSearchForm(request.POST).cleaned_data["code"]
 
         if form.is_valid():
-            especimenes_list = Specimen.objects.filter(code__exact= code_string)
+            specimen_list = Specimen.objects.filter(code__exact= code_string)
 
 
     template = loader.get_template("inventory/bootstrap/tables.html")
     context = {
-        "especimenes_list": especimenes_list,
+        "specimen_list": specimen_list,
     }
     return HttpResponse(template.render(context, request))
 
@@ -273,9 +271,9 @@ def download(request):
 
 
 def specimen(request, specimen_code):
-    especimenes_list = Specimen.objects.filter(code__exact = specimen_code)
+    specimen_list = Specimen.objects.filter(code__exact = specimen_code)
     specimen = get_object_or_404(Specimen, pk=specimen_code)
-    template = loader.get_template("inventory/bootstrap/specimen2.html")
+    template = loader.get_template("inventory/bootstrap/specimen.html")
 
     if specimen:
         try:
@@ -325,3 +323,13 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect("/")
+
+def get_method_by_name(cls, method_name):
+    # Check if the method exists in the class
+    if hasattr(cls, method_name) and callable(getattr(cls, method_name)):
+        # Return the method
+        print("success")
+        return getattr(cls, method_name)
+    else:
+        # Method doesn't exist or is not callable
+        return None
