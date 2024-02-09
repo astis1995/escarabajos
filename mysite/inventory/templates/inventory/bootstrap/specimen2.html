@@ -1,5 +1,5 @@
 {% load static %}
-
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -12,20 +12,14 @@
 
     <title>CICIMA General Beetle Inventory</title>
 
-    <!-- Custom fonts for this template -->
-    <link rel="stylesheet" href="{% static 'inventory/bootstrap/vendor/fontawesome-free/css/all.min.css' %}">
+    <!-- Custom fonts for this template-->
+    <link href="{% static "inventory/bootstrap/vendor/fontawesome-free/css/all.min.css" %}"  rel="stylesheet" type="text/css">
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
 
-    <!-- Custom styles for this template -->
-    <link rel="stylesheet" href="{% static 'inventory/bootstrap/css/sb-admin-2.min.css' %}">
-
-
-
-    <!-- Custom styles for this page -->
-
-    <link rel="stylesheet" href="{% static 'inventory/bootstrap/vendor/datatables/dataTables.bootstrap4.min.css' %}">
+    <!-- Custom styles for this template-->
+    <link href="{% static "inventory/bootstrap/css/sb-admin-2.min.css"%}" rel="stylesheet">
 
 </head>
 
@@ -33,10 +27,6 @@
 
     <!-- Page Wrapper -->
     <div id="wrapper">
-
-      <!-- Sidebar -->
-
-<!-- Sidebar -->
 
         <!-- Sidebar -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
@@ -54,7 +44,7 @@
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item">
-                <a class="nav-link" href="{% url "inventory:index" %}">
+                <a class="nav-link" href="{% url "inventory:index"%}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
@@ -62,149 +52,25 @@
             <!-- Divider -->
             <hr class="sidebar-divider">
 
-            <!-- Nav Item - Upload -->
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Interface
+            </div>
+
+
+
+            <!-- Nav Item - Dashboard -->
             <li class="nav-item">
                 <a class="nav-link" href="{% url "inventory:upload" %}">
                     <i class="fas fa-fw fa-wrench"></i>
                     <span>Upload</span></a>
             </li>
 
-
-            <!-- Heading -->
-            <!--div class="sidebar-heading">
-                Upload
-            </div-->
-
-            <!-- Nav Item - Pages Collapse Menu -->
-            <!--li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
-                    aria-expanded="true" aria-controls="collapseTwo">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Components</span>
-                </a>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Custom Components:</h6>
-                        <a class="collapse-item" href="buttons.html">Buttons</a>
-                        <a class="collapse-item" href="cards.html">Cards</a>
-                    </div>
-                </div>
-            </li>
-
-            <!-- Nav Item - Utilities Collapse Menu -->
-            <!--li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
-                    aria-expanded="true" aria-controls="collapseUtilities">
-                    <i class="fas fa-fw fa-wrench"></i>
-                    <span>Utilities</span>
-                </a>
-                <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
-                    data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Custom Utilities:</h6>
-                        <a class="collapse-item" href="utilities-color.html">Colors</a>
-                        <a class="collapse-item" href="utilities-border.html">Borders</a>
-                        <a class="collapse-item" href="utilities-animation.html">Animations</a>
-                        <a class="collapse-item" href="utilities-other.html">Other</a>
-                    </div>
-                </div>
-            </li>
-
             <!-- Divider -->
-            <!--hr class="sidebar-divider">
-
-            <!-- Heading -->
-            <!--div class="sidebar-heading">
-                Addons
-            <div>
-
-            <!--Nav Item - Pages Collapse Menu -->
-            <!--li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
-                    aria-expanded="true" aria-controls="collapsePages">
-                    <i class="fas fa-fw fa-folder"></i>
-                    <span>Pages</span>
-                </a>
-                <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Login Screens:</h6>
-                        <a class="collapse-item" href="login.html">Login</a>
-                        <a class="collapse-item" href="register.html">Register</a>
-                        <a class="collapse-item" href="forgot-password.html">Forgot Password</a>
-                        <div class="collapse-divider"></div>
-                        <h6 class="collapse-header">Other Pages:</h6>
-                        <a class="collapse-item" href="404.html">404 Page</a>
-                        <a class="collapse-item" href="blank.html">Blank Page</a>
-                    </div>
-                </div>
-            </li>
-
-            <!-- Nav Item - Charts -->
-            <!--li class="nav-item">
-                <a class="nav-link" href="charts.html">
-                    <i class="fas fa-fw fa-chart-area"></i>
-                    <span>Charts</span></a>
-            </li>
-
-            <!-- Nav Item - Tables -->
-            <!--li class="nav-item active">
-                <a class="nav-link" href="tables.html">
-                    <i class="fas fa-fw fa-table"></i>
-                    <span>Tables</span></a>
-            </li>
-
-            <!-- Divider -->
-            <hr class="sidebar-divider d-none d-md-block">
-
-            <!-- Sidebar Toggler (Sidebar) -->
-            <!--div class="text-center d-none d-md-inline">
-                <button class="rounded-circle border-0" id="sidebarToggle"></button>
-            </div-->
-
-            <!-- Searchbar -->
-
-            <nav id="sidebarMenu" class="collapse d-lg-block sidebar collapse bg-white">
-
-              <div class="position-sticky">
-
-                <div class="list-group list-group-flush mx-3 mt-4">
-
-                  <!-- Collapsed content -->
-                  <ul id="collapseExample1" class="collapse show list-group list-group-flush">
-                    <li class="list-group-item py-1">
-
-                      <div class="input-group">
-                        <div class="form-outline" data-mdb-input-init>
-
-                          <div>
-                          </div>
-                          <form id="search-form" action="{% url "inventory:results" %}" method="post">
-                          <label >Search</label>
-                          {% csrf_token %}
-                          {% for field in field_names %}
-                          <input id="{{field}}" type="search" name="{{field}}" class="form-control" placeholder="{{field}}"/>
-                          {% endfor %}
-                          <button id="search-button" type="submit" class="btn btn-primary">
-                            <i class="fas fa-search"></i>
-                          </button>
-
-                          </form>
-
-
-                        </div>
-
-                      </div>
-
-                    </li>
+            <hr class="sidebar-divider">
 
 
 
-
-                  </ul>
-
-                </div>
-              </div>
-            </nav> <!-- End of Searchbar -->
 
         </ul>
         <!-- End of Sidebar -->
@@ -219,14 +85,12 @@
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
                     <!-- Sidebar Toggle (Topbar) -->
-                    <form class="form-inline">
-                        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                            <i class="fa fa-bars"></i>
-                        </button>
-                    </form>
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
 
                     <!-- Topbar Search -->
-                    <!--form
+                    <form
                         class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
                         <div class="input-group">
                             <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..."
@@ -387,15 +251,14 @@
 
                         <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="{% url "inventory:login_view"%}" id="userDropdown" role="button"
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">
                                   {% if user %}
-                                  {{user}}
-                                  {% else %}
-                                  Please Log In
-                                  {% endif %}
-                                </span>
+                                {{user}}
+                                {% else %}
+                                Please Log In
+                                {% endif %}</span>
                                 <img class="img-profile rounded-circle"
                                     src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp">
                             </a>
@@ -415,7 +278,7 @@
                                     Activity Log
                                 </a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="" data-toggle="modal" data-target="#logoutModal">
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout
                                 </a>
@@ -430,133 +293,77 @@
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
 
-                    <!-- Page Heading -->
-                    <h1 class="h3 mb-2 text-gray-800">Inventory</h1>
-                    <p class="mb-4">CICIMA-UCR Biomaterials and Biomimicry Laboratory's General Beetle Inventory</a>.</p>
-                    <a href="{% url "inventory:upload" %}" class=" d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                            class="fas fa-upload fa-sm text-white-50"></i> Upload specimens</a>
-                    <a href="./download" class=" d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                                    class="fas fa-download fa-sm text-white-50"></i> Download catalog</a>
-                    <!-- DataTales Example -->
+                  <!-- Page Heading -->
+                  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                      <h1 class="h3 mb-0 text-gray-800">
+                      {% if error_message%}
+                      {{error_message}}
+                      {% endif%}
+                      Specimen {{specimen.code}}: {{specimen.genus}} {{specimen.species}}
+                      </h1>
+                  </div>
+                  <!-- Page Content -->
+                  <div class="card shadow mb-4">
+                      <div class="card-header py-3">
+                          <h6 class="m-0 font-weight-bold text-primary">Specimen Information</h6>
+                      </div>
+
+                      <div class="card-body">
+                          <div class="text-center">
+                              <!--img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 25rem;"
+                                  src="img/undraw_posting_photo.svg" alt="..."-->
+
+                          <div>
+                            <a href="{% url "admin:inventory_specimen_change" specimen.code %}" class=" d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                                            class="fas fa-download fa-sm text-white-50"></i> Edit Entry</a>
+                          </div>
+                          </div>
+
+                          <strong>Code</strong> <p>{{ specimen.code }}</p>
+                          <strong>Genus</strong><p>{{ specimen.genus }}</p>
+                          <strong>Species</strong><p>{{ specimen.species }}</p>
+                          <strong>Label</strong><p>{{ specimen.label }}</p>
+                          <strong>Notes</strong><p>{{ specimen.notes }}</p>
+                          <strong>Old Code</strong><p>{{ specimen.old_code }}</p>
+                          <strong>Collection day</strong><p>{{ specimen.collection_day }}</p>
+                          <strong>Collection month</strong><p>{{ specimen.collection_month }}</p>
+                          <strong>Collection year</strong><p>{{ specimen.collection_year }}</p>
+                          <strong>Death Date</strong><p>{{ specimen.death_date }}</p>
+                          <strong>Sex Code</strong><p>{{ specimen.sex_code }}</p>
+                          <strong>Refrigerator</strong><p>{{ specimen.refrigerator }}</p>
+                          <strong>Tray</strong><p>{{ specimen.tray }}</p>
+                          <strong>Row</strong><p>{{ specimen.row }}</p>
+                          <strong>Column</strong><p>{{ specimen.column }}</p>
+                          <strong>Location Code</strong><p>{{ specimen.location_code }}</p>
+                          <strong>Location</strong><p>{{ specimen.location }}</p>
+                          <strong>Country</strong><p>{{ specimen.country }}</p>
+                          <strong>Province</strong><p>{{ specimen.province }}</p>
+                          <strong>Latitude</strong><p>{{ specimen.latitude }}</p>
+                          <strong>Longitude</strong><p>{{ specimen.longitude }}</p>
+                          <strong>Elevation</strong><p>{{ specimen.elevation }}</p>
+                          <strong>Light Dark</strong><p>{{ specimen.light_dark }}</p>
+                          <strong>Histology_location</strong><p>{{ specimen.histology_location }}</p>
+                          <strong>Histology_stage_performed</strong><p>{{ specimen.histology_stage_performed }}</p>
+                          <strong>Histology_stage_next_up</strong><p>{{ specimen.histology_stage_next_up }}</p>
+                          <strong>RNA location</strong><p>{{ specimen.rna_location }}</p>
+                          <strong>EtOH voucher</strong><p>{{ specimen.etoh_voucher }}</p>
+                          <strong>Elytron</strong><p>{{ specimen.elytron }}</p>
+                          <strong>Purpose</strong><p>{{ specimen.purpose }}</p>
+
+                          <p></p>
+                          <!--a target="_blank" rel="nofollow" href="https://undraw.co/">Browse Illustrations on
+                              unDraw &rarr;</a-->
+                      </div>
+
+
+                  </div>
+                  <div class="card shadow mb-4">
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">General Inventory</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                          <th>CODE</th>
-                                          <th>GENUS</th>
-                                          <th>SPECIES</th>
-                                          <th>LABEL</th>
-                                          <th>NOTES</th>
-                                          <th>OLD_CODE</th>
-                                          <th>COLLECTION_DAY</th>
-                                          <th>COLLECTION_MONTH</th>
-                                          <th>COLLECTION_YEAR</th>
-                                          <th>DEATH_DATE</th>
-                                          <th>SEX_CODE</th>
-                                          <th>REFRIGERATOR</th>
-                                          <th>TRAY_NUMBER</th>
-                                          <th>ROW_NUMBER</th>
-                                          <th>COLUMN_NUMBER</th>
-                                          <th>LOCATION_CODE</th>
-                                          <th>LOCATION</th>
-                                          <th>COUNTRY</th>
-                                          <th>PROVINCE</th>
-                                          <th>LATITUDE</th>
-                                          <th>LONGITUDE</th>
-                                          <th>ELEVATION</th>
-                                          <th>LIGHT_DARK</th>
-                                          <th>HISTOLOGY_LOCATION</th>
-                                          <th>HISTOLOGY_STAGED_PERFORMED</th>
-                                          <th>HISTOLOGY_STAGE_NEXT_UP</th>
-                                          <th>RNA_LOCATION</th>
-                                          <th>ETOH_VOUCHER</th>
-                                          <th>ELYTRON</th>
-                                          <th>PURPOSE</th>
-                                        </tr>
-                                    </thead>
-                                    <tfoot>
-                                        <tr>
-                                          <th>CODE</th>
-                                          <th>GENUS</th>
-                                          <th>SPECIES</th>
-                                          <th>LABEL</th>
-                                          <th>NOTES</th>
-                                          <th>OLD_CODE</th>
-                                          <th>COLLECTION_DAY</th>
-                                          <th>COLLECTION_MONTH</th>
-                                          <th>COLLECTION_YEAR</th>
-                                          <th>DEATH_DATE</th>
-                                          <th>SEX_CODE</th>
-                                          <th>REFRIGERATOR</th>
-                                          <th>TRAY_NUMBER</th>
-                                          <th>ROW_NUMBER</th>
-                                          <th>COLUMN_NUMBER</th>
-                                          <th>LOCATION_CODE</th>
-                                          <th>LOCATION</th>
-                                          <th>COUNTRY</th>
-                                          <th>PROVINCE</th>
-                                          <th>LATITUDE</th>
-                                          <th>LONGITUDE</th>
-                                          <th>ELEVATION</th>
-                                          <th>LIGHT_DARK</th>
-                                          <th>HISTOLOGY_LOCATION</th>
-                                          <th>HISTOLOGY_STAGED_PERFORMED</th>
-                                          <th>HISTOLOGY_STAGE_NEXT_UP</th>
-                                          <th>RNA_LOCATION</th>
-                                          <th>ETOH_VOUCHER</th>
-                                          <th>ELYTRON</th>
-                                          <th>PURPOSE</th>
-                                        </tr>
-                                    </tfoot>
-                                    <tbody>
-                                      {% for especimen in especimenes_list %}
-                                          <tr>
-
-                                          <td> <a href="{% url "inventory:specimen" especimen.code %}">{{ especimen.code }}</a> </td>
-                                          <td>{{ especimen.genus }}</td>
-                                          <td>{{ especimen.species }}</td>
-                                          <td>{{ especimen.label }}</td>
-                                          <td>{{ especimen.notes }}</td>
-                                          <td>{{ especimen.old_code }}</td>
-                                          <td>{{ especimen.collection_day }}</td>
-                                          <td>{{ especimen.collection_month }}</td>
-                                          <td>{{ especimen.collection_year }}</td>
-                                          <td>{{ especimen.death_date }}</td>
-                                          <td>{{ especimen.sex_code }}</td>
-                                          <td>{{ especimen.refrigerator }}</td>
-                                          <td>{{ especimen.tray }}</td>
-                                          <td>{{ especimen.row }}</td>
-                                          <td>{{ especimen.column }}</td>
-                                          <td>{{ especimen.location_code }}</td>
-                                          <td>{{ especimen.location }}</td>
-                                          <td>{{ especimen.country }}</td>
-                                          <td>{{ especimen.province }}</td>
-                                          <td>{{ especimen.latitude }}</td>
-                                          <td>{{ especimen.longitude }}</td>
-                                          <td>{{ especimen.elevation }}</td>
-                                          <td>{{ especimen.light_dark }}</td>
-                                          <td>{{ especimen.histology_location }}</td>
-                                          <td>{{ especimen.histology_stage_performed }}</td>
-                                          <td>{{ especimen.histology_stage_next_up }}</td>
-                                          <td>{{ especimen.rna_location }}</td>
-                                          <td>{{ especimen.etoh_voucher }}</td>
-                                          <td>{{ especimen.elytron }}</td>
-                                          <td>{{ especimen.purpose }}</td>
-
-                                          </tr>
-                                          {% endfor %}
-
-                                    </tbody>
-                                </table>
-                            </div>
+                            <h6 class="m-0 font-weight-bold text-primary">Specimen Information</h6>
                         </div>
                     </div>
-
+                  </div>
                 </div>
                 <!-- /.container-fluid -->
 
@@ -605,21 +412,14 @@
     </div>
 
     <!-- Bootstrap core JavaScript-->
-    <script src="{% static "inventory/bootstrap/vendor/jquery/jquery.min.js" %}"></script>
-    <script src="{% static "inventory/bootstrap/vendor/bootstrap/js/bootstrap.bundle.min.js" %}" ></script>
+    <script src="{% static "inventory/bootstrap/vendor/jquery/jquery.min.js"%} "></script>
+    <script src="{% static "inventory/bootstrap/vendor/bootstrap/js/bootstrap.bundle.min.js"%}"></script>
 
     <!-- Core plugin JavaScript-->
-    <script src="{% static "inventory/bootstrap/vendor/jquery-easing/jquery.easing.min.js" %}"></script>
+    <script src="{% static "inventory/bootstrap/vendor/jquery-easing/jquery.easing.min.js"%}"></script>
 
     <!-- Custom scripts for all pages-->
-    <script src="{% static "inventory/bootstrap/js/sb-admin-2.min.js" %}"></script>
-
-    <!-- Page level plugins -->
-    <script src="{% static "inventory/bootstrap/vendor/datatables/jquery.dataTables.min.js" %}"></script>
-    <script src="{% static "inventory/bootstrap/vendor/datatables/dataTables.bootstrap4.min.js" %}"></script>
-
-    <!-- Page level custom scripts -->
-    <script src="{% static "inventory/bootstrap/js/demo/datatables-demo.js" %}"></script>
+    <script src="{% static "inventory/bootstrap/js/sb-admin-2.min.js"%}"></script>
 
 </body>
 
