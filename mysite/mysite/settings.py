@@ -8,12 +8,16 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
+
+White Noise:https://stackoverflow.com/questions/5836674/why-does-debug-false-setting-make-my-django-static-files-access-fail#:~:text=So%20basically%20when%20you%20make,The%20answer%20is%20whitenoise.&text=Add%20'whitenoise.,-middleware.
 """
 
 from pathlib import Path
+import os
 
+#PROJECT_DIR=os.path.dirname(__file__)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent #Es el folder más exterior de mysite
 
 
 # Quick-start development settings - unsuitable for production
@@ -25,8 +29,9 @@ SECRET_KEY = "django-insecure-p!g#i*qj&1$qmae)_zd*kj8rrpa%**21(@ezwwpp_%i8#je8fd
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['estebanvsotom.pythonanywhere.com', "127.0.0.1"]
 
+ALLOWED_HOSTS = ['estebanvsotom.pythonanywhere.com', "127.0.0.1"]
+#ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -38,11 +43,13 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    #"whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware", #add whitenoise
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -52,6 +59,13 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "mysite.urls"
+
+#STORAGES = {
+#    # ...
+#    "staticfiles": {
+#        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+#    },
+#}
 
 TEMPLATES = [
     {
@@ -70,7 +84,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "mysite.wsgi.application"
-
+#WSGI_APPLICATION = "wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -134,7 +148,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT= os.path.join(BASE_DIR,'staticfiles/')
 
+MEDIA_ROOT = os.path.join(BASE_DIR,'media')# empieza desde el folder mysite mas exterior, no necesita /
+MEDIA_URL = '/media/'
+#solucion  https://stackoverflow.com/questions/48276444/django-css-file-not-loading-in-production-debug-false
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+STATICFILES_DIRS = [
+    #os.path.join(BASE_DIR, "staticfiles"),
+]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 

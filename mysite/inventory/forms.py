@@ -1,5 +1,7 @@
 from django import forms
-
+from django.forms import ModelForm
+from .models import Spectrum
+from . import views as vw
 class SpecimenSearchForm(forms.Form):
 
     code = forms.CharField(label="code", required=False)
@@ -49,3 +51,8 @@ class UploadFileForm(forms.Form):
 class LoginForm(forms.Form):
     username = forms.CharField(label= "username", max_length=65)
     password = forms.CharField(label = "password", max_length=65, widget=forms.PasswordInput)
+
+class SpectrumForm(forms.ModelForm):
+    class Meta:
+        model = Spectrum
+        fields=["file"]
