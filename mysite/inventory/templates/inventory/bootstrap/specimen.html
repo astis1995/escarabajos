@@ -59,9 +59,9 @@
 
 
 
-            <!-- Nav Item - Upload -->
+            <!-- Nav Item - upload_catalog -->
             <li class="nav-item">
-                <a class="nav-link" href="{% url "inventory:upload" %}">
+                <a class="nav-link" href="{% url "inventory:upload_catalog" %}">
                     <i class="fas fa-fw fa-wrench"></i>
                     <span>Upload</span></a>
             </li>
@@ -303,9 +303,11 @@
                       </h1>
                   </div>
                   <!-- Page Content -->
+
+                  <!--div class="card shadow mb-4"-->
                   <div class="card shadow mb-4">
                       <div class="card-header py-3">
-                          <h6 class="m-0 font-weight-bold text-primary">Specimen Information</h6>
+                          <h6 class="m-0 font-weight-bold text-primary">Spectral Information</h6>
                       </div>
 
                       <div class="card-body">
@@ -349,15 +351,185 @@
                           <strong>EtOH voucher</strong><p>{{ specimen.etoh_voucher }}</p>
                           <strong>Elytron</strong><p>{{ specimen.elytron }}</p>
                           <strong>Purpose</strong><p>{{ specimen.purpose }}</p>
+                          <p>Image</p>
+                          {% for spectrum in spectra %}
+                          <img src="../media/{{spectrum.image}}">
+                          {% endfor%}
 
-                          <p></p>
+
+                          Nivel "../media/test.png"
+                          <img src="../media/test.png">
+                          Nivel "../media/media2/test.png"
+                          <img src="../media/media2/test.png">
+                          Nivel "media/test.png"
+                          <img src="media/test.png">
+                          Nivel test.png
+                          <img src="test.png">
+                          Nivel media/images/test2.svg
+                          <img src="media/images/test2.svg">
+                          Nivel "../media/images/test2.svg""
+                          <img src="../media/images/test2.svg">
+                          Nivel "../test.png"
+                          <img src="../test.png">
+
+
                           <!--a target="_blank" rel="nofollow" href="https://undraw.co/">Browse Illustrations on
                               unDraw &rarr;</a-->
                       </div>
 
+                  </div>
+
+                  <div class="card shadow mb-4">
+                      <div class="card-header py-3">
+                          <h6 class="m-0 font-weight-bold text-primary">Specimen Information</h6>
+                      </div>
+
+                      <div class="card-body">
+                          <div class="text-center">
+                              <!--img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 25rem;"
+                                  src="img/undraw_posting_photo.svg" alt="..."-->
+
+
+                          </div>
+                          <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                      <th>FILENAME</th>
+                                      <th>ID</th>
+                                      <th>DATE</th>
+                                      <th>TIME</th>
+                                      <th>USER</th>
+                                      <th>DESCRIPTION</th>
+                                      <th>MINUMUM WAVELENGTH</th>
+                                      <th>EQUIPMENT</th>
+                                      <th>SERIES</th>
+                                      <th>SOFTWARE</th>
+                                      <th>OPERATING MODE</th>
+                                      <th>NUMBER OF CYCLES</th>
+                                      <th>SLIT LENGTH PMT</th>
+                                      <th>RESPONSE InGaAs DETECTOR</th>
+                                      <th>RESPONSE PMT DETECTOR</th>
+                                      <th>INGAAS GAIN</th>
+                                      <th>PMT GAIN</th>
+                                      <th>MONOCHROMATOR CHANGE</th>
+                                      <th>LAMP CHANGE</th>
+                                      <th>PMT CHANGE</th>
+                                      <th>BEAM SELECTOR</th>
+                                      <th>CBM</th>
+                                      <th>CBD STATUS</th>
+                                      <th>ATTENUATOR PERCENTAGE SAMPLE</th>
+                                      <th>ATTENUATOR PERCENTAGE REFERENCE</th>
+                                      <th>POLARIZER</th>
+                                      <th>UNITS</th>
+                                      <th>MEASURING MODE</th>
+                                      <th>MAXIMUM WAVELENGTH</th>
+                                      <th>STEP</th>
+                                      <th>NUMBER OF DATAPOINTS</th>
+                                      <th>MAX MEASUREMENT</th>
+                                      <th>MIN MEASUREMENT</th>
+                                      <th>NOTES</th>
+                                      <th>SPECIMEN</th>
+                                      <th>FILE</th>
+                                    </tr>
+                                </thead>
+                                <tfoot>
+                                    <tr>
+                                      <th>FILENAME</th>
+                                      <th>ID</th>
+                                      <th>DATE</th>
+                                      <th>TIME</th>
+                                      <th>USER</th>
+                                      <th>DESCRIPTION</th>
+                                      <th>MINUMUM WAVELENGTH</th>
+                                      <th>EQUIPMENT</th>
+                                      <th>SERIES</th>
+                                      <th>SOFTWARE</th>
+                                      <th>OPERATING MODE</th>
+                                      <th>NUMBER OF CYCLES</th>
+                                      <th>SLIT LENGTH PMT</th>
+                                      <th>RESPONSE InGaAs DETECTOR</th>
+                                      <th>RESPONSE PMT DETECTOR</th>
+                                      <th>INGAAS GAIN</th>
+                                      <th>PMT GAIN</th>
+                                      <th>MONOCHROMATOR CHANGE</th>
+                                      <th>LAMP CHANGE</th>
+                                      <th>PMT CHANGE</th>
+                                      <th>BEAM SELECTOR</th>
+                                      <th>CBM</th>
+                                      <th>CBD STATUS</th>
+                                      <th>ATTENUATOR PERCENTAGE SAMPLE</th>
+                                      <th>ATTENUATOR PERCENTAGE REFERENCE</th>
+                                      <th>POLARIZER</th>
+                                      <th>UNITS</th>
+                                      <th>MEASURING MODE</th>
+                                      <th>MAXIMUM WAVELENGTH</th>
+                                      <th>STEP</th>
+                                      <th>NUMBER OF DATAPOINTS</th>
+                                      <th>MAX MEASUREMENT</th>
+                                      <th>MIN MEASUREMENT</th>
+                                      <th>NOTES</th>
+                                      <th>SPECIMEN</th>
+                                      <th>FILE</th>
+                                    </tr>
+                                </tfoot>
+
+                              <tbody>
+
+                                {% for spectrum in spectra %}
+
+                                <tr>
+
+                                <td> <a href="{% url "inventory:download_spectrum" spectrum.id %}">{{ spectrum.filename }}</a> </td>
+                                <td>{{ spectrum.id }}</td>
+                                <td>{{ spectrum.date }}</td>
+                                <td>{{ spectrum.time }}</td>
+                                <td>{{ spectrum.user }}</td>
+                                <td>{{ spectrum.description }}</td>
+                                <td>{{ spectrum.minimum_wavelength }}</td>
+                                <td>{{ spectrum.equipment }}</td>
+                                <td>{{ spectrum.series }}</td>
+                                <td>{{ spectrum.software }}</td>
+                                <td>{{ spectrum.operating_mode }}</td>
+                                <td>{{ spectrum.cycles }}</td>
+                                <td>{{ spectrum.slit_pmt }}</td>
+                                <td>{{ spectrum.response_ingaas }}</td>
+                                <td>{{ spectrum.response_pmt }}</td>
+                                <td>{{ spectrum.pmt_gain }}</td>
+                                <td>{{ spectrum.ingaas_gain }}</td>
+                                <td>{{ spectrum.monochromator_change }}</td>
+                                <td>{{ spectrum.lamp_change }}</td>
+                                <td>{{ spectrum.pmt_change }}</td>
+                                <td>{{ spectrum.beam_selector }}</td>
+                                <td>{{ spectrum.cbm }}</td>
+                                <td>{{ spectrum.cbd_status }}</td>
+                                <td>{{ spectrum.attenuator_percentage_sample }}</td>
+                                <td>{{ spectrum.attenuator_percentage_reference }}</td>
+                                <td>{{ spectrum.polarizer }}</td>
+                                <td>{{ spectrum.units }}</td>
+                                <td>{{ spectrum.measuring_mode }}</td>
+                                <td>{{ spectrum.maximum_wavelength }}</td>
+                                <td>{{ spectrum.step }}</td>
+                                <td>{{ spectrum.number_of_datapoints }}</td>
+                                <td>{{ spectrum.maximum_measurement }}</td>
+                                <td>{{ spectrum.minimum_measurement }}</td>
+                                <td>{{ spectrum.notes }}</td>
+                                <td>{{ spectrum.specimen }}</td>
+                                <td>{{ spectrum.file }}</td>
+
+                                </tr>
+                                {% endfor%}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        <p></p>
+                          <!--a target="_blank" rel="nofollow" href="https://undraw.co/">Browse Illustrations on
+                              unDraw &rarr;</a-->
+                      </div>
 
                   </div>
-                  <!--div class="card shadow mb-4">
+
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
                             <h6 class="m-0 font-weight-bold text-primary">Specimen Information</h6>
@@ -420,6 +592,14 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{% static "inventory/bootstrap/js/sb-admin-2.min.js"%}"></script>
+
+    <!-- Page level plugins -->
+    <script src="{% static "inventory/bootstrap/vendor/datatables/jquery.dataTables.min.js" %}"></script>
+    <script src="{% static "inventory/bootstrap/vendor/datatables/dataTables.bootstrap4.min.js" %}"></script>
+
+    <!-- Page level custom scripts -->
+    <script src="{% static "inventory/bootstrap/js/demo/datatables-demo.js" %}"></script>
+
 
 </body>
 

@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse,HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render , redirect
-from .models import Specimen
+from .models import *
 from django.template import loader
 from django.views import generic
 from .forms import *
@@ -9,9 +9,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 import pandas as pd
 from django.contrib import messages
-
-
-
+from decimal import *
+import re
+from pandas.errors import ParserError
+from django.core.files.uploadedfile import UploadedFile
+from svglib.svglib import svg2rlg
+import os
 #constants
 
 columns_names = [
@@ -54,7 +57,7 @@ def index(request):
     context = {
         "specimen_list": specimen_list,
     }
-
+    print(os.getcwd())
     if request.method == "POST":
         form = SpecimenSearchForm(request.POST)
         field_names = list(form.fields.keys())
@@ -160,7 +163,7 @@ def results(request):
     }
     return HttpResponse(template.render(context, request))
 
-def handle_uploaded_file(f, request):
+def handle_uploaded_catalog_file(f, request):
     print("°°°°°°°°°°°file is being handled°°°°°°°°°°°°°°°°°°°°")
     with open("temp.txt", "wb+") as destination:
         for chunk in f.chunks():
@@ -224,9 +227,10 @@ def handle_uploaded_file(f, request):
         messages.add_message(request, messages.INFO, f"Attention! No specimens were added")
     else:
         messages.add_message(request, messages.INFO, f"Success! {total} specimen(s) were added")
+
 @login_required
-def upload(request):
-    template = loader.get_template("inventory/bootstrap/upload.html")
+def upload_catalog(request):
+    template = loader.get_template("inventory/bootstrap/upload_catalog.html")
     context = {}
     if request.method == "POST":
         print("°°°°°°°°°°°Method is post°°°°°°°°°°°°°°°°°°°°")
@@ -235,13 +239,15 @@ def upload(request):
 
         if form.is_valid():
             print("°°°°°°°°°°°form is valid°°°°°°°°°°°°°°°°°°°°")
-
-            handle_uploaded_file(request.FILES["file"],request)
+            try:
+                handle_uploaded_catalog_file(request.FILES["file"],request)
+            except (ParserError, UnicodeDecodeError):
+                messages.add_message(request, messages.INFO, f"File format is invalid. Please follow the instructions carefully or contact site administrator")
     else:
         form = UploadFileForm()
 
 
-    return render(request,"inventory/bootstrap/upload.html", {"form":form} )
+    return render(request,"inventory/bootstrap/upload_catalog.html", {"form":form} )
 
 import csv
 
@@ -265,21 +271,20 @@ def download(request):
     for specimen in specimens:
         row_data = [specimen.code, specimen.label, specimen.notes, specimen.old_code, specimen.collection_day, specimen.collection_month, specimen.collection_year , specimen.death_date, specimen.sex_code, specimen.refrigerator, specimen.tray, specimen.row, specimen.column, specimen.location_code, specimen.location, specimen.genus, specimen.species, specimen.country, specimen.province, specimen.latitude, specimen.longitude, specimen.elevation, specimen.light_dark, specimen.histology_location, specimen.histology_stage_performed, specimen.histology_stage_next_up, specimen.rna_location, specimen.etoh_voucher, specimen.elytron, specimen.purpose.rstrip()]
         writer.writerow(row_data)
-
-
     return response
 
 
 def specimen(request, specimen_code):
     specimen_list = Specimen.objects.filter(code__exact = specimen_code)
-    specimen = get_object_or_404(Specimen, pk=specimen_code)
+    specimen_result = get_object_or_404(Specimen, pk=specimen_code)
     template = loader.get_template("inventory/bootstrap/specimen.html")
 
-    if specimen:
+    if specimen_result:
         try:
-
+            spectra = Spectrum.objects.filter(specimen__code = specimen_result.code)
             context = {
-                "specimen": specimen,
+                "specimen": specimen_result,
+                "spectra": spectra
             }
             return HttpResponse(template.render(context, request))
         except (KeyError, Specimen.DoesNotExist):
@@ -333,3 +338,191 @@ def get_method_by_name(cls, method_name):
     else:
         # Method doesn't exist or is not callable
         return None
+
+def spectra(request):
+    specimen_list = Specimen.objects.filter(code__exact = specimen_code)
+    specimen = get_object_or_404(Specimen, pk=specimen_code)
+    template = loader.get_template("inventory/bootstrap/specimen.html")
+
+    if specimen:
+        try:
+
+            context = {
+                "specimen": specimen,
+            }
+            return HttpResponse(template.render(context, request))
+        except (KeyError, Specimen.DoesNotExist):
+            # Redisplay the question voting form.
+            context = {
+                "error_message": "Specimen does not exist",
+            }
+            return HttpResponse(template.render(context, request))
+
+
+def handle_uploaded_spectrum(f):
+    def responses(str):
+        re1 = "\d+/(\d+,\d+) \d+,\d+/(\d+,\d+)"
+        p = re.compile(re1)
+        m= p.match(str)
+        if m:
+            return float(m.group(1).replace(",", ".")),float(m.group(2).replace(",", "."))
+        else:
+            return 0,0
+    def attenuator_settings(str):
+        re1 = "S:(\d+,\d+) R:(\d+,\d+)"
+        p = re.compile(re1)
+        m= p.match(str)
+        if m:
+            return float(m.group(1).replace(",", ".")),float(m.group(2).replace(",", "."))
+        else:
+            return 0,0
+    def slit_pmt_aperture(str):
+        re1 = "\d+/servo \d+,\d+/(\d+,\d+)"
+        p = re.compile(re1)
+        m= p.match(str)
+        if m:
+            return Decimal(m.group(1).replace(",", "."))
+        else:
+            return 0
+    #f = open(file_location)
+    metadata = {}
+    df = pd.DataFrame()
+    with open("temp_spectrum.txt", "wb+") as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+
+    with open("temp_spectrum.txt") as data_file:
+        for index, row in enumerate(data_file): #0-89
+
+            row_str = row.strip()
+            if index +1 == 3: #Filename and extension
+                metadata["filename"]= row_str
+            if index + 1 == 4: #date DD/MM/YYYY
+                metadata["date"]= row_str
+            if index + 1 == 5:#Time HH:MM:SS.SS
+                metadata["time"]= row_str
+            if index + 1 == 8:#user
+                metadata["user"]= row_str
+            if index + 1 == 9:#description
+                metadata["description"]= row_str
+            if index + 1 == 10:#minimum wavelength
+                metadata["minimum_wavelength"]= Decimal(row_str.replace(",", "."))
+            if index + 1 == 12:#equipment name
+                metadata["equipment"]= row_str
+            if index + 1 == 13:#equipment series
+                metadata["series"]= row_str
+            if index + 1 == 14:#data visualizer version, equipment version, date and time
+                metadata["software"]= row_str
+            if index + 1 == 21:#Operating mode
+                metadata["operating_mode"]= row_str
+            if index + 1 == 22: #Number of cycles
+                metadata["cycles"]= row_str
+            if index + 1 == 32: #range/servo
+                metadata["slit_pmt"]= slit_pmt_aperture(row_str)
+            if index + 1 == 33:
+                metadata["response_ingaas"], metadata["response_pmt"]= responses(row_str)
+            if index + 1 == 35: #pmt gain, if 0 is automatic
+                metadata["pmt_gain"]= Decimal(row_str.replace(",", "."))
+            if index + 1 == 36: #InGaAs detector gain
+                metadata["ingaas_gain"]= Decimal(row_str.replace(",", "."))
+            if index + 1 == 42:#monochromator wavelength nm
+                metadata["monochromator_change"]= Decimal(row_str.replace(",", "."))
+            if index + 1 == 43:#lamp change wavelength
+                metadata["lamp_change"]= Decimal(row_str.replace(",", "."))
+            if index + 1 == 44:#pmt wavelength
+                metadata["pmt_change"]= Decimal(row_str.replace(",", "."))
+            if index + 1 == 45:#beam selector
+                metadata["beam_selector"]= row_str
+            if index + 1 == 46:
+                metadata["cbm"]= row_str
+            if index + 1 == 47: #cbd status, on/off
+                metadata["cbd_status"]= row_str
+            if index + 1 == 48: #attenuator percentage
+                metadata["attenuator_percentage_sample"], metadata["attenuator_percentage_reference"]= attenuator_settings(row_str)
+            if index + 1 == 49:
+                metadata["polarizer"]= Decimal(row_str.replace(",", "."))
+            if index + 1 == 80:
+                metadata["units"]= row_str
+            if index + 1 == 81:
+                metadata["measuring_mode"]= row_str
+            if index + 1 == 84:
+                metadata["maximum_wavelength"]= Decimal(row_str.replace(",", "."))
+            if index + 1 == 85:
+                metadata["step"]= Decimal(row_str.replace(",", "."))
+            if index + 1 == 86:
+                metadata["number_of_datapoints"]= Decimal(row_str.replace(",", "."))
+            if index + 1 == 88:
+                metadata["maximum_measurement"]= Decimal(row_str.replace(",", "."))
+            if index + 1 == 89:
+                metadata["minimum_measurement"]= Decimal(row_str.replace(",", "."))
+            if index +1 == 90:
+                break
+
+        df = pd.read_csv(data_file, sep="\t", decimal =",", names=["wavelength", metadata["measuring_mode"]])
+        return metadata, df
+
+@login_required
+def upload_spectra(request):
+    template = loader.get_template("inventory/bootstrap/upload_spectra.html")
+    context = {}
+    if request.method == "POST":
+        print("°°°°°°°°°°°Upload spectra Method is post°°°°°°°°°°°°°°°°°°°°")
+        form= SpectrumForm(request.POST, request.FILES)
+
+
+        if form.is_valid():
+            print("°°°°°°°°°°°form is valid°°°°°°°°°°°°°°°°°°°°")
+
+            new_spectrum = form.save()
+            metadata, df = handle_uploaded_spectrum(request.FILES["file"])
+            print(df)
+            print("fieldnames")
+            #print(dir(Spectrum))
+            field_names = [f.name for f in Spectrum._meta.get_fields()]
+            for field in field_names:
+                try:
+                    if metadata[field]:
+                        setattr(new_spectrum,field,metadata[field])
+                except Exception as e:
+                    print("Exception:")
+                    print(e)
+            print(new_spectrum.operating_mode)
+
+            #Create and save image
+            fig = create_svg_image(df, metadata)
+            img_filename = new_spectrum.filename.replace(".ASC", "temp.svg")
+            fig.savefig(img_filename)
+
+
+            with open(img_filename, "rb") as image_file:
+                new_spectrum.image = UploadedFile(file=image_file)
+                new_spectrum.save()
+
+            new_spectrum.save()
+            print(new_spectrum.image)
+            messages.add_message(request, messages.INFO, f"Spectrum uploaded sucessfully")
+    else:
+        form = SpectrumForm()
+        return render(request,"inventory/bootstrap/upload_spectra.html", {"form":form} )
+
+    return render(request,"inventory/bootstrap/upload_spectra.html", {"form":form} )
+
+@login_required
+def download_spectrum(request,spectrum_id):
+    spectrum_to_download = Spectrum.objects.get(id = spectrum_id)
+    filename = spectrum_to_download.filename
+    response = HttpResponse(spectrum_to_download.file, content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename=%s' % filename
+
+    return response
+
+def create_svg_image(df, metadata):
+    ax = df.plot(x="wavelength", y = metadata["measuring_mode"], grid = True, figsize = (15,10))
+    fig = ax.get_figure()
+
+    ax.set_xlabel("wavelength [nm]")
+    ax.set_ylabel(metadata["measuring_mode"])
+    image_format = 'svg' # e.g .png, .svg, etc.
+    image_name = 'temp_plot.svg'
+
+    return fig
