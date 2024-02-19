@@ -13,7 +13,6 @@ from decimal import *
 import re
 from pandas.errors import ParserError
 from django.core.files.uploadedfile import UploadedFile
-from svglib.svglib import svg2rlg
 import os
 #constants
 
