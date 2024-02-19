@@ -38,7 +38,7 @@ class Specimen(models.Model):
         return str(self.code)
 
 class Spectrum(models.Model):
-    id = models.AutoField( primary_key = True)
+    id = models.AutoField( primary_key = True, null=False, blank=False)
     filename = models.CharField(max_length=150,null=True)
     date  = models.CharField(max_length=150, blank=True,null=True)
     time = models.CharField(max_length=500, blank=True,null=True)
