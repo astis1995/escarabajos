@@ -3,6 +3,8 @@ export inventory_species data in mysql by going to MySQL Workbench, opening inve
 Follow the django tutorial in https://help.pythonanywhere.com/pages/FollowingTheDjangoTutorial
 workon django4
 Install mysqlclient: pip install mysqlclient
+Install matplotlib: pip install matplotlib
+Install whitenoise: pip install whitenoise
 Intall pandas: pip install pandas
 create database in pythonanywhere, estebanvsotom$inventory
 user: estebanvsotom
