@@ -77,10 +77,11 @@ class Spectrum(models.Model):
     image = models.ImageField(upload_to="images", blank=True, null=True)
     #spectra/%Y/%m/%d/
     def __str__(self):
-        def get_filename():
-            try:
-                filename= str(self.filename)
-                return filename
-            except:
-                return "No filename"
-        return str(self.id)
+        #def get_filename():
+        #    try:
+        #        filename= str(self.filename)
+        #        return filename
+        #    except:
+        #        return "No filename"
+        #return str(self.filename)
+        return "spectrum"
