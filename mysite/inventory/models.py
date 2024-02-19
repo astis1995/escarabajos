@@ -72,9 +72,9 @@ class Spectrum(models.Model):
     maximum_measurement = models.DecimalField(max_length=150, blank=True, max_digits = 19, decimal_places = 3,null=True)
     minimum_measurement = models.DecimalField(max_length=150, blank=True, max_digits = 19, decimal_places = 3,null=True)
     notes= models.CharField(max_length=250, blank=True, help_text = "Please add particular notes for this spectrum: ")
-    specimen = models.ForeignKey(Specimen, on_delete = models.SET_NULL, blank=True, null=True)
-    file = models.FileField(upload_to="uploads/spectra/%Y/%m/%d/")
-    image = models.ImageField(upload_to="images", blank=True, null=True)
+    #specimen = models.ForeignKey(Specimen, on_delete = models.SET_NULL, blank=True, null=True)
+    #file = models.FileField(upload_to="uploads/spectra/%Y/%m/%d/")
+    #image = models.ImageField(upload_to="images", blank=True, null=True)
     #spectra/%Y/%m/%d/
     def __str__(self):
         def get_filename():
