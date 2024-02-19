@@ -472,6 +472,7 @@ def upload_spectra(request):
         if form.is_valid():
             print("°°°°°°°°°°°form is valid°°°°°°°°°°°°°°°°°°°°")
 
+            #create a new spectrum
             new_spectrum = form.save()
             metadata, df = handle_uploaded_spectrum(request.FILES["file"])
             print(df)
