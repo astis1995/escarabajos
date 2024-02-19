@@ -79,10 +79,10 @@ class Spectrum(models.Model):
     def __str__(self):
         def get_filename():
             try:
-                filename= str(self.filename)
+                filename= str(self.id)
                 return filename
             except:
                 return "No filename"
-        return str(self.filename)
+        return str(self.id)
 
         #return "spectrum"
