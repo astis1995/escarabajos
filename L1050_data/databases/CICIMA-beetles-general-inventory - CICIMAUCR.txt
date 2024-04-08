@@ -111,7 +111,7 @@ CICIMAUCR0109	46	Chrysina	resplendens	F	etoh	#46 C. resplendens female kenji, fr
 CICIMAUCR0110	13	Chrysina	chrysargyrea	M	general	MV 2023 8-VI-2023	Costa Rica	Puntarenas	Monteverde	MV	10.34367225	-84.79611834				2023		1	3	2	2								CICIMAUCR0110 MV//SEX: M 2023
 CICIMAUCR0111	14	Chrysina	chrysargyrea	M	general	#14 MV.V.23 02-VI-23	Costa Rica	Puntarenas	Monteverde	MV	10.34367225	-84.79611834				2023		1	3	2	2								CICIMAUCR0111 MV//SEX: M 2023
 CICIMAUCR0112	44	Chrysina	resplendens	F	etoh	#44 female kenji C resplendens, from Kenji Nishida	Costa Rica	Puntarenas	nr. Estacion Biologica Monteverde	MV	10.316699	-84.809033				2023		1	2	2	3								CICIMAUCR0112 MV//SEX: F 2023
-kali	KAL-3	Chrysina	kalinini			EtOH, tapa dice M	Costa Rica									2023		1	2	2	3								CICIMAUCR0113 //SEX: U 2023
+CICIMAUCR0113	KAL-3	Chrysina	kalinini			EtOH, tapa dice M	Costa Rica									2023		1	2	2	3								CICIMAUCR0113 //SEX: U 2023
 CICIMAUCR0114	16	Chrysina	chrysargyrea	M	general	MV 2023 8-VI-2023	Costa Rica	Puntarenas	Monteverde	MV	10.34367225	-84.79611834				2023		1	3	2	2								CICIMAUCR0114 MV//SEX: M 2023
 CICIMAUCR0115	17	Chrysina	chrysargyrea	M	general	MV 2023 8-VI-2023	Costa Rica	Puntarenas	Monteverde	MV	10.34367225	-84.79611834				2023		1	3	2	2								CICIMAUCR0115 MV//SEX: M 2023
 CICIMAUCR0116	KALI-5	Chrysina	kalinini	M			Costa Rica	Puntarenas	Altamira, La Amistad, Costa Rica	AM	9.029859203	-83.00967801	1369	3	5	2022		1	2	2	3	Light	Both eyes, B7	through 1X PBS wash series	Osmication	n/a	95%	n/a	CICIMAUCR0116 AM//SEX: M 44684
