@@ -1,13 +1,23 @@
 filename	reason
 CICIMAUCR0001-1	Low reflectance
+CICIMAUCR0002-1	Low reflectance
+CICIMAUCR0013-1	low reflectance
 CICIMAUCR0013-3	low reflectance
 CICIMAUCR0014-2	low reflectance
 CICIMAUCR0014-3	low reflectance
+CICIMAUCR0019-1	low reflectance
 CICIMAUCR0019-2	low reflectance
+CICIMAUCR0019-3	low reflectance
 CICIMAUCR0158-3	low reflectance
+CICIMAUCR0018-1	low reflectance
 CICIMAUCR0018-2	low reflectance
 CICIMAUCR0018-3	low reflectance
 CICIMAUCR0020-2	low reflectance
 CICIMAUCR0020-3	low reflectance
+CICIMAUCR0008-3	low reflectance
 CICIMAUCR0008-2	low reflectance
+CICIMAUCR0113-2	low reflectance
 CICIMAUCR0113-3	low reflectance
+CICIMAUCR0113-4	low reflectance
+CICIMAUCR0098-2	low reflectance
+CICIMAUCR0098-3	low reflectance

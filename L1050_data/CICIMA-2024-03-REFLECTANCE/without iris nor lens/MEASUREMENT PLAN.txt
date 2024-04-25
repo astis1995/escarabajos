@@ -99,6 +99,31 @@ CICIMAUCR0104-3	C. resplendens
 CICIMAUCR0108-3	C. resplendens
 CICIMAUCR0112-3	C. resplendens
 
+
+CICIMAUCR0008-4	C. kalinini
+CICIMAUCR0018-4	C. cupreomarginata
+CICIMAUCR0020-4	C. resplendens
+CICIMAUCR0008-5	C. kalinini
+CICIMAUCR0018-5	C. cupreomarginata
+CICIMAUCR0020-5	C. resplendens
+
+CICIMAUCR0113-5	C. kalinini
+CICIMAUCR0098-4	C. cupreomarginata
+CICIMAUCR0113-6	C. kalinini
+CICIMAUCR0098-5	C. cupreomarginata
+
+CICIMAUCR0158-4	C. cupreomarginata
+CICIMAUCR0019-4	C. cupreomarginata
+CICIMAUCR0158-5	C. cupreomarginata
+CICIMAUCR0019-5	C. cupreomarginata
+CICIMAUCR0018-6	C. cupreomarginata
+CICIMAUCR0018-7	C. cupreomarginata
+CICIMAUCR0020-6	C. resplendens
+CICIMAUCR0020-7	C. resplendens
+
+CICIMAUCR0019-6	C. cupreomarginata
+CICIMAUCR0019-7	C. cupreomarginata
+a
 ]]]]]]]]]]]]]]]]]]]]]]
 
 
