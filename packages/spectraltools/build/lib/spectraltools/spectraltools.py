@@ -173,7 +173,7 @@ class Specimen_Collection:
         filenames = self.get_data_filenames()
         spectra = []
         for filename in filenames:
-            spectrum = Spectrum(filename, self)
+            spectrum = Spectrum(filename, angsol_collection)
             spectra.append(spectrum)
         return spectra
 
@@ -587,25 +587,6 @@ class Spectrum:
         max_value = df[self.measuring_mode].max()
         df.loc[:,self.measuring_mode] = df.loc[:,self.measuring_mode]/max_value
         return df
-        
-    def get_maxima(self):
-        maxima_list = PeakList(self).get_maxima()
-        return maxima_list
-        
-    def get_minima(self):
-        minima_list = PeakList(self).get_maxima()
-        return minima_list
-    
-    def get_critical_points(self):
-        peaks = PeakList(self).get_peaks()
-        return peaks    
-        
-    def get_collection(self):
-        return self.collection
-    def get_species(self):
-        return self.species
-    def get_genus(self):
-        return self.genus
 
     
 ####
