@@ -272,12 +272,13 @@ class PeakList:
 
         peaks = []
         
-        for i in zip(min_x_values, min_y_values):
-            min_peak = Peak(i[0], i[1])
-            peaks.append(min_peak)
         for i in zip(max_x_values, max_y_values):
-            max_peak = Peak(i[0], i[1])
+            max_peak = [i[0], i[1]]
             peaks.append(max_peak)
+        for i in zip(min_x_values, min_y_values):
+            min_peak = [i[0], i[1]]
+            peaks.append(min_peak)
+        
         return peaks
 
 
