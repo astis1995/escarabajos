@@ -369,10 +369,21 @@ class Critical_Points(Metric):
         #crit_i, crit_x, crit_y = 
         
         peaks = spectrum.get_critical_points()
-        metric_value = [list(element) for element in peaks]
+        #print( f"{peaks=}")
+        
+        x_list= []
+        for peak in peaks:
+            x_list.append(peak[0])
+        #print(x_list)
+        
+        y_list = []
+        for peak in peaks:
+            y_list.append(peak[1])
+        #print(y_list)
+        
         #first maximum is metric_value[0][1]
-        first_max = metric_value[0][1]
-        metric_value = [obj/first_max for obj in metric_value]
+        
+        metric_value = np.array([x_list, y_list])
         return metric_value
      
 
@@ -411,7 +422,7 @@ class Minimum_Points(Metric):
 
     @staticmethod
     def description():
-        return f"""This metric returns a vector with each minimum wavelength and relative reflectance."""
+        return f"""This metric returns a vector with each minimum wavelength and reflectance."""
 
     def __repr__(self):
         return f'Minimum_Points : {self.metric_value} for {self.spectrum.genus} {self.spectrum.species} in {self.spectrum.filename}'
@@ -422,7 +433,7 @@ class Minimum_Points(Metric):
 
 class Maximum_Points(Metric):
     """This metric returns a vector with each minimum wavelength and relative reflectance."""
-    name = "Minimum_Points"
+    name = "Maximum_Points"
     
     def get_metric_value(self, spectrum):
        
@@ -441,7 +452,7 @@ class Maximum_Points(Metric):
 
     @staticmethod
     def description():
-        return f"""This metric returns a vector with each minimum wavelength and relative reflectance."""
+        return f"""This metric returns a vector with each maximum wavelength and reflectance."""
 
     def __repr__(self):
         return f'Minimum_Points : {self.metric_value} for {self.spectrum.genus} {self.spectrum.species} in {self.spectrum.filename}'
@@ -452,7 +463,7 @@ class Maximum_Points(Metric):
 
 class Minimum_Points_Normalized(Metric):
     """This metric returns a vector with each minimum wavelength and relative reflectance."""
-    name = "Minimum_Points"
+    name = "Minimum_Points_Normalized"
     
     def get_metric_value(self, spectrum):
        
@@ -483,7 +494,7 @@ class Minimum_Points_Normalized(Metric):
 
 class Maximum_Points_Normalized(Metric):
     """This metric returns a vector with each minimum wavelength and relative reflectance."""
-    name = "Minimum_Points"
+    name = "Maximum_Points_Normalized"
     
     def get_metric_value(self, spectrum):
        
@@ -503,7 +514,7 @@ class Maximum_Points_Normalized(Metric):
 
     @staticmethod
     def description():
-        return f"""This metric returns a vector with each minimum wavelength and relative reflectance."""
+        return f"""This metric returns a vector with each maximum wavelength and relative reflectance."""
 
     def __repr__(self):
         return f'Minimum_Points : {self.metric_value} for {self.spectrum.genus} {self.spectrum.species} in {self.spectrum.filename}'
