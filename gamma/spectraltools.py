@@ -14,87 +14,6 @@ import re
 import scipy
 
 
-# In[2]:
-
-
-# This line of code allow us to access data in colab
-# open(r"/content/drive/My Drive/CICIMA/escarabajos_files/L1050_data", "r")
-
-
-# ### Workplace
-
-# """This section allows the user to choose their workplace location.
-# This is important if the user has multiple locations and operating systems in which this 
-# script is run"""
-# 
-# #select location
-# working_at = "wfh"
-# 
-# #Training data is used when we are already certain of species and genera for a particular sample
-# training_data_is_used = False
-# 
-# if working_at == "colaboratory":
-#   from google.colab import drive
-#   drive.mount("/content/drive")
-#   #base folder
-#   """Select the location for your base folder"""
-#     
-#   base_folder = r"/content/drive/My Drive/CICIMA/escarabajos_files"
-#   
-# elif working_at == "wfh":
-# 
-#     """Select the location of your base folder"""
-#     base_folder = r"C:\Users\esteb\cicima\escarabajos"
-# 
-# elif working_at == "cicima_desktop":
-#   
-#     """Select the location of your base folder"""
-#     base_folder = r"C:\Users\EstebanSoto\Jupyter\escarabajos"
-# 
-# elif working_at == "cicima_laptop":
-#     
-#     """Select the location of your base folder"""
-#     base_folder = r"/home/vinicio/escarabajos"
-# 
-# #define the location of the tables with information about the collections and its parent directory
-# 
-# collection_tables_main_path =  os.path.join(base_folder, "L1050_data","collections")
-# collection_files_main_path = os.path.join(base_folder, "L1050_data")
-# 
-# # Define report location
-# report_location = os.path.join(base_folder, "reports","data_analysis")
-# 
-# #collection_descriptor = r"CICIMAUCR and ANGSOL" tododelete
-# 
-# #File location and metadata location for collection 1
-# angsol_collection_path = os.path.join(collection_files_main_path,"ANGSOL","average") 
-# angsol_collection_metadata = os.path.join(collection_tables_main_path,"CICIMA-beetles-general-inventory - ANGSOL.txt") 
-# 
-# #File location and metadata location for collection 2
-# cicimaucr_collection_path = os.path.join(collection_files_main_path,r"TRA_data_CICIMA_INBUCR","CICIMAUCR","reflectance")  #listo
-# cicimaucr_collection_2_path = os.path.join(collection_files_main_path,r"CICIMA-2024-01-REFLECTANCE","average")
-# cicimaucr_collection_3_path = os.path.join(collection_files_main_path,r"CICIMA-2024-03-REFLECTANCE","without iris nor lens","average")
-# cicima_ucr_metadata = os.path.join(collection_tables_main_path,r"CICIMA-beetles-general-inventory - CICIMAUCR.txt") 
-# 
-# #File location and metadata location for collection 3
-# inbucr_collection_path = os.path.join(collection_files_main_path,r"INBUCR","average") #listo
-# inbucr_metadata = os.path.join(collection_tables_main_path,r"CICIMA-beetles-general-inventory - INBUCR.txt") 
-# 
-# #File location and metadata location for collection 4
-# bioucr_collection_path = os.path.join(collection_files_main_path,r"BIOUCR","average")  #listo
-# bioucr_metadata = os.path.join(collection_tables_main_path,r"CICIMA-beetles-general-inventory - BIOUCR.txt") 
-# 
-# #agregated data location, here averages and std will be saved when training data and retreived when classifying spectra
-# agregated_data_location = os.path.join(base_folder, "agregated_data")
-# agregated_data_avg_path = os.path.join(agregated_data_location,"peak_averages_krc.txt" )  #listo
-# agregated_data_std_path  = os.path.join( agregated_data_location , r"peak_std_krc.txt") #listo
-# 
-# 
-# 
-
-# In[3]:
-
-
 #decorator
 def plot_wrapper(func):
     def wrapper(*args, **kwargs):
@@ -106,16 +25,6 @@ def plot_wrapper(func):
         plt.show()
         return result
     return wrapper
-
-
-# In[ ]:
-
-
-
-
-
-# In[4]:
-
 
 class Specimen_Collection:
     """This class represents a physical collection of specimens"""
@@ -177,13 +86,6 @@ class Specimen_Collection:
             spectra.append(spectrum)
         return spectra
 
-
-# In[5]:
-
-
-#Instantiate collection
-#angsol_collection = Specimen_Collection("ANGSOL", angsol_collection_path, angsol_collection_metadata, "HIGH")
-#angsol_collection.set_description("ANGSOL collection has specimens that belong to Angel Solis. The confidence that we have about specimen identification is high.")
 
 
 # In[6]:
@@ -267,8 +169,8 @@ class PeakList:
 
         #get peaks
 
-        min_peaks_index, min_x_values, min_y_values = self.get_minima()
-        max_peaks_index, max_x_values, max_y_values = self.get_maxima()
+        min_i, min_x_values, min_y_values = self.get_minima()
+        max_i, max_x_values, max_y_values = self.get_maxima()
 
         peaks = []
         
@@ -319,8 +221,7 @@ class PeakList:
         peaks_index = peaks_funct[0]
         x_values = x[peaks_index]
         y_values = y[peaks_index]
-        
-     
+
         return peaks_index, x_values, y_values
 
     def get_maxima(self):
@@ -594,7 +495,7 @@ class Spectrum:
         return maxima_list
         
     def get_minima(self):
-        minima_list = PeakList(self).get_maxima()
+        minima_list = PeakList(self).get_minima()
         return minima_list
     
     def get_critical_points(self):

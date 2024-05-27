@@ -86,6 +86,7 @@ def feature_and_label_extractor(Metric, spectra):
     codes = []
     #get code, label and feature for each spectrum
     for spectrum in spectra:
+        #spectrum.plot()
         feature = Metric(spectrum).metric_value
         label = spectrum.get_species()
         code = spectrum.code
@@ -181,7 +182,7 @@ class  Gamma_Area_Under_Curve_First_Min_Cut(Metric):
     #this is a subclass of Gamma
     #get_gamma_factor must be redefined
     visible_range_start_wavelength = 450
-    name = "gamma_area_under_curve_cut_first_minimum"
+    name = "Gamma_Area_Under_Curve_First_Min_Cut"
 
     def __init__(self, spectrum):
         
@@ -248,7 +249,20 @@ class  Gamma_Area_Under_Curve_First_Min_Cut(Metric):
                 min_in_between_x = x[index]
                 min_in_between_y = y[index]
                 break
-
+        #If we cant find a first minimum (it could be because there is a small minimum not large enough to be detected.
+        #we are going to find the next one 
+        if min_in_between_i ==0:
+            for index in min_i:
+                #print("index")
+                if second_max_x <= x[index] :
+                    min_in_between_i = index
+                    min_in_between_x = x[index]
+                    min_in_between_y = y[index]
+                    break
+            
+        #print(f"{first_max_x=}")
+        #print(f"{second_max_x=}")
+        #print(f"{min_in_between_i=}")
         # print(f"min in bet: {min_in_between_i} {min_in_between_x} {min_in_between_y} ")
         #second minimum
         #get the location of the second minimum
@@ -257,13 +271,14 @@ class  Gamma_Area_Under_Curve_First_Min_Cut(Metric):
         min_after_second_max_y = 0
         for index in min_i:
             # print(f" second_max_x  <= x[index] { second_max_x  <= x[index]}")
-            if second_max_x  <= x[index]:
+            #check if the second min is greater than the first min_in_between too
+            if (second_max_x  <= x[index]) & (x[min_in_between_i]  < x[index]): 
                 min_after_second_max_i = index
                 min_after_second_max_x = x[index]
                 min_after_second_max_y = y[index]
                 break
-
-
+        #print(f"{min_after_second_max_i=}")
+        
         # print(f"min after: {min_after_second_max_i} {min_after_second_max_x} {min_after_second_max_y} ")
 
         x_values = [first_max_x, min_in_between_x, second_max_x, min_after_second_max_x]
@@ -282,6 +297,9 @@ class  Gamma_Area_Under_Curve_First_Min_Cut(Metric):
         #print(f"fmi: {min_in_between_i}")
         x_left = x[:min_in_between_i]
         y_left = y[:min_in_between_i]
+        #print(f"{spectrum}")
+        #print(f"{y=}")
+        #print(f"{y_left=}")
         #set last one to zero for picture to be displaye properly
         y_left[-1] = y_left[0]
         
@@ -383,7 +401,7 @@ class Critical_Points(Metric):
         
         #first maximum is metric_value[0][1]
         
-        metric_value = np.array([x_list, y_list])
+        metric_value = [x_list, y_list]
         return metric_value
      
 
@@ -422,7 +440,7 @@ class Minimum_Points(Metric):
 
     @staticmethod
     def description():
-        return f"""This metric returns a vector with each minimum wavelength and reflectance."""
+        return f"""This metric returns a vector with each minimum's wavelength and reflectance."""
 
     def __repr__(self):
         return f'Minimum_Points : {self.metric_value} for {self.spectrum.genus} {self.spectrum.species} in {self.spectrum.filename}'
@@ -452,10 +470,10 @@ class Maximum_Points(Metric):
 
     @staticmethod
     def description():
-        return f"""This metric returns a vector with each maximum wavelength and reflectance."""
+        return f"""This metric returns a vector with each maximum's wavelength and reflectance."""
 
     def __repr__(self):
-        return f'Minimum_Points : {self.metric_value} for {self.spectrum.genus} {self.spectrum.species} in {self.spectrum.filename}'
+        return f'Maximum_Points : {self.metric_value} for {self.spectrum.genus} {self.spectrum.species} in {self.spectrum.filename}'
 
 
 # In[11]:
@@ -483,10 +501,10 @@ class Minimum_Points_Normalized(Metric):
 
     @staticmethod
     def description():
-        return f"""This metric returns a vector with each minimum wavelength and relative reflectance."""
+        return f"""This metric returns a vector with each minimum's wavelength and relative reflectance."""
 
     def __repr__(self):
-        return f'Minimum_Points : {self.metric_value} for {self.spectrum.genus} {self.spectrum.species} in {self.spectrum.filename}'
+        return f'Minimum_Points_Normalized : {self.metric_value} for {self.spectrum.genus} {self.spectrum.species} in {self.spectrum.filename}'
 
 
 # In[12]:
@@ -514,10 +532,10 @@ class Maximum_Points_Normalized(Metric):
 
     @staticmethod
     def description():
-        return f"""This metric returns a vector with each maximum wavelength and relative reflectance."""
+        return f"""This metric returns a vector with each maximum's wavelength and relative reflectance."""
 
     def __repr__(self):
-        return f'Minimum_Points : {self.metric_value} for {self.spectrum.genus} {self.spectrum.species} in {self.spectrum.filename}'
+        return f'Maximum_Points_Normalized : {self.metric_value} for {self.spectrum.genus} {self.spectrum.species} in {self.spectrum.filename}'
 
 
 

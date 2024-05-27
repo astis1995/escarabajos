@@ -1,2 +1,0 @@
-	cupreomarginata_x_avg	cupreomarginata_y_avg	cupreomarginata_x_std	cupreomarginata_y_std	resplendens_x_avg	resplendens_y_avg	resplendens_x_std	resplendens_y_std	kalinini_x_avg	kalinini_y_avg	kalinini_x_std	kalinini_y_std
-0	566.75	845.25	8.525696452489967	49.48926651305311	571.7272727272727	743.2727272727273	25.484722372044104	77.96863111544623	577.4444444444445	776.3333333333334	12.517641871562365	17.371752294393843
