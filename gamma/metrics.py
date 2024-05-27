@@ -14,14 +14,11 @@ class Metric():
     This is useful when using it in the report methods """
     name = "Metric"
     
-    def get_metric_value(self, spectrum):
-        metric_value = None
-        return metric_value
+    def get_metric_value(self):
+        return self.metric_value
 
-    def __init__(self, spectrum):
-        
-        self.spectrum = spectrum
-        self.metric_value = self.get_metric_value(spectrum)
+    def calculate_metric_value(self):
+        return 0.0
         
     @classmethod
     def get_name(cls):
@@ -36,7 +33,7 @@ class Metric():
 
     def __repr__(self):
         return f'{self.name} value: {self.metric_value:.4f} for {self.spectrum.genus} {self.spectrum.species}. File: {self.spectrum.filename}'
-
+    
 
 # In[2]:
 
@@ -48,7 +45,11 @@ class Gamma_Arbitrary_Limits(Metric):
     ir_max_wavelength = 2500.00
     name = "Gamma_Arbitrary_Limits"
     
-    def get_metric_value(self, spectrum):
+    def __init__(self, spectrum):
+        self.spectrum = spectrum
+        self.metric_value = self.calculate_metric_value(spectrum)
+        
+    def calculate_metric_value(self, spectrum):
         def get_maximum_in_range(spectrum, min_wavelength, max_wavelength):
             measuring_mode = spectrum.metadata["measuring_mode"]
             df = spectrum.data
@@ -59,22 +60,19 @@ class Gamma_Arbitrary_Limits(Metric):
 
         uv_vis_wavelength, uv_vis_max = get_maximum_in_range(spectrum, Gamma_Arbitrary_Limits.uv_vis_min_wavelength, Gamma_Arbitrary_Limits.uv_vis_max_wavelength)
         ir_wavelength, ir_max = get_maximum_in_range(spectrum, Gamma_Arbitrary_Limits.ir_min_wavelength, Gamma_Arbitrary_Limits.ir_max_wavelength)
-        metric_value = (uv_vis_max / ir_max)*1.00
-        
-        return metric_value
+        metric_value_return = (uv_vis_max / ir_max)*1.00
+        return metric_value_return
 
     def __init__(self, spectrum):
         self.name = "Gamma_Arbitrary_Limits"
-        self.spectrum = spectrum
-        self.metric_value = self.get_metric_value(spectrum)
-
+        
     
     @staticmethod
     def description():
         return f"""This algorithm calculates the ratio between the highest reflectance peak in the visible range (Between {Gamma_Arbitrary_Limits.uv_vis_min_wavelength} nm and {Gamma_Arbitrary_Limits.uv_vis_max_wavelength} nm)
                 and the maximum peak in the IR range up to {Gamma_Arbitrary_Limits.ir_max_wavelength} nm. Beyond {Gamma_Arbitrary_Limits.ir_max_wavelength} nm the internal structure's reflectance generates unwanted noise."""
     def __repr__(self):
-        return f'Gamma arbitrary limits, value: {self.metric_value:.4f} for {self.spectrum.genus} {self.spectrum.species}. File: {self.spectrum.filename}'
+        return f'Gamma arbitrary limits, value: {self.get_metric_value():.4f} for {self.spectrum.genus} {self.spectrum.species}. File: {self.spectrum.filename}'
 
 
 # In[3]:
@@ -87,7 +85,8 @@ def feature_and_label_extractor(Metric, spectra):
     #get code, label and feature for each spectrum
     for spectrum in spectra:
         #spectrum.plot()
-        feature = Metric(spectrum).metric_value
+        metric = Metric(spectrum)
+        feature = metric.get_metric_value()
         label = spectrum.get_species()
         code = spectrum.code
         codes.append(code)
@@ -98,27 +97,23 @@ def feature_and_label_extractor(Metric, spectra):
     
     return data
     
-
-
-
 # In[ ]:
 
 
 class Gamma_First_Two_Peaks(Metric):
     """This gamma metric calculates the ratio between the second and first peak."""
     name = "Gamma_First_Two_Peaks"
-    
-    def get_metric_value(self, spectrum):
+
+    def __init__(self, spectrum):
+        self.spectrum = spectrum
+        self.metric_value = self.calculate_metric_value(self.spectrum)
+        
+    def calculate_metric_value(self, spectrum):
         #get list of maxima and minima
         max_i, max_x, max_y = spectrum.get_maxima()
         #Divide second peak over first peak
         metric_value = max_y[1]/max_y[0]
         return metric_value
-
-    def __init__(self, spectrum):
-        
-        self.spectrum = spectrum
-        self.metric_value = self.get_metric_value(spectrum)
 
     @staticmethod
     def description():
@@ -140,10 +135,8 @@ class Gamma_Area_Under_Curve_Naive(Metric):
     name = "Gamma_Area_Under_Curve_Naive"
     
     def __init__(self, spectrum):
-        
         self.spectrum = spectrum
-        self.metric_value = self.get_metric_value(spectrum)
-        
+        self.metric_value = self.calculate_metric_value(self.spectrum)
    
     def description():
         return f"""This method calculates the ratio between the area under the curve for the spectrum between {Gamma_Area_Under_Curve_Naive.visible_start_wavelength} 
@@ -151,7 +144,7 @@ class Gamma_Area_Under_Curve_Naive(Metric):
         {GammaAreaUnderCurveNaive.ir_end_wavelength} nm (infrared range)."""
 
 
-    def get_metric_value(self, spectrum):
+    def calculate_metric_value(self, spectrum):
 
         def get_area_under_curve(spectrum, start_wavelength, finish_wavelength):
             # Subset the DataFrame to the range of interest
@@ -185,16 +178,15 @@ class  Gamma_Area_Under_Curve_First_Min_Cut(Metric):
     name = "Gamma_Area_Under_Curve_First_Min_Cut"
 
     def __init__(self, spectrum):
-        
         self.spectrum = spectrum
-        self.metric_value = self.get_metric_value(spectrum)
+        self.metric_value = self.calculate_metric_value(self.spectrum)
         
     def description():
         return f"""This algorithm calculates the area for the visible region (starting at {Gamma_Area_First_Min_Cut.visible_range_start_wavelength} 
         and ending in the first minima between the maximum in the visible range and the maximum in the IR range. 
         Then calculates the area of the IR range up to the second minumum. The ratio between these two areas is the gamma value."""
 
-    def get_metric_value(self, spectrum):
+    def calculate_metric_value(self, spectrum):
 
         def get_area_under_curve(spectrum, start_wavelength, finish_wavelength):
             # Assuming your DataFrame is named df and has columns 'wavelength' and 'height'
@@ -326,18 +318,18 @@ class  Gamma_Area_Under_Curve_First_Min_Cut(Metric):
 class Gamma_Vector_Relative_Reflectance(Metric):
     """This gamma metric calculates a vector with all the relative heights with respect to the first peak."""
     name = "Gamma_Vector_Relative_Reflectance"
-    
-    def get_metric_value(self, spectrum):
+
+    def __init__(self, spectrum):
+        self.spectrum = spectrum
+        self.metric_value = self.calculate_metric_value(self.spectrum)
+        
+    def calculate_metric_value(self, spectrum):
         #get list of maxima and minima
         max_i, max_x, max_y = spectrum.get_maxima()
         
         #Divide every peak over first peak
         metric_value = list(max_y/max_y[0])
         return metric_value
-
-    def __init__(self, spectrum):
-        self.spectrum = spectrum
-        self.metric_value = self.get_metric_value(spectrum)
 
     @staticmethod
     def description():
@@ -353,18 +345,18 @@ class Gamma_Vector_Relative_Reflectance(Metric):
 class Wavelength_Vector(Metric):
     """This gamma metric calculates a vector with each peak's wavelength."""
     name = "Wavelength_Vector"
-    
-    def get_metric_value(self, spectrum):
+
+    def __init__(self, spectrum):
+        self.spectrum = spectrum
+        self.metric_value = self.calculate_metric_value(self.spectrum)
+        
+    def calculate_metric_value(self, spectrum):
         #get list of maxima and minima
         max_i, max_x, max_y = spectrum.get_maxima()
         
         #Divide every peak over first peak
         metric_value = list(max_x)
         return metric_value
-
-    def __init__(self, spectrum):
-        self.spectrum = spectrum
-        self.metric_value = self.get_metric_value(spectrum)
 
     @staticmethod
     def description():
@@ -380,8 +372,12 @@ class Wavelength_Vector(Metric):
 class Critical_Points(Metric):
     """This metric returns a vector with each critical point wavelength and relative reflectance."""
     name = "Critical_Points"
-    
-    def get_metric_value(self, spectrum):
+
+    def __init__(self, spectrum):
+        self.spectrum = spectrum
+        self.metric_value = self.calculate_metric_value(self.spectrum)
+        
+    def calculate_metric_value(self, spectrum):
        
         #get list of maxima and minima
         #crit_i, crit_x, crit_y = 
@@ -405,10 +401,6 @@ class Critical_Points(Metric):
         return metric_value
      
 
-    def __init__(self, spectrum):
-        self.spectrum = spectrum
-        self.metric_value = self.get_metric_value(spectrum)
-
     @staticmethod
     def description():
         return f"""This metric returns a vector with each critical point wavelength and relative reflectance."""
@@ -423,8 +415,12 @@ class Critical_Points(Metric):
 class Minimum_Points(Metric):
     """This metric returns a vector with each minimum wavelength and relative reflectance."""
     name = "Minimum_Points"
-    
-    def get_metric_value(self, spectrum):
+
+    def __init__(self, spectrum):
+        self.spectrum = spectrum
+        self.metric_value = self.calculate_metric_value(self.spectrum)
+        
+    def calculate_metric_value(self, spectrum):
        
         #get list of maxima and minima
         min_i, min_x, min_y = spectrum.get_minima() 
@@ -432,11 +428,6 @@ class Minimum_Points(Metric):
         metric_value = [min_x, min_y]
         
         return metric_value
-     
-
-    def __init__(self, spectrum):
-        self.spectrum = spectrum
-        self.metric_value = self.get_metric_value(spectrum)
 
     @staticmethod
     def description():
@@ -452,8 +443,12 @@ class Minimum_Points(Metric):
 class Maximum_Points(Metric):
     """This metric returns a vector with each minimum wavelength and relative reflectance."""
     name = "Maximum_Points"
-    
-    def get_metric_value(self, spectrum):
+
+    def __init__(self, spectrum):
+        self.spectrum = spectrum
+        self.metric_value = self.calculate_metric_value(self.spectrum)
+        
+    def calculate_metric_value(self, spectrum):
        
         #get list of maxima and minima
         max_i, max_x, max_y = spectrum.get_maxima() 
@@ -462,11 +457,6 @@ class Maximum_Points(Metric):
         
         #first maximum is metric_value[0][1]
         return metric_value
-     
-
-    def __init__(self, spectrum):
-        self.spectrum = spectrum
-        self.metric_value = self.get_metric_value(spectrum)
 
     @staticmethod
     def description():
@@ -482,8 +472,12 @@ class Maximum_Points(Metric):
 class Minimum_Points_Normalized(Metric):
     """This metric returns a vector with each minimum wavelength and relative reflectance."""
     name = "Minimum_Points_Normalized"
-    
-    def get_metric_value(self, spectrum):
+
+    def __init__(self, spectrum):
+        self.spectrum = spectrum
+        self.metric_value = self.calculate_metric_value(self.spectrum)
+        
+    def calculate_metric_value(self, spectrum):
        
         #get list of maxima and minima
         min_i, min_x, min_y = spectrum.get_minima() 
@@ -493,11 +487,7 @@ class Minimum_Points_Normalized(Metric):
         metric_value = [min_x, min_y]
         
         return metric_value
-     
 
-    def __init__(self, spectrum):
-        self.spectrum = spectrum
-        self.metric_value = self.get_metric_value(spectrum)
 
     @staticmethod
     def description():
@@ -513,8 +503,12 @@ class Minimum_Points_Normalized(Metric):
 class Maximum_Points_Normalized(Metric):
     """This metric returns a vector with each minimum wavelength and relative reflectance."""
     name = "Maximum_Points_Normalized"
-    
-    def get_metric_value(self, spectrum):
+
+    def __init__(self, spectrum):
+        self.spectrum = spectrum
+        self.metric_value = self.calculate_metric_value(self.spectrum)
+        
+    def calculate_metric_value(self, spectrum):
        
         #get list of maxima and minima
         max_i, max_x, max_y = spectrum.get_maxima() 
@@ -524,11 +518,6 @@ class Maximum_Points_Normalized(Metric):
         metric_value = [max_x, max_y]
         
         return metric_value
-     
-
-    def __init__(self, spectrum):
-        self.spectrum = spectrum
-        self.metric_value = self.get_metric_value(spectrum)
 
     @staticmethod
     def description():
@@ -590,9 +579,8 @@ class Metric_Testbench():
         fig.savefig(filename)
         
         return metric_df, filename
-        
-def save_aggregated_data(metric_class,filtered_spectra, agregated_data_location):
 
+def get_aggregated_data(metric_class,filtered_spectra):
     #Calculate gammas
     metric_list = []
 
@@ -621,12 +609,19 @@ def save_aggregated_data(metric_class,filtered_spectra, agregated_data_location)
     #print(grouped_stats)
     grouped_stats = grouped_stats
     #print(grouped_stats)
+    return grouped_stats
+    
+def save_aggregated_data(metric_class,filtered_spectra, agregated_data_location):
+
+    #calculate aggregated data 
+    grouped_stats = get_aggregated_data(metric_class,filtered_spectra)
     
     #save information
     path_location = os.path.join(agregated_data_location, "metric_avg_std")
     create_path_if_not_exists(path_location)
     path_and_filename = os.path.join( path_location, f'{metric_class.get_name()}.txt')
     grouped_stats.to_csv( path_and_filename, index=True, sep = "\t")
+    
     #return path
     return path_and_filename
 
