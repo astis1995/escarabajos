@@ -83,7 +83,7 @@ class Gamma_Arbitrary_Limits(Metric):
         uv_vis_wavelength, uv_vis_max = get_maximum_in_range(spectrum, Gamma_Arbitrary_Limits.uv_vis_min_wavelength, Gamma_Arbitrary_Limits.uv_vis_max_wavelength)
         ir_wavelength, ir_max = get_maximum_in_range(spectrum, Gamma_Arbitrary_Limits.ir_min_wavelength, Gamma_Arbitrary_Limits.ir_max_wavelength)
         metric_value_return = (uv_vis_max / ir_max)*1.00
-        print(metric_value_return)
+        #print(metric_value_return)
         return metric_value_return
 
     def __init__(self, spectrum):
@@ -611,7 +611,7 @@ def read_aggregated_data(agregated_data_location):
     # Get a list of all files in the folder
     file_list = os.listdir(folder_path)
 
-    print(file_list)
+    #print(file_list)
     
     # Print the list of files
     dataframes = {}
