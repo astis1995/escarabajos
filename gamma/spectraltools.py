@@ -17,10 +17,10 @@ import scipy
 #decorator
 def plot_wrapper(func):
     def wrapper(*args, **kwargs):
-        print("Something is happening before the function is called.")
+        #print("Something is happening before the function is called.")
         plt.figure(figsize=(10, 5))
         result = func(*args, **kwargs)
-        print("Something is happening after the function is called.")
+        #print("Something is happening after the function is called.")
         plt.grid(True)
         plt.show()
         return result
@@ -95,8 +95,8 @@ class Specimen_Collection:
 def test_collection_class():
     angsol_collection = Specimen_Collection("ANGSOL", angsol_collection_path, angsol_collection_metadata, "HIGH")
     #print(f"{angsol_collection.get_metadata()=} \n" )
-    print(f"{angsol_collection.get_data_folder_path()=} \n" )   
-    print(f"{angsol_collection.get_data_filenames()=} \n" )
+    #print(f"{angsol_collection.get_data_folder_path()=} \n" )   
+    #print(f"{angsol_collection.get_data_filenames()=} \n" )
 #test_collection_class()
 
 
@@ -173,7 +173,8 @@ class PeakList:
         max_i, max_x_values, max_y_values = self.get_maxima()
 
         peaks = []
-        
+
+        #print("peak called")
         for i in zip(max_x_values, max_y_values):
             max_peak = list((i[0], i[1]))
             peaks.append(max_peak)
@@ -188,9 +189,11 @@ class PeakList:
         self.spectrum.plot_settings()
         x_values = []
         y_values = []
+        
         for peak in self.get_peaks():
-            x_values.append(peak.x_value)
-            y_values.append(peak.y_value)
+            #print(peak)
+            x_values.append(peak[0])
+            y_values.append(peak[1])
             
         return plt.scatter(x_values, y_values, color="r")
         
@@ -536,8 +539,8 @@ def test_peak_class():
     for spectrum in spectra:
         peaklist1 = PeakList(spectrum)
         #peaklist1.plot()
-        print(peaklist1)
-        print(peaklist1.plot())
+        #print(peaklist1)
+        #print(peaklist1.plot())
 #test_peak_class()
 
 
