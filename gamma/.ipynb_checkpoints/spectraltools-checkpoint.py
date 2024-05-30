@@ -120,10 +120,16 @@ class Peak:
         def __init__(self, x, y):
             self.x_value = x
             self.y_value = y
+        def __lt__(self, other):
+            return self.x_value < other.x_value
         def __str__(self):
             return f"({self.x_value}, {self.y_value})"
         def __repr__(self):
             return f"({self.x_value}, {self.y_value})"
+        def get_x(self):
+            return self.x_value
+        def get_y(self):
+            return self.y_value
 
 class PeakList:
     prominence_threshold_min = 0.15
@@ -155,8 +161,8 @@ class PeakList:
 
     def get_spectrum(self):
         return self.spectrum
-        
-    def get_peaks(self):
+
+    def get_peaks_as_object(self):
         import scipy
         #get info
         x = self.spectrum.data["wavelength"].values
@@ -176,24 +182,29 @@ class PeakList:
 
         #print("peak called")
         for i in zip(max_x_values, max_y_values):
-            max_peak = list((i[0], i[1]))
+            max_peak = Peak(i[0], i[1])
             peaks.append(max_peak)
         for i in zip(min_x_values, min_y_values):
-            min_peak = list((i[0], i[1]))
+            min_peak = Peak(i[0], i[1])
             peaks.append(min_peak)
-        
+
+        peaks = sorted(peaks)
         return peaks
+        
+    def get_peaks(self):
+        peaks = self.get_peaks_as_object()
+        x = []
+        y = []
+        for peak in peaks: 
+            x.append(peak.get_x())
+            y.append(peak.get_y())
+        
+        return x, y
 
 
     def plot_settings(self): 
         self.spectrum.plot_settings()
-        x_values = []
-        y_values = []
-        
-        for peak in self.get_peaks():
-            #print(peak)
-            x_values.append(peak[0])
-            y_values.append(peak[1])
+        x_values, y_values = self.get_peaks()
             
         return plt.scatter(x_values, y_values, color="r")
         
@@ -504,6 +515,12 @@ class Spectrum:
     def get_critical_points(self):
         peaks = PeakList(self).get_peaks()
         return peaks    
+
+    def get_data(self):
+        return self.data
+
+    def get_code(self):
+        return self.code
         
     def get_collection(self):
         return self.collection
