@@ -196,8 +196,9 @@ class PeakList:
         x = []
         y = []
         for peak in peaks: 
-            x.append(peak.get_x())
-            y.append(peak.get_y())
+            if not ((peak.get_x() > 855)&(peak.get_x() < 869)):  
+                x.append(peak.get_x())
+                y.append(peak.get_y())
         
         return x, y
 
@@ -227,8 +228,8 @@ class PeakList:
         y_inverted = -y + y_max
 
         #maximum height
-        # This prevents  minima less than 20% 
-        maximum_height = y_inverted.max() * 0.90
+        # This prevents  minima less than 40% 
+        maximum_height = y_inverted.max() * 0.60
         minimum_height = 0
         #get minima
         peaks_funct = scipy.signal.find_peaks(y_inverted, distance= self.min_distance_between_peaks, prominence=self.prominence_threshold_min, height = (minimum_height, maximum_height))

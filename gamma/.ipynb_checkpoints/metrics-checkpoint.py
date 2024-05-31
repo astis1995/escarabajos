@@ -283,7 +283,8 @@ class  Gamma_Area_Under_Curve_First_Min_Cut(Metric):
         y_left = y[:min_in_between_i]
         #print(f"{spectrum}")
         #print(f"{y=}")
-        #print(f"{y_left=}")
+        print(f"{y_left=}")
+        
         #set last one to zero for picture to be displaye properly
         y_left[-1] = y_left[0]
         
@@ -292,8 +293,10 @@ class  Gamma_Area_Under_Curve_First_Min_Cut(Metric):
         #print(f"min_after_second_max_i: {min_after_second_max_i}")
         x_right = x[min_in_between_i:min_after_second_max_i]
         y_right = y[min_in_between_i:min_after_second_max_i]
+        print(f"{y_right=}")
         #set last one to zero for picture to be displaye properly
-        y_right[0] = y_right[-1] = y_left[0]
+        if ( (y_right.size !=0) and ( y_left.size !=0)): 
+            y_right[0] = y_right[-1] = y_left[0]
         
         #show figure
 
