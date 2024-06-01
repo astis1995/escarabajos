@@ -464,7 +464,11 @@ class Spectrum:
                 result = ""
             #print("not mt")
             #print(f"specimen species {specimen}")
-            result = str(specimen.iloc[0]["species"])
+            try:
+                result = str(specimen.iloc[0]["species"])
+            except Exception as e:
+                print("Update specimen in the corresponding collection, please")
+                return "na"
             #print(f"species, type{type(result)}")
             if isinstance(result,str):
                 return result
