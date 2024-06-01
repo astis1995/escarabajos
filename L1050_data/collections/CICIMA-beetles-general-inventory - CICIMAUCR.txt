@@ -1,8 +1,8 @@
 code	old_code	genus	species	sex_code	purpose	notes	country	province	location	location_code	latitude	longitude	elevation	collection_day	collection_month	collection_year	death_date	refrigerator	tray	row	column	light_dark	histology_location	histology_stage_performed	histology_stage_next_up	rna_location	etoh_voucher	elytron	label
 CICIMAUCR0001		Chrysina	kalinini			AM '22, La Amistad, 03-04.v.2022 Chrysina kalinini, 95% EtOH	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173		3	5	2022		1	2	4	3								CICIMAUCR0001 AM//SEX: U 3.2022
-CICIMAUCR0002				M		male AM 3.V.22	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173		3	5	2022		1	2	1	1								CICIMAUCR0002 AM//SEX: M 3.V.2022
-CICIMAUCR0003				M		male AM V.22	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173			5	2022		1	2	1	1								CICIMAUCR0003 AM//SEX: M V.2022
-CICIMAUCR0004				M		male AM V.22	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173			5	2022		1	2	1	1								CICIMAUCR0004 AM//SEX: M V.2022
+CICIMAUCR0002		Chrysina	kalinini	M		male AM 3.V.22	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173		3	5	2022		1	2	1	1								CICIMAUCR0002 AM//SEX: M 3.V.2022
+CICIMAUCR0003		Chrysina	kalinini	M		male AM V.22	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173			5	2022		1	2	1	1								CICIMAUCR0003 AM//SEX: M V.2022
+CICIMAUCR0004		Chrysina	kalinini	M		male AM V.22	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173			5	2022		1	2	1	1								CICIMAUCR0004 AM//SEX: M V.2022
 CICIMAUCR0005	6	Chrysina	boucardi	F	RNA-opsins. Elitro izquierdo E. Bermudez SEM 04-MAR-2024. Elitro derecho perdido.	MV 6 MV 23 F?	Costa Rica	Puntarenas	Monteverde	MV	10.34367225	-84.79611834			6	2023		1	2	1	1	dark-adapted							CICIMAUCR0005 MV//SEX: F VI.2023
 CICIMAUCR0006	kali4	Chrysina	kalinini			AM '22 //Poco etanol	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173				2022		1	2	1	1								CICIMAUCR0006 AM//SEX: U 2022
 CICIMAUCR0007	20	Chrysina	chrysargyrea	M	general	MV 23, chrysargyrea GOLD	Costa Rica	Puntarenas	lower light, Estacion Biologica Monteverde	MV	10.316699	-84.809033	1497			2023		1	2	1	1								CICIMAUCR0007 MV//SEX: M 2023
@@ -68,8 +68,8 @@ CICIMAUCR0066		Chrysina	optima	F		Costa Rica, Cartago. P.N. Tapanti 1500 msnm 16
 CICIMAUCR0067		Chrysina	optima	M		Costa Rica, Cartago. P.N. Tapanti 1500 msnm 16-18/V/2015 Scarabaeidae Rutelinae Chrysina optima male	Costa Rica 	Cartago	P. N. Tapantí	TP	9.574242117	-83.75709361	1500	16	5	2015		1	1	3	3								CICIMAUCR0067 TP//SEX: M 16.V.2015
 CICIMAUCR0068		Chrysina	optima	M		Costa Rica, Cartago. P.N. Tapanti 1500 msnm 16-18/V/2015 C. optima male	Costa Rica 	Cartago	P. N. Tapantí	TP	9.574242117	-83.75709361	1500	16	5	2015		1	1	3	3								CICIMAUCR0068 TP//SEX: M 16.V.2015
 CICIMAUCR0069		Chrysina	boucardi	F	1 elitro E. Bermudez SEM 4-MAR-24.	Costa Rica, Cartago. P.N. Tapanti ¿2015? C. boucardi female	Costa Rica 	Cartago	P. N. Tapantí	TP	9.574242117	-83.75709361				2015		1	1	3	3								CICIMAUCR0069 TP//SEX: F 2015
-CICIMAUCR0070	ID005	Chrysina	resplendens	F		Chrysina resplendens female? Costa Rica Alajuela San Ramón, Los Ángeles Norte. 1100 msnm III-2016 	Costa Rica	Alajuela	Reserva natural y hotel Villa Blanca, Los Ángeles	LA-SR	10.20195775	-84.48268891	1100		3	2016		1	1	3	3								CICIMAUCR0070 LA-SR//SEX: F III.2016
-CICIMAUCR0071		Chrysina	resplendens	F		C. resplendens female Villa Blanca Abril 2016 Sin cabeza (ojos preparacion)	Costa Rica 	Alajuela	Reserva natural y hotel Villa Blanca, Los Ángeles	LA-SR	10.20195775	-84.48268891	1100		4	2016		1	1	3	3								CICIMAUCR0071 LA-SR//SEX: F IV.2016
+CICIMAUCR0070		Chrysina	resplendens	F		Chrysina resplendens female? Costa Rica Alajuela San Ramón, Los Ángeles Norte. 1100 msnm III-2016 	Costa Rica	Alajuela	Reserva natural y hotel Villa Blanca, Los Ángeles	LA-SR	10.20195775	-84.48268891	1100		3	2016		1	1	3	3								CICIMAUCR0070 LA-SR//SEX: F III.2016
+CICIMAUCR0071	ID004	Chrysina	resplendens	F		C. resplendens female Villa Blanca Abril 2016 Sin cabeza (ojos preparacion)	Costa Rica 	Alajuela	Reserva natural y hotel Villa Blanca, Los Ángeles	LA-SR	10.20195775	-84.48268891	1100		4	2016		1	1	3	3								CICIMAUCR0071 LA-SR//SEX: F IV.2016
 CICIMAUCR0072						"Sandía" Tapantí	Costa Rica 	Cartago	P. N. Tapantí	TP	9.574242117	-83.75709361				2015		1	1	4	2								CICIMAUCR0072 TP//SEX: U 2015
 CICIMAUCR0073						"Sandía" Tapantí	Costa Rica 	Cartago	P. N. Tapantí	TP	9.574242117	-83.75709361				2015		1	1	4	2								CICIMAUCR0073 TP//SEX: U 2015
 CICIMAUCR0074						"Sandía" Tapantí	Costa Rica 	Cartago	P. N. Tapantí	TP	9.574242117	-83.75709361				2015		1	1	4	2								CICIMAUCR0074 TP//SEX: U 2015
@@ -103,7 +103,7 @@ CICIMAUCR0101	45	Chrysina	resplendens	F	etoh	#45 Kenji female resplendens, from 
 CICIMAUCR0102	10	Chrysina	chrysargyrea	M	general	MV 2023 8-VI-23	Costa Rica	Puntarenas	Monteverde	MV	10.34367225	-84.79611834				2023		1	3	2	1								CICIMAUCR0102 MV//SEX: M 2023
 CICIMAUCR0103	4	Chrysina	chrysargyrea	M	general	MV 2023 5-VI-23	Costa Rica	Puntarenas	Monteverde	MV	10.34367225	-84.79611834				2023		1	3	2	1								CICIMAUCR0103 MV//SEX: M 2023
 CICIMAUCR0104	19	Chrysina	resplendens	M	general. Elitro en prestamo a E. Bermudez FEB-2024.	MV.V.23 02 02-VI-2023 125. C. resplendens.	Costa Rica	Puntarenas	Monteverde	MV	10.34367225	-84.79611834				2023		1	2	2	3								CICIMAUCR0104 MV//SEX: M 2023
-CICIMAUCR0105		Chrysina	kalinini		Elitro en prestamo a E. Bermudez 02-2024	C. kalinini La Amistad AM V.2022	Costa Rica	Puntarenas	Altamira, La Amistad, Costa Rica	AM	9.030185803	-83.00826173				2022		1	2	2	3								CICIMAUCR0105 AM//SEX: U 2022
+CICIMAUCR0105		Chrysina	kalinini			C. kalinini La Amistad AM V.2022	Costa Rica	Puntarenas	Altamira, La Amistad, Costa Rica	AM	9.030185803	-83.00826173				2022		1	2	2	3								CICIMAUCR0105 AM//SEX: U 2022
 CICIMAUCR0106	11	Chrysina	chrysargyrea	M	general	MV 2023 8-VI-2023	Costa Rica	Puntarenas	Monteverde	MV	10.34367225	-84.79611834				2023		1	3	2	2								CICIMAUCR0106 MV//SEX: M 2023
 CICIMAUCR0107	12	Chrysina	chrysargyrea	M	general	MV 2023 8-VI-2023	Costa Rica	Puntarenas	Monteverde	MV	10.34367225	-84.79611834				2023		1	3	2	2								CICIMAUCR0107 MV//SEX: M 2023
 CICIMAUCR0108	9	Chrysina	resplendens	M	general	MV GROUP	Costa Rica	Puntarenas	Monteverde	MV	10.34367225	-84.79611834				2023		1	2	2	3								CICIMAUCR0108 MV//SEX: M 2023
@@ -180,3 +180,9 @@ CICIMAUCR0178	NI #001					Verde brillante metálico																							CICIMA
 CICIMAUCR0179	NI #002					Verde rojizo metálico																							CICIMAUCR0179 //SEX :U 
 CICIMAUCR0180		Strigidia				Strigidia sp, anómala verde rojizo metálico																							CICIMAUCR0180// SEX: U
 CICIMAUCR0181		Chrysina	boucardi			CHRYSINA BOUCARDI CORONADO 2(ICP) 2023. Préstamo a Angel Solís Dic 2023.	COSTA RICA	SAN JOSÉ	CORONADO	CO						2023													CICIMAUCR0181 CO//SEX: U 2023
+CICIMAUCR0201		Chrysina	cupreomarginata																										
+CICIMAUCR0204		Chrysina	cupreomarginata																										
+CICIMAUCR0205		Chrysina	cupreomarginata																										
+CICIMAUCR0225		Chrysina	resplendens																										
+CICIMAUCR0250		Chrysina	resplendens																										
+CICIMAUCR0251		Chrysina	resplendens																										
