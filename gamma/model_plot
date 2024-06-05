@@ -1,0 +1,17 @@
+digraph G {
+concentrate=True;
+dpi=96;
+rankdir=TB;
+node [shape=record];
+1936293622064 [label="{flatten_input|InputLayer}|{input:|output:}|{{[(None, 5)]}|{[(None, 5)]}}"];
+1936293003328 [label="{flatten|Flatten}|{input:|output:}|{{(None, 5)}|{(None, 5)}}"];
+1936293755920 [label="{dense|Dense}|{input:|output:}|{{(None, 5)}|{(None, 10)}}"];
+1936296000528 [label="{dense_1|Dense}|{input:|output:}|{{(None, 10)}|{(None, 10)}}"];
+1936296121872 [label="{dropout|Dropout}|{input:|output:}|{{(None, 10)}|{(None, 10)}}"];
+1936293708656 [label="{dense_2|Dense}|{input:|output:}|{{(None, 10)}|{(None, 3)}}"];
+1936293622064 -> 1936293003328;
+1936293003328 -> 1936293755920;
+1936293755920 -> 1936296000528;
+1936296000528 -> 1936296121872;
+1936296121872 -> 1936293708656;
+}
