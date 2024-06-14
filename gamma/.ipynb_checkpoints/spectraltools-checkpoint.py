@@ -114,7 +114,153 @@ def create_path_if_not_exists(path):
 
 
 # In[8]:
+def get_metadata_and_dataframe(file_location):
+         #definitions
+        #Logic to read ASCII data
+        import os
+        import pandas as pd
+        import re
 
+        def get_sample_code_from_filename(row_str, file_location):
+            #print("string")
+            #print(file_location)
+            filename = os.path.basename(file_location)
+            re1 = r"([a-zA-Z\d]+)(?:-\d)*(?:.Sample)*.(?:txt)*(?:ASC)*"
+            #Names are in the form CODE-MEASUREMENTNUMBER.TXT
+            p = re.compile(re1)
+            m = p.match(filename)
+            # print(f"match filename: {m}")
+            if m:
+                # print(f"group 1: {m.group(1)}")
+                return(m.group(1))
+            return get_sample_code(row_str)
+
+        def get_sample_code(row_str):
+            #Tries to get the sample code from the file, if it does not match
+            #it tries to get it from the filename.
+            # print("string")
+            # print(row_str)
+            re1 = r"([a-zA-Z\d]+)(?:-\d)*(?:.Sample)*.(?:txt)*(?:ASC)*"
+            #Names are in the form CODE-MEASUREMENTNUMBER.TXT
+            p = re.compile(re1)
+            m = p.match(row_str)
+            # print(f"match: {m}")
+            if m:
+                return(m.group(1))
+            else:
+                ""
+
+        def responses(str):
+            re1 = "\d+/(\d+,\d+) \d+,\d+/(\d+,\d+)"
+            p = re.compile(re1)
+            m= p.match(str)
+            if m:
+                return m.group(1),m.group(2)
+            else:
+                return "",""
+        def attenuator_settings(str):
+            re1 = "S:(\d+,\d+) R:(\d+,\d+)"
+            p = re.compile(re1)
+            m= p.match(str)
+            if m:
+                return m.group(1),m.group(2)
+            else:
+                return "",""
+        def slit_pmt_aperture(str):
+            re1 = "\d+/servo \d+,\d+/(\d+,\d+)"
+            p = re.compile(re1)
+            m= p.match(str)
+            if m:
+                return m.group(1)
+            else:
+                return ""
+        #Initializa metadata dict
+        metadata = {}
+
+        #Read header
+        lines = []
+        with open(file_location, encoding= "latin1") as myfile:
+            lines = myfile.readlines()[0:90]
+        metadata["header"] = "".join(lines)
+
+
+        #read_metadata
+        f = open(file_location, encoding= "latin1")
+
+        df = pd.DataFrame()
+        with f as data_file:
+            for index, row in enumerate(data_file): #0-89
+
+                row_str = row.strip()
+                if index +1 == 3: #Filename and extension
+                    metadata["filename"]= row_str
+                    metadata["code"] = get_sample_code_from_filename(row_str, file_location)
+                if index + 1 == 4: #date DD/MM/YYYY
+                    metadata["date"]= row_str
+                if index + 1 == 5:#Time HH:MM:SS.SS
+                    metadata["time"]= row_str
+                if index + 1 == 8:#user
+                    metadata["user"]= row_str
+                if index + 1 == 9:#description
+                    metadata["description"]= row_str
+                if index + 1 == 10:#minimum wavelength
+                    metadata["minimum_wavelength"]= row_str
+                if index + 1 == 12:#equipment name
+                    metadata["equipment"]= row_str
+                if index + 1 == 13:#equipment series
+                    metadata["series"]= row_str
+                if index + 1 == 14:#data visualizer version, equipment version, date and time
+                    metadata["software"]= row_str
+                if index + 1 == 21:#Operating mode
+                    metadata["operating_mode"]= row_str
+                if index + 1 == 22: #Number of cycles
+                    metadata["cycles"]= row_str
+                if index + 1 == 32: #range/servo
+                    metadata["slit_pmt"]= slit_pmt_aperture(row_str)
+                if index + 1 == 33:
+                    metadata["response_ingaas"], metadata["response_pmt"]= responses(row_str)
+                if index + 1 == 35: #pmt gain, if 0 is automatic
+                    metadata["pmt_gain"]= row_str
+                if index + 1 == 36: #InGaAs detector gain
+                    metadata["ingaas_gain"]= row_str
+                if index + 1 == 42:#monochromator wavelength nm
+                    metadata["monochromator_change"]= row_str
+                if index + 1 == 43:#lamp change wavelength
+                    metadata["lamp_change"]= row_str
+                if index + 1 == 44:#pmt wavelength
+                    metadata["pmt_change"]= row_str
+                if index + 1 == 45:#beam selector
+                    metadata["beam_selector"]= row_str
+                if index + 1 == 46:
+                    metadata["cbm"]= row_str
+                if index + 1 == 47: #cbd status, on/off
+                    metadata["cbd_status"]= row_str
+                if index + 1 == 48: #attenuator percentage
+                    metadata["attenuator_sample"], metadata["attenuator_reference"]= attenuator_settings(row_str)
+                if index + 1 == 49:
+                    metadata["polarizer"]= row_str
+                if index + 1 == 80:
+                    metadata["units"]= row_str
+                if index + 1 == 81:
+                    metadata["measuring_mode"]= row_str
+                if index + 1 == 84:
+                    metadata["maximum_wavelength"]= row_str
+                if index + 1 == 85:
+                    metadata["step"]= row_str
+                if index + 1 == 86:
+                    metadata["number_of_datapoints"]= row_str
+                if index + 1 == 88:
+                    metadata["maximum_measurement"]= row_str
+                if index + 1 == 89:
+                    metadata["minimum_measurement"]= row_str
+                if index +1 == 90:
+                    break
+            df = pd.read_csv(f, sep="\t", decimal =",", names=["wavelength", metadata["measuring_mode"]]).dropna()
+            df["wavelength"],df[metadata["measuring_mode"]] = df["wavelength"].astype(float), df[metadata["measuring_mode"]].astype(float)
+            df = df[df["wavelength"]<2000].reset_index()
+            
+            return metadata, df
+            
 
 class Peak:
         def __init__(self, x, y):
@@ -270,153 +416,7 @@ class Spectrum:
     It provides the maxima and minima and a """
     #These variables delimit the thresholds used to determine if a point can be considered a maximum or minimum
     
-        
     
-    def get_metadata_and_dataframe(self, file_location):
-         #definitions
-        #Logic to read ASCII data
-        import os
-        import pandas as pd
-        import re
-
-        def get_sample_code_from_filename(row_str, file_location):
-            #print("string")
-            #print(file_location)
-            filename = os.path.basename(file_location)
-            re1 = r"([a-zA-Z\d]+)(?:-\d)*(?:.Sample)*.(?:txt)*(?:ASC)*"
-            #Names are in the form CODE-MEASUREMENTNUMBER.TXT
-            p = re.compile(re1)
-            m = p.match(filename)
-            # print(f"match filename: {m}")
-            if m:
-                # print(f"group 1: {m.group(1)}")
-                return(m.group(1))
-            return get_sample_code(row_str)
-
-        def get_sample_code(row_str):
-            #Tries to get the sample code from the file, if it does not match
-            #it tries to get it from the filename.
-            # print("string")
-            # print(row_str)
-            re1 = r"([a-zA-Z\d]+)(?:-\d)*(?:.Sample)*.(?:txt)*(?:ASC)*"
-            #Names are in the form CODE-MEASUREMENTNUMBER.TXT
-            p = re.compile(re1)
-            m = p.match(row_str)
-            # print(f"match: {m}")
-            if m:
-                return(m.group(1))
-            else:
-                ""
-
-        def responses(str):
-            re1 = "\d+/(\d+,\d+) \d+,\d+/(\d+,\d+)"
-            p = re.compile(re1)
-            m= p.match(str)
-            if m:
-                return m.group(1),m.group(2)
-            else:
-                return "",""
-        def attenuator_settings(str):
-            re1 = "S:(\d+,\d+) R:(\d+,\d+)"
-            p = re.compile(re1)
-            m= p.match(str)
-            if m:
-                return m.group(1),m.group(2)
-            else:
-                return "",""
-        def slit_pmt_aperture(str):
-            re1 = "\d+/servo \d+,\d+/(\d+,\d+)"
-            p = re.compile(re1)
-            m= p.match(str)
-            if m:
-                return m.group(1)
-            else:
-                return ""
-        #Initializa metadata dict
-        metadata = {}
-
-        #Read header
-        lines = []
-        with open(file_location, encoding= "latin1") as myfile:
-            lines = myfile.readlines()[0:90]
-        metadata["header"] = "".join(lines)
-
-
-        #read_metadata
-        f = open(file_location, encoding= "latin1")
-
-        df = pd.DataFrame()
-        with f as data_file:
-            for index, row in enumerate(data_file): #0-89
-
-                row_str = row.strip()
-                if index +1 == 3: #Filename and extension
-                    metadata["filename"]= row_str
-                    metadata["code"] = get_sample_code_from_filename(row_str, file_location)
-                if index + 1 == 4: #date DD/MM/YYYY
-                    metadata["date"]= row_str
-                if index + 1 == 5:#Time HH:MM:SS.SS
-                    metadata["time"]= row_str
-                if index + 1 == 8:#user
-                    metadata["user"]= row_str
-                if index + 1 == 9:#description
-                    metadata["description"]= row_str
-                if index + 1 == 10:#minimum wavelength
-                    metadata["minimum_wavelength"]= row_str
-                if index + 1 == 12:#equipment name
-                    metadata["equipment"]= row_str
-                if index + 1 == 13:#equipment series
-                    metadata["series"]= row_str
-                if index + 1 == 14:#data visualizer version, equipment version, date and time
-                    metadata["software"]= row_str
-                if index + 1 == 21:#Operating mode
-                    metadata["operating_mode"]= row_str
-                if index + 1 == 22: #Number of cycles
-                    metadata["cycles"]= row_str
-                if index + 1 == 32: #range/servo
-                    metadata["slit_pmt"]= slit_pmt_aperture(row_str)
-                if index + 1 == 33:
-                    metadata["response_ingaas"], metadata["response_pmt"]= responses(row_str)
-                if index + 1 == 35: #pmt gain, if 0 is automatic
-                    metadata["pmt_gain"]= row_str
-                if index + 1 == 36: #InGaAs detector gain
-                    metadata["ingaas_gain"]= row_str
-                if index + 1 == 42:#monochromator wavelength nm
-                    metadata["monochromator_change"]= row_str
-                if index + 1 == 43:#lamp change wavelength
-                    metadata["lamp_change"]= row_str
-                if index + 1 == 44:#pmt wavelength
-                    metadata["pmt_change"]= row_str
-                if index + 1 == 45:#beam selector
-                    metadata["beam_selector"]= row_str
-                if index + 1 == 46:
-                    metadata["cbm"]= row_str
-                if index + 1 == 47: #cbd status, on/off
-                    metadata["cbd_status"]= row_str
-                if index + 1 == 48: #attenuator percentage
-                    metadata["attenuator_sample"], metadata["attenuator_reference"]= attenuator_settings(row_str)
-                if index + 1 == 49:
-                    metadata["polarizer"]= row_str
-                if index + 1 == 80:
-                    metadata["units"]= row_str
-                if index + 1 == 81:
-                    metadata["measuring_mode"]= row_str
-                if index + 1 == 84:
-                    metadata["maximum_wavelength"]= row_str
-                if index + 1 == 85:
-                    metadata["step"]= row_str
-                if index + 1 == 86:
-                    metadata["number_of_datapoints"]= row_str
-                if index + 1 == 88:
-                    metadata["maximum_measurement"]= row_str
-                if index + 1 == 89:
-                    metadata["minimum_measurement"]= row_str
-                if index +1 == 90:
-                    break
-            df = pd.read_csv(f, sep="\t", decimal =".", names=["wavelength", metadata["measuring_mode"]]).dropna()
-            df = df[df["wavelength"]<2000].reset_index()
-            df["wavelength"],df[metadata["measuring_mode"]] = df["wavelength"].astype(float), df[metadata["measuring_mode"]].astype(float)
-            return metadata, df
     
     def __str__(self):
         return self.code
@@ -479,7 +479,7 @@ class Spectrum:
         self.file_location = file_location
         self.collection = collection
         
-        self.metadata, self.data = self.get_metadata_and_dataframe(file_location)
+        self.metadata, self.data = get_metadata_and_dataframe(file_location)
         self.code = self.metadata["code"]
         self.filename =  self.metadata["filename"]
         self.genus = get_genus(self.code, collection)
@@ -533,6 +533,11 @@ class Spectrum:
         return self.species
     def get_genus(self):
         return self.genus
+    def __lt__(self, other):
+        def alphanum_key(s):
+            import re
+            return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s)]
+        return alphanum_key(self.code) < alphanum_key(other.code)
 
     
 ####
