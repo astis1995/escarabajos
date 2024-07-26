@@ -151,7 +151,7 @@ def get_metadata_and_dataframe(file_location):
                 ""
 
         def responses(str):
-            re1 = "\d+/(\d+,\d+) \d+,\d+/(\d+,\d+)"
+            re1 = r"\d+/(\d+,\d+) \d+,\d+/(\d+,\d+)"
             p = re.compile(re1)
             m= p.match(str)
             if m:
@@ -159,7 +159,7 @@ def get_metadata_and_dataframe(file_location):
             else:
                 return "",""
         def attenuator_settings(str):
-            re1 = "S:(\d+,\d+) R:(\d+,\d+)"
+            re1 = r"S:(\d+,\d+) R:(\d+,\d+)"
             p = re.compile(re1)
             m= p.match(str)
             if m:
@@ -167,7 +167,7 @@ def get_metadata_and_dataframe(file_location):
             else:
                 return "",""
         def slit_pmt_aperture(str):
-            re1 = "\d+/servo \d+,\d+/(\d+,\d+)"
+            re1 = r"\d+/servo \d+,\d+/(\d+,\d+)"
             p = re.compile(re1)
             m= p.match(str)
             if m:
@@ -185,6 +185,7 @@ def get_metadata_and_dataframe(file_location):
 
 
         #read_metadata
+        print(f"File: {file_location}")
         f = open(file_location, encoding= "latin1")
 
         df = pd.DataFrame()
@@ -256,6 +257,7 @@ def get_metadata_and_dataframe(file_location):
                 if index +1 == 90:
                     break
             df = pd.read_csv(f, sep="\t", decimal =",", names=["wavelength", metadata["measuring_mode"]]).dropna()
+            print(df)
             df["wavelength"],df[metadata["measuring_mode"]] = df["wavelength"].astype(float), df[metadata["measuring_mode"]].astype(float)
             df = df[df["wavelength"]<2000].reset_index()
             
