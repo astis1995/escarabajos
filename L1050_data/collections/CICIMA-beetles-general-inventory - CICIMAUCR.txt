@@ -1,13 +1,13 @@
 code	old_code	genus	species	sex_code	purpose	notes	country	province	location	location_code	latitude	longitude	elevation	collection_day	collection_month	collection_year	death_date	refrigerator	tray	row	column	light_dark	histology_location	histology_stage_performed	histology_stage_next_up	rna_location	etoh_voucher	elytron	label
 CICIMAUCR0001		Chrysina	kalinini			AM '22, La Amistad, 03-04.v.2022 Chrysina kalinini, 95% EtOH	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173		3	5	2022		1	2	4	3								CICIMAUCR0001 AM//SEX: U 3.2022
-CICIMAUCR0002		Chrysina	kalinini	M		male AM 3.V.22	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173		3	5	2022		1	2	1	1								CICIMAUCR0002 AM//SEX: M 3.V.2022
-CICIMAUCR0003		Chrysina	kalinini	M		male AM V.22	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173			5	2022		1	2	1	1								CICIMAUCR0003 AM//SEX: M V.2022
-CICIMAUCR0004		Chrysina	kalinini	M		male AM V.22	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173			5	2022		1	2	1	1								CICIMAUCR0004 AM//SEX: M V.2022
+CICIMAUCR0002		Chrysina	kalinini	M	medido ventral	male AM 3.V.22	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173		3	5	2022		1	2	1	1								CICIMAUCR0002 AM//SEX: M 3.V.2022
+CICIMAUCR0003		Chrysina	kalinini	M	medido ventral	male AM V.22	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173			5	2022		1	2	1	1								CICIMAUCR0003 AM//SEX: M V.2022
+CICIMAUCR0004		Chrysina	kalinini	M	medido ventral	male AM V.22	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173			5	2022		1	2	1	1								CICIMAUCR0004 AM//SEX: M V.2022
 CICIMAUCR0005	6	Chrysina	boucardi	F	RNA-opsins. Elitro izquierdo E. Bermudez SEM 04-MAR-2024. Elitro derecho perdido.	MV 6 MV 23 F?	Costa Rica	Puntarenas	Monteverde	MV	10.34367225	-84.79611834			6	2023		1	2	1	1	dark-adapted							CICIMAUCR0005 MV//SEX: F VI.2023
-CICIMAUCR0006	kali4	Chrysina	kalinini			AM '22 //Poco etanol	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173				2022		1	2	1	1								CICIMAUCR0006 AM//SEX: U 2022
+CICIMAUCR0006	kali4	Chrysina	kalinini		medido ventral	AM '22 //Poco etanol	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173				2022		1	2	1	1								CICIMAUCR0006 AM//SEX: U 2022
 CICIMAUCR0007	20	Chrysina	chrysargyrea	M	general	MV 23, chrysargyrea GOLD	Costa Rica	Puntarenas	lower light, Estacion Biologica Monteverde	MV	10.316699	-84.809033	1497			2023		1	2	1	1								CICIMAUCR0007 MV//SEX: M 2023
 CICIMAUCR0008	kali2	Chrysina	kalinini			AM '22	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173				2022		1	2	1	1								CICIMAUCR0008 AM//SEX: U 2022
-CICIMAUCR0009	kali1	Chrysina	kalinini			AM 	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173				2022		1	2	1	1								CICIMAUCR0009 AM//SEX: U 2022
+CICIMAUCR0009	kali1	Chrysina	kalinini		medido ventral	AM 	Costa Rica	Puntarenas	Parque Internacional La Amistad, Altamira	AM	9.030185803	-83.00826173				2022		1	2	1	1								CICIMAUCR0009 AM//SEX: U 2022
 CICIMAUCR0010	58	Chrysina	chrysargyrea	F		MV	Costa Rica	Guanacaste	nr. Reserva Bosque Nuboso Santa Elena	MV	10.34361583	-84.79609395		28	5	2023		1	2	1	2	dark-adapted							CICIMAUCR0010 MV//SEX: F 28.v.2023
 CICIMAUCR0011	50	Chrysina	chrysargyrea	M		MV	Costa Rica	Guanacaste	nr. Reserva Bosque Nuboso Santa Elena	MV	10.34361583	-84.79609395		28	5	2023		1	2	1	2	dark-adapted							CICIMAUCR0011 MV//SEX: M 28.v.2023
 CICIMAUCR0012	2	Chrysina	cupreomarginata	M	RNA-opsins	MV	Costa Rica	Puntarenas	Monteverde	MV	10.34367225	-84.79611834				2023		1	2	1	2	dark-adapted							CICIMAUCR0012 MV//SEX: M 2023
@@ -68,8 +68,8 @@ CICIMAUCR0066		Chrysina	optima	F		Costa Rica, Cartago. P.N. Tapanti 1500 msnm 16
 CICIMAUCR0067		Chrysina	optima	M		Costa Rica, Cartago. P.N. Tapanti 1500 msnm 16-18/V/2015 Scarabaeidae Rutelinae Chrysina optima male	Costa Rica 	Cartago	P. N. Tapantí	TP	9.574242117	-83.75709361	1500	16	5	2015		1	1	3	3								CICIMAUCR0067 TP//SEX: M 16.V.2015
 CICIMAUCR0068		Chrysina	optima	M		Costa Rica, Cartago. P.N. Tapanti 1500 msnm 16-18/V/2015 C. optima male	Costa Rica 	Cartago	P. N. Tapantí	TP	9.574242117	-83.75709361	1500	16	5	2015		1	1	3	3								CICIMAUCR0068 TP//SEX: M 16.V.2015
 CICIMAUCR0069		Chrysina	boucardi	F	1 elitro E. Bermudez SEM 4-MAR-24.	Costa Rica, Cartago. P.N. Tapanti ¿2015? C. boucardi female	Costa Rica 	Cartago	P. N. Tapantí	TP	9.574242117	-83.75709361				2015		1	1	3	3								CICIMAUCR0069 TP//SEX: F 2015
-CICIMAUCR0070		Chrysina	resplendens	F		Chrysina resplendens female? Costa Rica Alajuela San Ramón, Los Ángeles Norte. 1100 msnm III-2016 	Costa Rica	Alajuela	Reserva natural y hotel Villa Blanca, Los Ángeles	LA-SR	10.20195775	-84.48268891	1100		3	2016		1	1	3	3								CICIMAUCR0070 LA-SR//SEX: F III.2016
-CICIMAUCR0071	ID004	Chrysina	resplendens	F		C. resplendens female Villa Blanca Abril 2016 Sin cabeza (ojos preparacion)	Costa Rica 	Alajuela	Reserva natural y hotel Villa Blanca, Los Ángeles	LA-SR	10.20195775	-84.48268891	1100		4	2016		1	1	3	3								CICIMAUCR0071 LA-SR//SEX: F IV.2016
+CICIMAUCR0070		Chrysina	resplendens	F	medido ventral	Chrysina resplendens female? Costa Rica Alajuela San Ramón, Los Ángeles Norte. 1100 msnm III-2016 	Costa Rica	Alajuela	Reserva natural y hotel Villa Blanca, Los Ángeles	LA-SR	10.20195775	-84.48268891	1100		3	2016		1	1	3	3								CICIMAUCR0070 LA-SR//SEX: F III.2016
+CICIMAUCR0071	ID004	Chrysina	resplendens	F	medido ventral	C. resplendens female Villa Blanca Abril 2016 Sin cabeza (ojos preparacion)	Costa Rica 	Alajuela	Reserva natural y hotel Villa Blanca, Los Ángeles	LA-SR	10.20195775	-84.48268891	1100		4	2016		1	1	3	3								CICIMAUCR0071 LA-SR//SEX: F IV.2016
 CICIMAUCR0072						"Sandía" Tapantí	Costa Rica 	Cartago	P. N. Tapantí	TP	9.574242117	-83.75709361				2015		1	1	4	2								CICIMAUCR0072 TP//SEX: U 2015
 CICIMAUCR0073						"Sandía" Tapantí	Costa Rica 	Cartago	P. N. Tapantí	TP	9.574242117	-83.75709361				2015		1	1	4	2								CICIMAUCR0073 TP//SEX: U 2015
 CICIMAUCR0074						"Sandía" Tapantí	Costa Rica 	Cartago	P. N. Tapantí	TP	9.574242117	-83.75709361				2015		1	1	4	2								CICIMAUCR0074 TP//SEX: U 2015
@@ -98,7 +98,7 @@ CICIMAUCR0096	13	Chrysina	optima	M		Chrysina optima male. Costa Rica, Cartago. P
 CICIMAUCR0097		Chrysina	kalinini			AM11 KALI 22	Costa Rica	Puntarenas	Altamira, La Amistad, Costa Rica	AM	9.030185803	-83.00826173				2022		1	2	2	3								CICIMAUCR0097 AM//SEX: U 2022
 CICIMAUCR0098	3	Chrysina	cupreomarginata	M		MV	Costa Rica	Puntarenas	Monteverde	MV	10.34367225	-84.79611834				2023		1	2	2	3								CICIMAUCR0098 MV//SEX: M 2023
 CICIMAUCR0099						NA	Costa Rica									2023		1	2	2	3								CICIMAUCR0099 //SEX: U 2023
-CICIMAUCR0100	64	Chrysina	cupreomarginata	M	general	64 Cupreomarginata male	Costa Rica	Puntarenas	Reserva Bosque Nuboso Santa Elena	MV	10.343871	-84.796085	1664	28	5	2023		1	2	2	3								CICIMAUCR0100 MV//SEX: M 28.v.2023
+CICIMAUCR0100	64	Chrysina	cupreomarginata	M	general, parte ventral para SEM	64 Cupreomarginata male	Costa Rica	Puntarenas	Reserva Bosque Nuboso Santa Elena	MV	10.343871	-84.796085	1664	28	5	2023		1	2	2	3								CICIMAUCR0100 MV//SEX: M 28.v.2023
 CICIMAUCR0101	45	Chrysina	resplendens	F	etoh	#45 Kenji female resplendens, from Kenji Nishida	Costa Rica	Puntarenas	nr. Estacion Biologica Monteverde	MV	10.316699	-84.809033				2023		1	2	2	3								CICIMAUCR0101 MV//SEX: F 2023
 CICIMAUCR0102	10	Chrysina	chrysargyrea	M	general	MV 2023 8-VI-23	Costa Rica	Puntarenas	Monteverde	MV	10.34367225	-84.79611834				2023		1	3	2	1								CICIMAUCR0102 MV//SEX: M 2023
 CICIMAUCR0103	4	Chrysina	chrysargyrea	M	general	MV 2023 5-VI-23	Costa Rica	Puntarenas	Monteverde	MV	10.34367225	-84.79611834				2023		1	3	2	1								CICIMAUCR0103 MV//SEX: M 2023
@@ -180,9 +180,37 @@ CICIMAUCR0178	NI #001					Verde brillante metálico																							CICIMA
 CICIMAUCR0179	NI #002					Verde rojizo metálico																							CICIMAUCR0179 //SEX :U 
 CICIMAUCR0180		Strigidia				Strigidia sp, anómala verde rojizo metálico																							CICIMAUCR0180// SEX: U
 CICIMAUCR0181		Chrysina	boucardi			CHRYSINA BOUCARDI CORONADO 2(ICP) 2023. Préstamo a Angel Solís Dic 2023.	COSTA RICA	SAN JOSÉ	CORONADO	CO						2023													CICIMAUCR0181 CO//SEX: U 2023
-CICIMAUCR0201		Chrysina	cupreomarginata																										
-CICIMAUCR0204		Chrysina	cupreomarginata																										
-CICIMAUCR0205		Chrysina	cupreomarginata																										
-CICIMAUCR0225		Chrysina	resplendens																										
-CICIMAUCR0250		Chrysina	resplendens																										
-CICIMAUCR0251		Chrysina	resplendens																										
+CICIMAUCR0201		Chrysina	cupreomarginata	F			COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.343871	-84.796085	1664	30	4	2024													
+CICIMAUCR0202		Chrysina	C. cupreomarginata	F		pata media derecha para ADN Julio 2024	COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.343871	-84.796085	1664	30	4	2024													
+CICIMAUCR0203		Chrysina	C. cupreomarginata	M		pata media derecha para ADN Julio 2024	COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.343871	-84.796085	1664	30	4	2024													
+CICIMAUCR0204		Chrysina	cupreomarginata	M			COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.343871	-84.796085	1664	30	4	2024													
+CICIMAUCR0205		Chrysina	cupreomarginata	F			COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.343871	-84.796085	1664	30	4	2024													
+CICIMAUCR0206		Chrysina	cupreomarginata	F		pata media derecha para ADN Julio 2024	COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.343871	-84.796085	1664	1	5	2024													
+CICIMAUCR0207		Chrysina	cupreomarginata	F		pata media derecha para ADN Julio 2024	COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.343871	-84.796085	1664	1	5	2024													
+CICIMAUCR0208		Chrysina	cupreomarginata	F		pata media derecha para ADN Julio 2024	COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.343871	-84.796085	1664	1	5	2024													
+CICIMAUCR0209		Chrysina	cupreomarginata	F			COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.343871	-84.796085	1664	1	5	2024													
+CICIMAUCR0210		Chrysina	resplendens	F			COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.34034	-84.81022	1544																
+CICIMAUCR0212		Chrysina	resplendens	F			COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.34034	-84.81022	1544																
+CICIMAUCR0213		Chrysina	resplendens	M			COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.34034	-84.81022	1544																
+CICIMAUCR0214		Chrysina	cupreomarginata	M			COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.343871	-84.796085	1664																
+CICIMAUCR0215		Chrysina	cupreomarginata	M			COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.343871	-84.796085	1664																
+CICIMAUCR0216		Chrysina	resplendens	F		pata media derecha para ADN Julio 2024	COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.334530	-84.819640	1456	2	5	2024													
+CICIMAUCR0221		Chrysina	resplendens	M		pata media derecha para ADN Julio 2024	COSTA RICA	PUNTARENAS	MONTEVERDE	MV	est. 10.319752	est. -84.806625	est. 1558 m		5	2024													
+CICIMAUCR0222		Chrysina	resplendens	M		pata media derecha para ADN Julio 2024	COSTA RICA	PUNTARENAS	MONTEVERDE	MV	est. 10.319752	est. -84.806625	est. 1558 m		5	2024													
+CICIMAUCR0223		Chrysina	resplendens	M			COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.319752	-84.806625	1558		5	2024													
+CICIMAUCR0225		Chrysina	resplendens	F			COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.319752	-84.806625	1558		5	2024													
+CICIMAUCR0226		Chrysina	resplendens	M		pata media derecha para ADN Julio 2024	COSTA RICA	PUNTARENAS	MONTEVERDE	MV	est. 10.319752	est. -84.806625	est. 1558 m		5	2024													
+CICIMAUCR0228		Chrysina	aurora	M		pata media derecha para ADN Julio 2024	COSTA RICA	PUNTARENAS	MONTEVERDE	MV	est. 10.319752	est. -84.806625	est. 1558 m		5	2024													
+CICIMAUCR0232		Chrysina	resplendens	M			COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.34034	-84.81022	1544																
+CICIMAUCR0233		Chrysina	resplendens	F			COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.34034	-84.81022	1544																
+CICIMAUCR0234		Chrysina	resplendens	M			COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.34034	-84.81022	1544																
+CICIMAUCR0235		Chrysina	resplendens	M			COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.34034	-84.81022	1544																
+CICIMAUCR0236		Chrysina	resplendens	M			COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.34803	-84.79281	1580																
+CICIMAUCR0237		Chrysina	boucardi	M		pata media derecha para ADN Julio 2024	COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.34803	-84.79281	1580	3	5	2024													
+CICIMAUCR0241		Chrysina	cupreomarginata	M		pata media derecha para ADN Julio 2024	COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.34803	-84.79281	1580	3	5	2024													
+CICIMAUCR0246		Chrysina	resplendens 	F		pata media derecha para ADN Julio 2024	COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.34803	-84.79281	1580	4	5	2024													
+CICIMAUCR0249		Chrysina	resplendens 	F		pata media derecha para ADN Julio 2024	COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.34034	-84.81022	1544	4	5	2024													
+CICIMAUCR0250		Chrysina	resplendens	M			COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.34034	-84.81022	1544	4	5	2024													
+CICIMAUCR0251		Chrysina	resplendens	F			COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.34034	-84.81022	1544	5	5	2024													
+CICIMAUCR0255		Chrysina	resplendens	F		pata media derecha para ADN Julio 2024	COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.34034	-84.81022	1544	5	5	2024													
+CICIMAUCR0259		Chrysina	resplendens	F		pata media derecha para ADN Julio 2024	COSTA RICA	PUNTARENAS	MONTEVERDE	MV	10.34034	-84.81022	1544	5	5	2024													
