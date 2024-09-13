@@ -257,7 +257,7 @@ def get_metadata_and_dataframe(file_location):
                 if index +1 == 90:
                     break
             df = pd.read_csv(f, sep="\t", decimal =",", names=["wavelength", metadata["measuring_mode"]]).dropna()
-            print(df)
+            #print(df) #debug
             df["wavelength"],df[metadata["measuring_mode"]] = df["wavelength"].astype(float), df[metadata["measuring_mode"]].astype(float)
             df = df[df["wavelength"]<2000].reset_index()
             

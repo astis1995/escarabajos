@@ -126,8 +126,9 @@ def feature_and_label_extractor(Metric, spectra):
 
 
 class Gamma_Area_Under_Curve_Naive(Metric):
-    #this is a subclass of Gamma
-    #get_gamma_factor must be redefined
+    """This method calculates the ratio between the area under the curve for the spectrum between {Gamma_Area_Under_Curve_Naive.visible_start_wavelength} 
+        and {Gamma_Area_Under_Curve_Naive.visible_end_wavelength} nm (visible range) and between {Gamma_Area_Under_Curve_Naive.ir_start_wavelength} nm and 
+        {GammaAreaUnderCurveNaive.ir_end_wavelength} nm (infrared range)."""
     visible_start_wavelength = 450
     visible_end_wavelength = ir_start_wavelength = 800
     ir_end_wavelength = 1500
@@ -171,8 +172,9 @@ class Gamma_Area_Under_Curve_Naive(Metric):
 
 
 class  Gamma_Area_Under_Curve_First_Min_Cut(Metric):
-    #this is a subclass of Gamma
-    #get_gamma_factor must be redefined
+    """This method calculates the area for the visible region (starting at {Gamma_Area_First_Min_Cut.visible_range_start_wavelength} 
+        and ending in the first minima between the maximum in the visible range and the maximum in the IR range. 
+        Then calculates the area of the IR range up to the second minumum. The ratio between these two areas is the gamma value."""
     visible_range_start_wavelength = 450
     name = "Gamma_Area_Under_Curve_First_Min_Cut"
 
