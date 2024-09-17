@@ -397,7 +397,7 @@ class Critical_Points(Metric):
 
 
 class Minimum_Points(Metric):
-    """This metric returns a vector with each minimum wavelength and relative reflectance."""
+    """This metric returns a vector with each minimum wavelength and absolute reflectance."""
     name = "Minimum_Points"
 
     def __init__(self, spectrum):
@@ -425,7 +425,7 @@ class Minimum_Points(Metric):
 
 
 class Maximum_Points(Metric):
-    """This metric returns a vector with each minimum wavelength and relative reflectance."""
+    """This metric returns a vector with each minimum wavelength and absolute reflectance."""
     name = "Maximum_Points"
 
     def __init__(self, spectrum):
