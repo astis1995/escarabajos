@@ -1,0 +1,30 @@
+INBUCR COLLECTION SPECIMENS' REFLECTANCE WILL BE MEASURED. 
+TO BE FED TO THE PREDICTIVE MODELS. 
+
+RANGE 2500 NM TO 250 NM
+GAIN 15
+RESPONSE 0,2 S
+DOUBLE BEAM
+
+CODE	DESCRIPTION
+INBUCR0127-1	C. resplendens
+INBUCR0137-1	C. cupreomarginata
+INBUCR0127-2	C. resplendens
+INBUCR0137-2	C. cupreomarginata
+INBUCR0127-3	C. resplendens
+INBUCR0137-3	C. cupreomarginata
+a
+INBUCR0143-1	C. kalinini
+INBUCR0144-1	C. cupreomarginata
+INBUCR0143-2	C. kalinini
+INBUCR0144-2	C. cupreomarginata
+INBUCR0143-3	C. kalinini
+INBUCR0144-3	C. cupreomarginata
+INBUCR0143-4	C. kalinini
+
+INBUCRO145-1	C. kalinini
+INBUCR0146-1	Chrysina sp.
+INBUCRO145-2	C. kalinini
+INBUCR0146-2	Chrysina sp.
+INBUCRO145-3	C. kalinini
+INBUCR0146-3	Chrysina sp.
