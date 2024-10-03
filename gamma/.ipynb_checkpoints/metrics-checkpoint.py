@@ -190,8 +190,7 @@ class  Gamma_Area_Under_Curve_First_Min_Cut(Metric):
     def set_metric_value(self, spectrum):
 
         def get_area_under_curve(spectrum, start_wavelength, finish_wavelength):
-            # Assuming your DataFrame is named df and has columns 'wavelength' and 'height'
-            # Let's say you have start_wavelength and finish_wavelength variables for the range you want to integrate over
+           
             # Subset the DataFrame to the range of interest
             subset_df = df[(df['wavelength'] >= start_wavelength) & (df['wavelength'] <= finish_wavelength)]
 
@@ -234,6 +233,7 @@ class  Gamma_Area_Under_Curve_First_Min_Cut(Metric):
         min_in_between_i = 0
         min_in_between_x =0
         min_in_between_y =0
+        
         #get the location of the minimum in between
         for index in min_i:
             #print("index")
@@ -242,9 +242,11 @@ class  Gamma_Area_Under_Curve_First_Min_Cut(Metric):
                 min_in_between_x = x[index]
                 min_in_between_y = y[index]
                 break
+                
         #If we cant find a first minimum (it could be because there is a small minimum not large enough to be detected.
         #we are going to find the next one 
         if min_in_between_i ==0:
+            print("No min was detected in the first run")
             for index in min_i:
                 #print("index")
                 if second_max_x <= x[index] :
@@ -252,7 +254,8 @@ class  Gamma_Area_Under_Curve_First_Min_Cut(Metric):
                     min_in_between_x = x[index]
                     min_in_between_y = y[index]
                     break
-            
+        if min_in_between_i ==0:
+            print("No min was detected in the second run")
         #second minimum
         #get the location of the second minimum
         min_after_second_max_i = 0
@@ -286,11 +289,18 @@ class  Gamma_Area_Under_Curve_First_Min_Cut(Metric):
         #print(f"{spectrum}")
         #print(f"{y=}")
         #print(f"{y_left=}")
-        
-        #set last one to zero for picture to be displaye properly
-        y_left[-1] = y_left[0]
-        
 
+        #if y_left has no elements it means there is no area before the first min
+        if len(y_left) == 0:
+            print(f"No area before first minimum for {spectrum.get_name()}")
+            
+        #set last one to zero for picture to be displayed properly
+        try:
+            y_left[-1] = y_left[0]
+        except Exception as e:
+           
+            print(e)
+        
         #split x, y RIGHT
         #print(f"min_after_second_max_i: {min_after_second_max_i}")
         x_right = x[min_in_between_i:min_after_second_max_i]
