@@ -423,10 +423,13 @@ class Spectrum:
     def __str__(self):
         return self.code
 
+    def get_name(self):
+            return self.filename
+
     def __init__(self, file_location, collection):
 
         import re
-
+        
         def get_genus(code, collection):
             #print("get_genus")
             
