@@ -57,18 +57,20 @@ class Specimen_Collection:
         return self.data_folder_path
     
     def get_data_filenames(self):
-        
+        """Gets every filename under data_folder_path with the extension in file_extension"""
         folder_path = self.get_data_folder_path()
         
         #list files in folder
         file_list = os.listdir(folder_path)
 
         #file extension
-        file_extension = ".txt"
+        file_extension = [".txt", ".csv"]
 
         # filters a list of strings to create a new list containing only the elements that end with file_extension
-        def filter_substring_elements(path_strings, substring):
-            filtered_paths = [path for path in path_strings if substring in path]
+        def filter_substring_elements(path_strings, substring_list):
+            filtered_paths = []
+            for extension in substring_list:
+                filtered_paths += [path for path in path_strings if (extension in path)]
             return filtered_paths
 
         #full path list
@@ -137,6 +139,12 @@ def check_l1050_file(file):
             return True
         else:
             return False
+
+def read_l1050_file(file):
+    return get_metadata_and_dataframe_l1050(file)
+
+def read_CRAIC_file(file):
+    return get_metadata_and_dataframe_CRAIC(file)
 #read_spectrum_file method
 def read_spectrum_file():
     #check if file is L1050
@@ -144,8 +152,161 @@ def read_spectrum_file():
     #if other raise exception
     pass
 
-def get_metadata_and_dataframe(file_location):
-         #definitions
+def get_metadata_and_dataframe_CRAIC(file_location):
+    #definitions
+        #Logic to read ASCII data
+        import os
+        import pandas as pd
+        import re
+
+        def get_metadata_from_filename( file_location):
+            """Returns the code and polarization from filename:
+            Examples: BIOUCR0001_L code: BIOUCR0001 polarization: L
+            Examples: BIOUCR0001_R code: BIOUCR0001 polarization: R
+            Examples: BIOUCR0001_O code: BIOUCR0001 polarization: O (no polarization)
+            Examples: BIOUCR0001_0 code: BIOUCR0001 polarization: 0 (degrees)
+            Examples: BIOUCR0001_0 code: BIOUCR0001 polarization: 90 (degrees)"""
+            #print("string")
+            #print(file_location)
+            filename = os.path.basename(file_location)
+            re1 = r"([a-zA-Z\d]+)_(L)*(R)*(O)*.csv"
+            #Names are in the form CODE-MEASUREMENTNUMBER.TXT
+            p = re.compile(re1)
+            m = p.match(filename)
+            # print(f"match filename: {m}")
+            if m:
+                print(f"group 2: {m.group(2)}")
+                code = (m.group(1))
+                polarization = (m.group(2))
+                return code, polarization
+            else:
+                print("No code information from filename. Check file: f{file_location}")
+                return "NA","NA"
+
+
+        def first_line(str):
+            print(f"{str=}")
+            #re1 = r"Time1=(\d)*ms:Average1=(\d)*:Objective=(\d)*X:Aperture=(\d)*: (((\d)*/(\d)*/(\d)*) ((\d)*:(\d)*:(\d)* (AM)*(PM)*))"
+            #re1 = "Time1=43ms:Average1=10:Objective=10X:Aperture=1: (3/5/2024 8:54:50 AM)"
+            re1 = r"Time1=(\d*)ms:Average1=(\d*).*:Objective=(\d*X):Aperture=(\d*): \((\d*/\d*/\d*) (\d*:\d*:\d* (AM)*(PM)*)\)"
+            p = re.compile(re1)
+            m= p.match(str)            
+            if m:
+                print("match!")
+                time1 = m.group(1)
+                print(f"{time1=}")
+                average1 = m.group(2)
+                print(f"{average1=}")
+                objective = m.group(3)
+                print(f"{objective=}")
+                aperture = m.group(4)
+                print(f"{aperture=}")
+                date = m.group(5)
+                print(f"{date=}")
+                time = m.group(6)
+                print(f"{time=}")
+                return time1, average1, objective, aperture, date, time
+            else:
+                return "",""
+        def operating_mode(str):
+            
+            if (str != ""):
+                if str == "Reflectance":
+                    return "%R"
+                elif str == "Transmittance":
+                    return "%T"
+                elif str == "Fluorescence":
+                    return "%F"
+                if str == "Absorptance":
+                    return "%A"
+            else:
+                return ""
+        def average_2(str):
+            re1 = r"Avg2: (\d*.\d*)"
+            p = re.compile(re1)
+            m= p.match(str)
+            if m:
+                return m.group(1)
+            else:
+                return ""
+        def integration_time1(str):
+            re1 = r"Int.Time1:(\d*.\d*)"
+            p = re.compile(re1)
+            m= p.match(str)
+            if m:
+                return m.group(1)
+            else:
+                return ""
+        def integration_time2(str):
+            re1 = r"Int.Time2:(\d*.\d*)"
+            p = re.compile(re1)
+            m= p.match(str)
+            if m:
+                return m.group(1)
+            else:
+                return ""
+        #Initializa metadata dict
+        metadata = {}
+
+        #Read header
+        lines = []
+        with open(file_location, encoding= "latin1") as myfile:
+            lines = myfile.readlines()[0:8]
+        metadata["header"] = "".join(lines)
+
+        #read_metadata
+        print(f"File: {file_location}")
+        f = open(file_location, encoding= "latin1")
+
+        df = pd.DataFrame()
+
+        #The file will open on the first line, the following for loop will iterate over each line until finished
+        #after the break statement, the file will be in the nth line, from which the dataframe will be read
+        with f as data_file:
+            for index, row in enumerate(data_file): #0-89
+
+                row_str = row.strip()
+                if index +1 == 1: #First line
+                    metadata["time1"], metadata["average1"], metadata["objective"], metadata["aperture"], metadata["date"], metadata["time"] =first_line(row_str)
+                if index + 1 == 3: #Mode(reflectance, transmittance, absorptance, fluorescence)
+                    metadata["operating_mode"]= operating_mode(row_str)
+                    #print(f"{operating_mode(row_str)=}")
+                if index + 1 == 7:#average2
+                    metadata["average2"]= average_2(row_str)
+                if index + 1 == 8:#int. Time1
+                    metadata["integration_time1"]= integration_time1(row_str)
+                if index + 1 == 9:#int. Time 2
+                    metadata["integration_time2"]= integration_time2(row_str)
+                    break
+            #wavelength is always measured in ms
+            metadata["units"]= "nm"
+            #CRAIC files are .csv files
+            df = pd.read_csv(f, sep=",", decimal =".", names=["wavelength", metadata["operating_mode"]]).dropna()
+            #print(df) #debug
+            df["wavelength"],df[metadata["operating_mode"]] = df["wavelength"].astype(float), df[metadata["operating_mode"]].astype(float)
+            df = df[df["wavelength"]<2000].reset_index()
+            df = df.drop("index", axis=1)
+
+            #get additional metadata info
+            #from filename
+            metadata["code"], metadata["polarization"]= get_metadata_from_filename(file_location)
+            print(f"{metadata["code"]=}")
+            print(f"{metadata["polarization"]=}")
+            #from data analysis
+            metadata["minimum_wavelength"]= df["wavelength"].min()
+            metadata["maximum_wavelength"]= df["wavelength"].max()
+            #print(df["wavelength"].diff())
+            metadata["step"]= np.round(np.mean(df["wavelength"].diff()),8) #8 significant figures
+            #print(f"{metadata["step"]=}")
+            metadata["number_of_datapoints"]= len(df[metadata["operating_mode"]])
+            metadata["maximum_measurement"]=  df[metadata["operating_mode"]].max()
+            metadata["minimum_measurement"]= df[metadata["operating_mode"]].min()
+            
+            return metadata, df
+
+
+def get_metadata_and_dataframe_l1050(file_location):
+        #definitions
         #Logic to read ASCII data
         import os
         import pandas as pd
@@ -290,7 +451,7 @@ def get_metadata_and_dataframe(file_location):
             #print(df) #debug
             df["wavelength"],df[metadata["measuring_mode"]] = df["wavelength"].astype(float), df[metadata["measuring_mode"]].astype(float)
             df = df[df["wavelength"]<2000].reset_index()
-            
+            df = df.drop("index", axis=1)
             return metadata, df
             
 
