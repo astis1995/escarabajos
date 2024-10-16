@@ -302,8 +302,8 @@ def get_metadata_and_dataframe_CRAIC(file_location):
             #get additional metadata info
             #from filename
             metadata["code"], metadata["polarization"]= get_metadata_from_filename(file_location)
-            print(f"{metadata["code"]=}")
-            print(f"{metadata["polarization"]=}")
+            print(f"{metadata['code']=}")
+            print(f"{metadata['polarization']=}")
             #from data analysis
             metadata["minimum_wavelength"]= df["wavelength"].min()
             metadata["maximum_wavelength"]= df["wavelength"].max()
