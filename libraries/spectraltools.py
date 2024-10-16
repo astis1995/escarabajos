@@ -14,6 +14,7 @@ import os
 import math
 import re
 import scipy
+import warnings
 
 
 #COLECCIONS
@@ -96,14 +97,20 @@ class Specimen_Collection:
             spectra.append(spectrum)
         return spectra
 
-    def collection_lookup(self, code, collection_list):
+    def collection_lookup(code, collection_list):
         
         for collection in collection_list:
-            if code in collections.get_codes():
+            if code in collection.get_codes():
                 return collection
             else:
-                raise ValueError("The provided code is not in the collection list")
-
+                #raise ValueError("The provided code is not in the collection list")
+                warnings.warn(f"The provided code ({code}) is not in the collection list:\n {collection_list} \n. Returning None instead", UserWarning)
+                return None
+    def __str__(self):
+        try:
+            return self.name
+        except:
+            return "None"
         
 
 # In[6]:
@@ -135,7 +142,8 @@ def create_path_if_not_exists(path):
 def check_CRAIC_file(file):
     with open(file) as f:
         first_line = (f.readline())
-        regex = r"Time1=\d*ms:Average1=\d*:Objective=\d*X:Aperture=\d*: (\d*/\d*/\d* \d*:\d*:\d* AM)"
+        print(f"{first_line=}")
+        regex = r"Time1=\d*ms:Average1=\d*:Objective=\d*X:Aperture=\d*: \(\d*/\d*/\d* \d*:\d*:\d* (?:AM)*(?:PM)*\)"
         match = re.search(regex, first_line)
         if match:
             return True
@@ -145,6 +153,7 @@ def check_CRAIC_file(file):
 def check_l1050_file(file):
     with open(file) as f:
         first_line = (f.readline())
+        print(f"{first_line=}")
         regex = r"PE UV       SUBTECH     SPECTRUM    ASCII       PEDS        .*"
         match = re.search(regex, first_line)
         if match:
@@ -158,11 +167,21 @@ def read_l1050_file(file):
 def read_CRAIC_file(file):
     return get_metadata_and_dataframe_CRAIC(file)
 #read_spectrum_file method
-def read_spectrum_file():
-    #check if file is L1050
-    #check if file is CRAIC
-    #if other raise exception
-    pass
+def read_spectrum_file(file):
+    # Check if the file is an L1050 type
+    if check_l1050_file(file):
+        print("l1050 file")
+        return read_l1050_file(file)
+    
+    # Check if the file is a CRAIC type
+    elif check_CRAIC_file(file):
+        print("CRAIC file")
+        return read_CRAIC_file(file)
+    
+    # Raise an exception if the file type is unknown
+    else:
+        print(f"{file=}")
+        raise ValueError("The file is neither a valid L1050 nor CRAIC file.")
 
 def get_metadata_and_dataframe_CRAIC(file_location):
     #definitions
@@ -626,19 +645,8 @@ class Spectrum:
 
     def get_name(self):
             return self.filename
-
-    def read_file(self, filename):
-        #checks if the file is a l1050 or a CRAIC file
-        #and reads it
-        metadata_and_dataframe = None
-        
-        if check_CRAIC_file(filename):
-            metadata_and_dataframe = read_CRAIC_file(filename)
-        elif check_l1050_file(filename):
-            metadata_and_dataframe = read_l1050_file(filename)
-        else:
-            raise ValueError("The provided file is neither a l1050 file nor a CRAIC file")
-        return metadata_and_dataframe
+    def get_filename(self):
+            return self.filename
         
     def __init__(self, file_location, collection):
 
@@ -698,12 +706,27 @@ class Spectrum:
         self.file_location = file_location
         self.collection = collection
         #read file
-        self.metadata, self.data = self.read_file(file_location)
-        self.code = self.metadata["code"]
-        self.filename =  self.metadata["filename"]
-        self.genus = get_genus(self.code, collection)
-        self.species = get_species(self.code, collection)
-        self.measuring_mode = self.metadata["measuring_mode"]
+        self.metadata, self.data = read_spectrum_file(file_location)
+        print(self.metadata)
+        
+        self.filename =  file_location
+        try:
+            self.code = self.metadata["code"]
+        except:
+            self.code = "na"
+        try:
+            self.measuring_mode = self.metadata["measuring_mode"]
+        except:
+            self.measuring_mode = "na"
+        try:
+            self.genus = get_genus(self.code, collection)
+        except:
+            self.genus = "na"
+        try:
+            self.species = get_species(self.code, collection)
+        except:
+            self.species = "na"
+        
 
     def plot_settings(self):
         measuring_mode = self.metadata["measuring_mode"]
@@ -744,7 +767,8 @@ class Spectrum:
         return self.data
     def get_data(self):
         return self.data
-
+    def get_metadata(self):
+        return self.metadata
     def get_code(self):
         return self.code
         
