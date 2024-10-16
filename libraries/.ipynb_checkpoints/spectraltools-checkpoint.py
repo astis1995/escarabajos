@@ -52,6 +52,10 @@ class Specimen_Collection:
     
     def get_metadata(self):
         return self.metadata
+
+    def get_codes(self):
+        codes = set(self.metadata["code"])
+        return codes
     
     def get_data_folder_path(self):
         return self.data_folder_path
@@ -92,7 +96,15 @@ class Specimen_Collection:
             spectra.append(spectrum)
         return spectra
 
+    def collection_lookup(self, code, collection_list):
+        
+        for collection in collection_list:
+            if code in collections.get_codes():
+                return collection
+            else:
+                raise ValueError("The provided code is not in the collection list")
 
+        
 
 # In[6]:
 
@@ -169,7 +181,7 @@ def get_metadata_and_dataframe_CRAIC(file_location):
             #print("string")
             #print(file_location)
             filename = os.path.basename(file_location)
-            re1 = r"([a-zA-Z\d]+)_(L)*(R)*(O)*.csv"
+            re1 = r"([a-zA-Z\d]+)_(R)*(L)*(O)*.csv"
             #Names are in the form CODE-MEASUREMENTNUMBER.TXT
             p = re.compile(re1)
             m = p.match(filename)
@@ -609,14 +621,25 @@ class Spectrum:
     It provides the maxima and minima and a """
     #These variables delimit the thresholds used to determine if a point can be considered a maximum or minimum
     
-    
-    
     def __str__(self):
         return self.code
 
     def get_name(self):
             return self.filename
 
+    def read_file(self, filename):
+        #checks if the file is a l1050 or a CRAIC file
+        #and reads it
+        metadata_and_dataframe = None
+        
+        if check_CRAIC_file(filename):
+            metadata_and_dataframe = read_CRAIC_file(filename)
+        elif check_l1050_file(filename):
+            metadata_and_dataframe = read_l1050_file(filename)
+        else:
+            raise ValueError("The provided file is neither a l1050 file nor a CRAIC file")
+        return metadata_and_dataframe
+        
     def __init__(self, file_location, collection):
 
         import re
@@ -674,8 +697,8 @@ class Spectrum:
         #attributes
         self.file_location = file_location
         self.collection = collection
-        
-        self.metadata, self.data = get_metadata_and_dataframe(file_location)
+        #read file
+        self.metadata, self.data = self.read_file(file_location)
         self.code = self.metadata["code"]
         self.filename =  self.metadata["filename"]
         self.genus = get_genus(self.code, collection)
@@ -717,6 +740,8 @@ class Spectrum:
         peaks = PeakList(self).get_peaks()
         return peaks    
 
+    def get_dataframe(self):
+        return self.data
     def get_data(self):
         return self.data
 
@@ -764,29 +789,5 @@ def test_peak_class():
         #peaklist1.plot()
         #print(peaklist1)
         #print(peaklist1.plot())
-#test_peak_class()
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
 
 
