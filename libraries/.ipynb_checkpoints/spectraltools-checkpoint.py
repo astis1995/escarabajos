@@ -15,6 +15,7 @@ import math
 import re
 import scipy
 import warnings
+from pathlib import Path
 
 
 #COLECCIONS
@@ -38,7 +39,7 @@ class Specimen_Collection:
           df = pd.read_csv(f, sep="\t", decimal =",", header=0, encoding="iso-8859-1")
           return df
 
-    def __init__(self, name, data_folder_path, metadata_path, quality):
+    def __init__(self, name = None, data_folder_path= None, metadata_path= None, quality= None):
         self.name = name
         self.data_folder_path = data_folder_path
         self.metadata = self.read_collection(metadata_path)
@@ -57,6 +58,14 @@ class Specimen_Collection:
     def get_codes(self):
         codes = set(self.metadata["code"])
         return codes
+        
+    def get_species():
+        species = set(self.metadata["species"])
+        return species
+        
+    def get_genera():
+        genera = set(self.metadata["genus"])
+        return genera
     
     def get_data_folder_path(self):
         return self.data_folder_path
@@ -96,7 +105,19 @@ class Specimen_Collection:
             spectrum = Spectrum(filename, self)
             spectra.append(spectrum)
         return spectra
-
+        
+    def genera_species_lookup(code, collection_list):
+        genera = []
+        species = []
+        
+        for collection in collection_list:
+            if code in collection.get_codes():
+                
+                return collection.get_metadata().loc()
+            else:
+                #raise ValueError("The provided code is not in the collection list")
+                #warnings.warn(f"The provided code ({code}) is not in the collection list:\n {collection_list} \n. Returning None instead", UserWarning)
+                return None
     def collection_lookup(code, collection_list):
         
         for collection in collection_list:
@@ -104,12 +125,17 @@ class Specimen_Collection:
                 return collection
             else:
                 #raise ValueError("The provided code is not in the collection list")
-                warnings.warn(f"The provided code ({code}) is not in the collection list:\n {collection_list} \n. Returning None instead", UserWarning)
+                #warnings.warn(f"The provided code ({code}) is not in the collection list:\n {collection_list} \n. Returning None instead", UserWarning)
                 return None
     def __str__(self):
         try:
             return self.name
         except:
+            return "None"
+    def __repr__(self):
+        try:
+            return self.name
+        except AttributeError:
             return "None"
         
 
@@ -140,9 +166,17 @@ def create_path_if_not_exists(path):
 
 # In[8]:
 def check_CRAIC_file(file):
+    #check if it is a hidden file
+    if Path(file).name.startswith("."):
+        return False
+    #check if it is a .csv file
+    if not Path(file).name.endswith(".csv"):
+        return False
+    #check if it is a CRAIC file
+    #print(f"{file=}")
     with open(file) as f:
         first_line = (f.readline())
-        print(f"{first_line=}")
+        #print(f"{first_line=}")
         regex = r"Time1=\d*ms:Average1=\d*:Objective=\d*X:Aperture=\d*: \(\d*/\d*/\d* \d*:\d*:\d* (?:AM)*(?:PM)*\)"
         match = re.search(regex, first_line)
         if match:
@@ -151,9 +185,12 @@ def check_CRAIC_file(file):
             return False
 
 def check_l1050_file(file):
+    #check if it is a hidden file
+    if Path(file).name.startswith("."):
+        return False
     with open(file) as f:
         first_line = (f.readline())
-        print(f"{first_line=}")
+        #print(f"{first_line=}")
         regex = r"PE UV       SUBTECH     SPECTRUM    ASCII       PEDS        .*"
         match = re.search(regex, first_line)
         if match:
@@ -170,12 +207,12 @@ def read_CRAIC_file(file):
 def read_spectrum_file(file):
     # Check if the file is an L1050 type
     if check_l1050_file(file):
-        print("l1050 file")
+        #print("l1050 file")
         return read_l1050_file(file)
     
     # Check if the file is a CRAIC type
     elif check_CRAIC_file(file):
-        print("CRAIC file")
+        #print("CRAIC file")
         return read_CRAIC_file(file)
     
     # Raise an exception if the file type is unknown
@@ -190,56 +227,59 @@ def get_metadata_and_dataframe_CRAIC(file_location):
         import pandas as pd
         import re
 
-        def get_metadata_from_filename( file_location):
-            """Returns the code and polarization from filename:
-            Examples: BIOUCR0001_L code: BIOUCR0001 polarization: L
-            Examples: BIOUCR0001_R code: BIOUCR0001 polarization: R
-            Examples: BIOUCR0001_O code: BIOUCR0001 polarization: O (no polarization)
-            Examples: BIOUCR0001_0 code: BIOUCR0001 polarization: 0 (degrees)
-            Examples: BIOUCR0001_0 code: BIOUCR0001 polarization: 90 (degrees)"""
+        def get_metadata_from_filename(file_location):
+            """Returns the code and polarization from filename. Examples:
+            BIOUCR0001_L code: BIOUCR0001 polarization: L
+            BIOUCR0001_R code: BIOUCR0001 polarization: R
+            BIOUCR0001_O code: BIOUCR0001 polarization: O (no polarization)
+            BIOUCR0001_0 code: BIOUCR0001 polarization: 0 (degrees)
+            BIOUCR0001_0 code: BIOUCR0001 polarization: 90 (degrees)
+            1037298L2 code: 1037298 polarization L """
             #print("string")
             #print(file_location)
-            filename = os.path.basename(file_location)
-            re1 = r"([a-zA-Z\d]+)_(R)*(L)*(O)*.csv"
-            #Names are in the form CODE-MEASUREMENTNUMBER.TXT
-            p = re.compile(re1)
-            m = p.match(filename)
-            # print(f"match filename: {m}")
-            if m:
-                print(f"group 2: {m.group(2)}")
-                code = (m.group(1))
-                polarization = (m.group(2))
-                return code, polarization
-            else:
-                print("No code information from filename. Check file: f{file_location}")
-                return "NA","NA"
+            basename = os.path.basename(file_location)
+            #re1 = r"([a-zA-Z\d]+)_(R)*(L)*(O)*.csv"
+            regexs = [ r"([\d]+?)([RLO])+\d*.csv", r"([a-zA-Z\d]+)_([RLO])+.csv",]
+            for regex in regexs:
+                #Names are in the form CODE-MEASUREMENTNUMBER.TXT
+                p = re.compile(regex)
+                m = p.match(basename)
+                # print(f"match basename: {m}")
+                if m:
+                    #print(f"group 2: {m.group(2)}")
+                    code = (m.group(1))
+                    polarization = (m.group(2))
+                    return code, polarization
+                
+            print("No code information from filename. Check file: f{file_location}")
+            return "NA","NA"
 
 
         def first_line(str):
-            print(f"{str=}")
+            #print(f"{str=}")
             #re1 = r"Time1=(\d)*ms:Average1=(\d)*:Objective=(\d)*X:Aperture=(\d)*: (((\d)*/(\d)*/(\d)*) ((\d)*:(\d)*:(\d)* (AM)*(PM)*))"
             #re1 = "Time1=43ms:Average1=10:Objective=10X:Aperture=1: (3/5/2024 8:54:50 AM)"
             re1 = r"Time1=(\d*)ms:Average1=(\d*).*:Objective=(\d*X):Aperture=(\d*): \((\d*/\d*/\d*) (\d*:\d*:\d* (AM)*(PM)*)\)"
             p = re.compile(re1)
             m= p.match(str)            
             if m:
-                print("match!")
+                #print("match!")
                 time1 = m.group(1)
-                print(f"{time1=}")
+                #print(f"{time1=}")
                 average1 = m.group(2)
-                print(f"{average1=}")
+                #print(f"{average1=}")
                 objective = m.group(3)
-                print(f"{objective=}")
+                #print(f"{objective=}")
                 aperture = m.group(4)
-                print(f"{aperture=}")
+                #print(f"{aperture=}")
                 date = m.group(5)
-                print(f"{date=}")
+                #print(f"{date=}")
                 time = m.group(6)
-                print(f"{time=}")
+                #print(f"{time=}")
                 return time1, average1, objective, aperture, date, time
             else:
                 return "",""
-        def operating_mode(str):
+        def measuring_mode(str):
             
             if (str != ""):
                 if str == "Reflectance":
@@ -286,7 +326,7 @@ def get_metadata_and_dataframe_CRAIC(file_location):
         metadata["header"] = "".join(lines)
 
         #read_metadata
-        print(f"File: {file_location}")
+        #print(f"File: {file_location}")
         f = open(file_location, encoding= "latin1")
 
         df = pd.DataFrame()
@@ -300,8 +340,8 @@ def get_metadata_and_dataframe_CRAIC(file_location):
                 if index +1 == 1: #First line
                     metadata["time1"], metadata["average1"], metadata["objective"], metadata["aperture"], metadata["date"], metadata["time"] =first_line(row_str)
                 if index + 1 == 3: #Mode(reflectance, transmittance, absorptance, fluorescence)
-                    metadata["operating_mode"]= operating_mode(row_str)
-                    #print(f"{operating_mode(row_str)=}")
+                    metadata["measuring_mode"]= measuring_mode(row_str)
+                    #print(f"{measuring_mode(row_str)=}")
                 if index + 1 == 7:#average2
                     metadata["average2"]= average_2(row_str)
                 if index + 1 == 8:#int. Time1
@@ -312,26 +352,26 @@ def get_metadata_and_dataframe_CRAIC(file_location):
             #wavelength is always measured in ms
             metadata["units"]= "nm"
             #CRAIC files are .csv files
-            df = pd.read_csv(f, sep=",", decimal =".", names=["wavelength", metadata["operating_mode"]]).dropna()
+            df = pd.read_csv(f, sep=",", decimal =".", names=["wavelength", metadata["measuring_mode"]]).dropna()
             #print(df) #debug
-            df["wavelength"],df[metadata["operating_mode"]] = df["wavelength"].astype(float), df[metadata["operating_mode"]].astype(float)
+            df["wavelength"],df[metadata["measuring_mode"]] = df["wavelength"].astype(float), df[metadata["measuring_mode"]].astype(float)
             df = df[df["wavelength"]<2000].reset_index()
             df = df.drop("index", axis=1)
 
             #get additional metadata info
             #from filename
             metadata["code"], metadata["polarization"]= get_metadata_from_filename(file_location)
-            print(f"{metadata['code']=}")
-            print(f"{metadata['polarization']=}")
+            #print(f"{metadata['code']=}")
+            #print(f"{metadata['polarization']=}")
             #from data analysis
             metadata["minimum_wavelength"]= df["wavelength"].min()
             metadata["maximum_wavelength"]= df["wavelength"].max()
             #print(df["wavelength"].diff())
             metadata["step"]= np.round(np.mean(df["wavelength"].diff()),8) #8 significant figures
             #print(f"{metadata["step"]=}")
-            metadata["number_of_datapoints"]= len(df[metadata["operating_mode"]])
-            metadata["maximum_measurement"]=  df[metadata["operating_mode"]].max()
-            metadata["minimum_measurement"]= df[metadata["operating_mode"]].min()
+            metadata["number_of_datapoints"]= len(df[metadata["measuring_mode"]])
+            metadata["maximum_measurement"]=  df[metadata["measuring_mode"]].max()
+            metadata["minimum_measurement"]= df[metadata["measuring_mode"]].min()
             
             return metadata, df
 
@@ -407,7 +447,7 @@ def get_metadata_and_dataframe_l1050(file_location):
 
 
         #read_metadata
-        print(f"File: {file_location}")
+        #print(f"File: {file_location}")
         f = open(file_location, encoding= "latin1")
 
         df = pd.DataFrame()
@@ -600,6 +640,7 @@ class PeakList:
         #maximum height
         # This prevents  minima less than 40% 
         maximum_height = y_inverted.max() * 0.60
+        
         minimum_height = 0
         #get minima
         peaks_funct = scipy.signal.find_peaks(y_inverted, distance= self.min_distance_between_peaks, prominence=self.prominence_threshold_min, height = (minimum_height, maximum_height))
@@ -707,7 +748,7 @@ class Spectrum:
         self.collection = collection
         #read file
         self.metadata, self.data = read_spectrum_file(file_location)
-        print(self.metadata)
+        #print(self.metadata)
         
         self.filename =  file_location
         try:
