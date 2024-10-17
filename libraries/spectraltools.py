@@ -15,7 +15,7 @@ import math
 import re
 import scipy
 import warnings
-
+from pathlib import Path
 
 #COLECCIONS
 
@@ -55,7 +55,9 @@ class Specimen_Collection:
         return self.metadata
 
     def get_codes(self):
-        codes = set(self.metadata["code"])
+        
+        codes = set(self.metadata["code"].values)
+        print(f"{codes=}")
         return codes
     
     def get_data_folder_path(self):
@@ -104,7 +106,7 @@ class Specimen_Collection:
                 return collection
             else:
                 #raise ValueError("The provided code is not in the collection list")
-                warnings.warn(f"The provided code ({code}) is not in the collection list:\n {collection_list} \n. Returning None instead", UserWarning)
+                warnings.warn(f"The provided code ({code}) is not in the collection list:", UserWarning)
                 return None
     def __str__(self):
         try:
@@ -196,14 +198,13 @@ def get_metadata_and_dataframe_CRAIC(file_location):
             Examples: BIOUCR0001_R code: BIOUCR0001 polarization: R
             Examples: BIOUCR0001_O code: BIOUCR0001 polarization: O (no polarization)
             Examples: BIOUCR0001_0 code: BIOUCR0001 polarization: 0 (degrees)
-            Examples: BIOUCR0001_0 code: BIOUCR0001 polarization: 90 (degrees)"""
-            #print("string")
-            #print(file_location)
-            filename = os.path.basename(file_location)
-            re1 = r"([a-zA-Z\d]+)_(R)*(L)*(O)*.csv"
+            Examples: BIOUCR0001_90 code: BIOUCR0001 polarization: 90 (degrees)"""
+            basename = Path(file_location).name
+            print(f"{basename=}")
+            re1 = r"([a-zA-Z\d]+)_(R*L*O*\d*).csv"
             #Names are in the form CODE-MEASUREMENTNUMBER.TXT
             p = re.compile(re1)
-            m = p.match(filename)
+            m = p.match(basename)
             # print(f"match filename: {m}")
             if m:
                 print(f"group 2: {m.group(2)}")
@@ -295,8 +296,8 @@ def get_metadata_and_dataframe_CRAIC(file_location):
         #after the break statement, the file will be in the nth line, from which the dataframe will be read
         with f as data_file:
             for index, row in enumerate(data_file): #0-89
-
                 row_str = row.strip()
+                print(f"{row_str=}")
                 if index +1 == 1: #First line
                     metadata["time1"], metadata["average1"], metadata["objective"], metadata["aperture"], metadata["date"], metadata["time"] =first_line(row_str)
                 if index + 1 == 3: #Mode(reflectance, transmittance, absorptance, fluorescence)
@@ -309,15 +310,18 @@ def get_metadata_and_dataframe_CRAIC(file_location):
                 if index + 1 == 9:#int. Time 2
                     metadata["integration_time2"]= integration_time2(row_str)
                     break
+        f = open(file_location, encoding= "latin1")
+        with f as data_file:
+            df = pd.read_csv(f, sep="	", decimal =".", names=["wavelength", metadata["operating_mode"]], skiprows = 9).dropna()
+            if df.empty:
+                warnings.warn(f"Dataframe is empty. File: {file_location}", UserWarning)
             #wavelength is always measured in ms
             metadata["units"]= "nm"
-            #CRAIC files are .csv files
-            df = pd.read_csv(f, sep=",", decimal =".", names=["wavelength", metadata["operating_mode"]]).dropna()
             #print(df) #debug
             df["wavelength"],df[metadata["operating_mode"]] = df["wavelength"].astype(float), df[metadata["operating_mode"]].astype(float)
             df = df[df["wavelength"]<2000].reset_index()
             df = df.drop("index", axis=1)
-
+            
             #get additional metadata info
             #from filename
             metadata["code"], metadata["polarization"]= get_metadata_from_filename(file_location)
@@ -478,6 +482,8 @@ def get_metadata_and_dataframe_l1050(file_location):
                     metadata["minimum_measurement"]= row_str
                 if index +1 == 90:
                     break
+            #normally l1050 spectrum does not have polarization
+            metadata["polarization"] = "O"
             df = pd.read_csv(f, sep="\t", decimal =",", names=["wavelength", metadata["measuring_mode"]]).dropna()
             #print(df) #debug
             df["wavelength"],df[metadata["measuring_mode"]] = df["wavelength"].astype(float), df[metadata["measuring_mode"]].astype(float)
@@ -643,6 +649,8 @@ class Spectrum:
     def __str__(self):
         return self.code
 
+    def get_polarization(self):
+        return self.polarization
     def get_name(self):
             return self.filename
     def get_filename(self):
@@ -710,6 +718,10 @@ class Spectrum:
         print(self.metadata)
         
         self.filename =  file_location
+        try:
+            self.polarization = self.metadata["polarization"]
+        except:
+            self.polarization = "na"
         try:
             self.code = self.metadata["code"]
         except:
