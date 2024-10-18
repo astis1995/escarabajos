@@ -17,7 +17,6 @@ import scipy
 import warnings
 from pathlib import Path
 
-
 #COLECCIONS
 
 #decorator
@@ -48,32 +47,34 @@ class Specimen_Collection:
 
     def set_description(self, description):
         self.description = description
-    
+
     def get_name(self):
         return self.name
-    
+
     def get_metadata(self):
         return self.metadata
 
     def get_codes(self):
-        codes = set(self.metadata["code"])
+
+        codes = set(self.metadata["code"].values)
+        #print(f"{codes=}")
         return codes
-        
+
     def get_species():
         species = set(self.metadata["species"])
         return species
-        
+
     def get_genera():
         genera = set(self.metadata["genus"])
         return genera
-    
+
     def get_data_folder_path(self):
         return self.data_folder_path
-    
+
     def get_data_filenames(self):
         """Gets every filename under data_folder_path with the extension in file_extension"""
         folder_path = self.get_data_folder_path()
-        
+
         #list files in folder
         file_list = os.listdir(folder_path)
 
@@ -89,15 +90,15 @@ class Specimen_Collection:
 
         #full path list
         filtered_list = [os.path.join(folder_path, path) for path in filter_substring_elements(file_list, file_extension)]
-        
+
         return filtered_list
-        
+
     def read_spectrum(self, file_path, collection):
-        
+
         spectrum = Spectrum(file_path, collection)
-        
+
         return spectrum
-    
+
     def get_spectra(self):
         filenames = self.get_data_filenames()
         spectra = []
@@ -105,21 +106,21 @@ class Specimen_Collection:
             spectrum = Spectrum(filename, self)
             spectra.append(spectrum)
         return spectra
-        
+
     def genera_species_lookup(code, collection_list):
         genera = []
         species = []
-        
+
         for collection in collection_list:
             if code in collection.get_codes():
-                
+
                 return collection.get_metadata().loc()
             else:
                 #raise ValueError("The provided code is not in the collection list")
                 #warnings.warn(f"The provided code ({code}) is not in the collection list:\n {collection_list} \n. Returning None instead", UserWarning)
                 return None
     def collection_lookup(code, collection_list):
-        
+
         for collection in collection_list:
             if code in collection.get_codes():
                 return collection
@@ -137,7 +138,7 @@ class Specimen_Collection:
             return self.name
         except AttributeError:
             return "None"
-        
+
 
 # In[6]:
 
@@ -146,7 +147,7 @@ class Specimen_Collection:
 def test_collection_class():
     angsol_collection = Specimen_Collection("ANGSOL", angsol_collection_path, angsol_collection_metadata, "HIGH")
     #print(f"{angsol_collection.get_metadata()=} \n" )
-    #print(f"{angsol_collection.get_data_folder_path()=} \n" )   
+    #print(f"{angsol_collection.get_data_folder_path()=} \n" )
     #print(f"{angsol_collection.get_data_filenames()=} \n" )
 #test_collection_class()
 
@@ -209,25 +210,17 @@ def read_spectrum_file(file):
     if check_l1050_file(file):
         #print("l1050 file")
         return read_l1050_file(file)
-    
+
     # Check if the file is a CRAIC type
     elif check_CRAIC_file(file):
         #print("CRAIC file")
         return read_CRAIC_file(file)
-    
+
     # Raise an exception if the file type is unknown
     else:
         print(f"{file=}")
         raise ValueError("The file is neither a valid L1050 nor CRAIC file.")
-
-def get_metadata_and_dataframe_CRAIC(file_location):
-    #definitions
-        #Logic to read ASCII data
-        import os
-        import pandas as pd
-        import re
-
-        def get_metadata_from_filename(file_location):
+def get_metadata_from_filename(file_location):
             """Returns the code and polarization from filename. Examples:
             BIOUCR0001_L code: BIOUCR0001 polarization: L
             BIOUCR0001_R code: BIOUCR0001 polarization: R
@@ -250,73 +243,83 @@ def get_metadata_and_dataframe_CRAIC(file_location):
                     code = (m.group(1))
                     polarization = (m.group(2))
                     return code, polarization
-                
+
             print("No code information from filename. Check file: f{file_location}")
             return "NA","NA"
 
 
-        def first_line(str):
-            #print(f"{str=}")
-            #re1 = r"Time1=(\d)*ms:Average1=(\d)*:Objective=(\d)*X:Aperture=(\d)*: (((\d)*/(\d)*/(\d)*) ((\d)*:(\d)*:(\d)* (AM)*(PM)*))"
-            #re1 = "Time1=43ms:Average1=10:Objective=10X:Aperture=1: (3/5/2024 8:54:50 AM)"
-            re1 = r"Time1=(\d*)ms:Average1=(\d*).*:Objective=(\d*X):Aperture=(\d*): \((\d*/\d*/\d*) (\d*:\d*:\d* (AM)*(PM)*)\)"
-            p = re.compile(re1)
-            m= p.match(str)            
-            if m:
-                #print("match!")
-                time1 = m.group(1)
-                #print(f"{time1=}")
-                average1 = m.group(2)
-                #print(f"{average1=}")
-                objective = m.group(3)
-                #print(f"{objective=}")
-                aperture = m.group(4)
-                #print(f"{aperture=}")
-                date = m.group(5)
-                #print(f"{date=}")
-                time = m.group(6)
-                #print(f"{time=}")
-                return time1, average1, objective, aperture, date, time
-            else:
-                return "",""
-        def measuring_mode(str):
-            
-            if (str != ""):
-                if str == "Reflectance":
-                    return "%R"
-                elif str == "Transmittance":
-                    return "%T"
-                elif str == "Fluorescence":
-                    return "%F"
-                if str == "Absorptance":
-                    return "%A"
-            else:
-                return ""
-        def average_2(str):
-            re1 = r"Avg2: (\d*.\d*)"
-            p = re.compile(re1)
-            m= p.match(str)
-            if m:
-                return m.group(1)
-            else:
-                return ""
-        def integration_time1(str):
-            re1 = r"Int.Time1:(\d*.\d*)"
-            p = re.compile(re1)
-            m= p.match(str)
-            if m:
-                return m.group(1)
-            else:
-                return ""
-        def integration_time2(str):
-            re1 = r"Int.Time2:(\d*.\d*)"
-            p = re.compile(re1)
-            m= p.match(str)
-            if m:
-                return m.group(1)
-            else:
-                return ""
-        #Initializa metadata dict
+def first_line(str):
+    #print(f"{str=}")
+    #re1 = r"Time1=(\d)*ms:Average1=(\d)*:Objective=(\d)*X:Aperture=(\d)*: (((\d)*/(\d)*/(\d)*) ((\d)*:(\d)*:(\d)* (AM)*(PM)*))"
+    #re1 = "Time1=43ms:Average1=10:Objective=10X:Aperture=1: (3/5/2024 8:54:50 AM)"
+    re1 = r"Time1=(\d*)ms:Average1=(\d*).*:Objective=(\d*X):Aperture=(\d*): \((\d*/\d*/\d*) (\d*:\d*:\d* (AM)*(PM)*)\)"
+    p = re.compile(re1)
+    m= p.match(str)
+    if m:
+        #print("match!")
+        time1 = m.group(1)
+        #print(f"{time1=}")
+        average1 = m.group(2)
+        #print(f"{average1=}")
+        objective = m.group(3)
+        #print(f"{objective=}")
+        aperture = m.group(4)
+        #print(f"{aperture=}")
+        date = m.group(5)
+        #print(f"{date=}")
+        time = m.group(6)
+        #print(f"{time=}")
+        return time1, average1, objective, aperture, date, time
+    else:
+        return "",""
+        
+def measuring_mode(str):
+    """Changes the measuring mode of CRAIC files to the standard notation"""
+    if (str != ""):
+        if str == "Reflectance":
+            return "%R"
+        elif str == "Transmittance":
+            return "%T"
+        elif str == "Fluorescence":
+            return "%F"
+        if str == "Absorptance":
+            return "%A"
+    else:
+        return ""
+        
+def average_2(str):
+    """Reads CRAIC files' average_2 data"""
+    re1 = r"Avg2: (\d*.\d*)"
+    p = re.compile(re1)
+    m= p.match(str)
+    if m:
+        return m.group(1)
+    else:
+        return ""
+def integration_time1(str):
+    """Reads CRAIC files' integration_time1 data"""
+    re1 = r"Int.Time1:(\d*.\d*)"
+    p = re.compile(re1)
+    m= p.match(str)
+    if m:
+        return m.group(1)
+    else:
+        return ""
+def integration_time2(str):
+    """Reads CRAIC files' integration_time2 data"""
+    re1 = r"Int.Time2:(\d*.\d*)"
+    p = re.compile(re1)
+    m= p.match(str)
+    if m:
+        return m.group(1)
+    else:
+        return ""
+                
+def get_metadata_and_dataframe_CRAIC(file_location):
+        """Reads CRAIC files' dataframe and metadata"""
+        #definitions
+    
+        #Inicializa metadata dict
         metadata = {}
 
         #Read header
@@ -326,6 +329,7 @@ def get_metadata_and_dataframe_CRAIC(file_location):
         metadata["header"] = "".join(lines)
 
         #read_metadata
+
         #print(f"File: {file_location}")
         f = open(file_location, encoding= "latin1")
 
@@ -335,8 +339,8 @@ def get_metadata_and_dataframe_CRAIC(file_location):
         #after the break statement, the file will be in the nth line, from which the dataframe will be read
         with f as data_file:
             for index, row in enumerate(data_file): #0-89
-
                 row_str = row.strip()
+                #print(f"{row_str=}")
                 if index +1 == 1: #First line
                     metadata["time1"], metadata["average1"], metadata["objective"], metadata["aperture"], metadata["date"], metadata["time"] =first_line(row_str)
                 if index + 1 == 3: #Mode(reflectance, transmittance, absorptance, fluorescence)
@@ -349,11 +353,30 @@ def get_metadata_and_dataframe_CRAIC(file_location):
                 if index + 1 == 9:#int. Time 2
                     metadata["integration_time2"]= integration_time2(row_str)
                     break
+        f = open(file_location, encoding= "latin1")
+
+        """This section reads the dataframe"""
+
+        with f as data_file:
+            print(f"{file_location}=")
+            #try reading using tabs as separator
+            df = pd.read_csv(f, sep="	", decimal =".", names=["wavelength", metadata["measuring_mode"]], skiprows = 9).dropna()
+            #try reading using comma as separator
+            if df.empty:
+                try:
+                    df = pd.read_csv(f, sep=",", decimal =".", names=["wavelength", metadata["measuring_mode"]], skiprows = 9).dropna()
+                except Exception as e:
+                    print(e)
+                    df = pd.DataFrame([])
+            #If nothing works show warning
+            if df.empty:
+                warnings.warn(f"Dataframe is empty. File: {file_location}", UserWarning)
+                
             #wavelength is always measured in ms
             metadata["units"]= "nm"
             #CRAIC files are .csv files
-            df = pd.read_csv(f, sep=",", decimal =".", names=["wavelength", metadata["measuring_mode"]]).dropna()
-            #print(df) #debug
+            #df = pd.read_csv(f, sep=",", decimal =".", names=["wavelength", metadata["measuring_mode"]]).dropna()
+            print(df) #debug
             df["wavelength"],df[metadata["measuring_mode"]] = df["wavelength"].astype(float), df[metadata["measuring_mode"]].astype(float)
             df = df[df["wavelength"]<2000].reset_index()
             df = df.drop("index", axis=1)
@@ -372,7 +395,7 @@ def get_metadata_and_dataframe_CRAIC(file_location):
             metadata["number_of_datapoints"]= len(df[metadata["measuring_mode"]])
             metadata["maximum_measurement"]=  df[metadata["measuring_mode"]].max()
             metadata["minimum_measurement"]= df[metadata["measuring_mode"]].min()
-            
+
             return metadata, df
 
 
@@ -518,13 +541,15 @@ def get_metadata_and_dataframe_l1050(file_location):
                     metadata["minimum_measurement"]= row_str
                 if index +1 == 90:
                     break
+            #normally l1050 spectrum does not have polarization
+            metadata["polarization"] = "O"
             df = pd.read_csv(f, sep="\t", decimal =",", names=["wavelength", metadata["measuring_mode"]]).dropna()
             #print(df) #debug
             df["wavelength"],df[metadata["measuring_mode"]] = df["wavelength"].astype(float), df[metadata["measuring_mode"]].astype(float)
             df = df[df["wavelength"]<2000].reset_index()
             df = df.drop("index", axis=1)
             return metadata, df
-            
+
 
 class Peak:
         def __init__(self, x, y):
@@ -547,7 +572,7 @@ class PeakList:
     min_height_threshold_denominator = 3.0
     max_height_threshold_denominator = 3.3
     min_distance_between_peaks = 50 #nm
-    max_distance_between_peaks = 50 #min distance 
+    max_distance_between_peaks = 50 #min distance
 
     def set_parameters(prominence_threshold_min = None, prominence_threshold_max = None, min_height_threshold_denominator = None, max_height_threshold_denominator = None,
     min_distance_between_peaks = None, max_distance_between_peaks = None ):
@@ -563,8 +588,8 @@ class PeakList:
             self.min_distance_between_peaks = min_distance_between_peaks
         if max_distance_between_peaks:
             self.max_distance_between_peaks = max_distance_between_peaks
-        
-            
+
+
     def __init__(self, spectrum):
         self.spectrum = spectrum
         self.peaks = self.get_peaks()
@@ -577,10 +602,10 @@ class PeakList:
         #get info
         x = self.spectrum.data["wavelength"].values
         y = self.spectrum.data[self.spectrum.metadata["measuring_mode"]].values
-        
+
         #parameters
         min_height = y.max()/self.max_height_threshold_denominator
-        
+
         width_t = 50.00
 
         #get peaks
@@ -600,47 +625,47 @@ class PeakList:
 
         peaks = sorted(peaks)
         return peaks
-        
+
     def get_peaks(self):
         peaks = self.get_peaks_as_object()
         x = []
         y = []
-        for peak in peaks: 
-            if not ((peak.get_x() > 855)&(peak.get_x() < 869)):  
+        for peak in peaks:
+            if not ((peak.get_x() > 855)&(peak.get_x() < 869)):
                 x.append(peak.get_x())
                 y.append(peak.get_y())
-        
+
         return x, y
 
 
-    def plot_settings(self): 
+    def plot_settings(self):
         self.spectrum.plot_settings()
         x_values, y_values = self.get_peaks()
-            
+
         return plt.scatter(x_values, y_values, color="r")
-        
-    @plot_wrapper    
+
+    @plot_wrapper
     def plot(self):
         self.plot_settings()
 
-    
+
     def get_minima(self):
         """This method returns the index, x values and y values of every minimum in a spectrum"""
-        
+
         #Get minimum
         spectrum = self.get_spectrum()
         #get wavelength and height of measurements
         x = spectrum.data["wavelength"].values
         y = spectrum.data[spectrum.metadata["measuring_mode"]].values
-        
+
         #reflect plot across x axis and displace it upwards
         y_max = y.max()
         y_inverted = -y + y_max
 
         #maximum height
-        # This prevents  minima less than 40% 
+        # This prevents  minima less than 40%
         maximum_height = y_inverted.max() * 0.60
-        
+
         minimum_height = 0
         #get minima
         peaks_funct = scipy.signal.find_peaks(y_inverted, distance= self.min_distance_between_peaks, prominence=self.prominence_threshold_min, height = (minimum_height, maximum_height))
@@ -656,19 +681,19 @@ class PeakList:
         #get wavelength and height of measurements
         x = spectrum.data["wavelength"].values
         y = spectrum.data[spectrum.metadata["measuring_mode"]].values
-    
+
         #define minimum height and min distance between minima
         min_height = y.max()/self.min_height_threshold_denominator
         min_distance = 50 #nm
         max_distance = 100.00
         width_t = 50.00
-    
+
         #get maxima
         peaks_funct = scipy.signal.find_peaks(y, height= min_height, distance= self.max_distance_between_peaks, prominence= self.prominence_threshold_max)
         peaks_index = peaks_funct[0] #indices
         x_values = x[peaks_index]   #x values
         y_values = y[peaks_index]    #y values
-    
+
         return peaks_index, x_values, y_values
 
 
@@ -680,26 +705,28 @@ class Spectrum:
     """This class represents the data and metadata for a L1050 file.
     It provides the maxima and minima and a """
     #These variables delimit the thresholds used to determine if a point can be considered a maximum or minimum
-    
+
     def __str__(self):
         return self.code
 
+    def get_polarization(self):
+        return self.polarization
     def get_name(self):
             return self.filename
     def get_filename(self):
             return self.filename
-        
+
     def __init__(self, file_location, collection):
 
         import re
-        
+
         def get_genus(code, collection):
             #print("get_genus")
-            
+
             #variables
             collection_name = collection.get_name()
             collection_metadata = collection.get_metadata()
-            
+
             #Locate specimen
             specimen= collection_metadata.loc[collection_metadata["code"]==code]
 
@@ -710,7 +737,7 @@ class Spectrum:
             # print(f"specimen genus {specimen}")
             result = specimen.iloc[0]["genus"]
             #print(f"genus, type{type(result)}")
-            
+
             if isinstance(result,str):
                 return result
             else:
@@ -719,11 +746,11 @@ class Spectrum:
         def get_species(code, collection):
             #print("get_species")
             # print(f"code: {code}")
-            
+
             #variables
             collection_name = collection.get_name()
             collection_metadata = collection.get_metadata()
-            
+
             #Locate specimen
             specimen= collection_metadata.loc[collection_metadata["code"]==code]
 
@@ -749,8 +776,12 @@ class Spectrum:
         #read file
         self.metadata, self.data = read_spectrum_file(file_location)
         #print(self.metadata)
-        
+
         self.filename =  file_location
+        try:
+            self.polarization = self.metadata["polarization"]
+        except:
+            self.polarization = "na"
         try:
             self.code = self.metadata["code"]
         except:
@@ -767,42 +798,42 @@ class Spectrum:
             self.species = get_species(self.code, collection)
         except:
             self.species = "na"
-        
+
 
     def plot_settings(self):
         measuring_mode = self.metadata["measuring_mode"]
-        
+
         df = self.data
-        
+
         x = df["wavelength"]
         y = df[measuring_mode]
-        
+
         plt.plot(x, y)
         plot = plt.title(f"{measuring_mode} for {self.genus} {self.species}, code {self.code}")
-        
+
         return plot
-        
-    @plot_wrapper    
+
+    @plot_wrapper
     def plot(self):
         self.plot_settings()
-        
+
     def get_normalized_spectrum(self):
         df = self.data[["wavelength", self.measuring_mode]]
         max_value = df[self.measuring_mode].max()
         df.loc[:,self.measuring_mode] = df.loc[:,self.measuring_mode]/max_value
         return df
-        
+
     def get_maxima(self):
         maxima_list = PeakList(self).get_maxima()
         return maxima_list
-        
+
     def get_minima(self):
         minima_list = PeakList(self).get_minima()
         return minima_list
-    
+
     def get_critical_points(self):
         peaks = PeakList(self).get_peaks()
-        return peaks    
+        return peaks
 
     def get_dataframe(self):
         return self.data
@@ -812,7 +843,7 @@ class Spectrum:
         return self.metadata
     def get_code(self):
         return self.code
-        
+
     def get_collection(self):
         return self.collection
     def get_species(self):
@@ -825,7 +856,7 @@ class Spectrum:
             return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s)]
         return alphanum_key(self.code) < alphanum_key(other.code)
 
-    
+
 ####
 
 
@@ -854,5 +885,3 @@ def test_peak_class():
         #peaklist1.plot()
         #print(peaklist1)
         #print(peaklist1.plot())
-
-

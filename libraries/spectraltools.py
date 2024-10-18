@@ -57,7 +57,7 @@ class Specimen_Collection:
     def get_codes(self):
 
         codes = set(self.metadata["code"].values)
-        print(f"{codes=}")
+        #print(f"{codes=}")
         return codes
 
     def get_species():
@@ -220,15 +220,7 @@ def read_spectrum_file(file):
     else:
         print(f"{file=}")
         raise ValueError("The file is neither a valid L1050 nor CRAIC file.")
-
-def get_metadata_and_dataframe_CRAIC(file_location):
-    #definitions
-        #Logic to read ASCII data
-        import os
-        import pandas as pd
-        import re
-
-        def get_metadata_from_filename(file_location):
+def get_metadata_from_filename(file_location):
             """Returns the code and polarization from filename. Examples:
             BIOUCR0001_L code: BIOUCR0001 polarization: L
             BIOUCR0001_R code: BIOUCR0001 polarization: R
@@ -256,68 +248,78 @@ def get_metadata_and_dataframe_CRAIC(file_location):
             return "NA","NA"
 
 
-        def first_line(str):
-            #print(f"{str=}")
-            #re1 = r"Time1=(\d)*ms:Average1=(\d)*:Objective=(\d)*X:Aperture=(\d)*: (((\d)*/(\d)*/(\d)*) ((\d)*:(\d)*:(\d)* (AM)*(PM)*))"
-            #re1 = "Time1=43ms:Average1=10:Objective=10X:Aperture=1: (3/5/2024 8:54:50 AM)"
-            re1 = r"Time1=(\d*)ms:Average1=(\d*).*:Objective=(\d*X):Aperture=(\d*): \((\d*/\d*/\d*) (\d*:\d*:\d* (AM)*(PM)*)\)"
-            p = re.compile(re1)
-            m= p.match(str)
-            if m:
-                #print("match!")
-                time1 = m.group(1)
-                #print(f"{time1=}")
-                average1 = m.group(2)
-                #print(f"{average1=}")
-                objective = m.group(3)
-                #print(f"{objective=}")
-                aperture = m.group(4)
-                #print(f"{aperture=}")
-                date = m.group(5)
-                #print(f"{date=}")
-                time = m.group(6)
-                #print(f"{time=}")
-                return time1, average1, objective, aperture, date, time
-            else:
-                return "",""
-        def measuring_mode(str):
-
-            if (str != ""):
-                if str == "Reflectance":
-                    return "%R"
-                elif str == "Transmittance":
-                    return "%T"
-                elif str == "Fluorescence":
-                    return "%F"
-                if str == "Absorptance":
-                    return "%A"
-            else:
-                return ""
-        def average_2(str):
-            re1 = r"Avg2: (\d*.\d*)"
-            p = re.compile(re1)
-            m= p.match(str)
-            if m:
-                return m.group(1)
-            else:
-                return ""
-        def integration_time1(str):
-            re1 = r"Int.Time1:(\d*.\d*)"
-            p = re.compile(re1)
-            m= p.match(str)
-            if m:
-                return m.group(1)
-            else:
-                return ""
-        def integration_time2(str):
-            re1 = r"Int.Time2:(\d*.\d*)"
-            p = re.compile(re1)
-            m= p.match(str)
-            if m:
-                return m.group(1)
-            else:
-                return ""
-        #Initializa metadata dict
+def first_line(str):
+    #print(f"{str=}")
+    #re1 = r"Time1=(\d)*ms:Average1=(\d)*:Objective=(\d)*X:Aperture=(\d)*: (((\d)*/(\d)*/(\d)*) ((\d)*:(\d)*:(\d)* (AM)*(PM)*))"
+    #re1 = "Time1=43ms:Average1=10:Objective=10X:Aperture=1: (3/5/2024 8:54:50 AM)"
+    re1 = r"Time1=(\d*)ms:Average1=(\d*).*:Objective=(\d*X):Aperture=(\d*): \((\d*/\d*/\d*) (\d*:\d*:\d* (AM)*(PM)*)\)"
+    p = re.compile(re1)
+    m= p.match(str)
+    if m:
+        #print("match!")
+        time1 = m.group(1)
+        #print(f"{time1=}")
+        average1 = m.group(2)
+        #print(f"{average1=}")
+        objective = m.group(3)
+        #print(f"{objective=}")
+        aperture = m.group(4)
+        #print(f"{aperture=}")
+        date = m.group(5)
+        #print(f"{date=}")
+        time = m.group(6)
+        #print(f"{time=}")
+        return time1, average1, objective, aperture, date, time
+    else:
+        return "",""
+        
+def measuring_mode(str):
+    """Changes the measuring mode of CRAIC files to the standard notation"""
+    if (str != ""):
+        if str == "Reflectance":
+            return "%R"
+        elif str == "Transmittance":
+            return "%T"
+        elif str == "Fluorescence":
+            return "%F"
+        if str == "Absorptance":
+            return "%A"
+    else:
+        return ""
+        
+def average_2(str):
+    """Reads CRAIC files' average_2 data"""
+    re1 = r"Avg2: (\d*.\d*)"
+    p = re.compile(re1)
+    m= p.match(str)
+    if m:
+        return m.group(1)
+    else:
+        return ""
+def integration_time1(str):
+    """Reads CRAIC files' integration_time1 data"""
+    re1 = r"Int.Time1:(\d*.\d*)"
+    p = re.compile(re1)
+    m= p.match(str)
+    if m:
+        return m.group(1)
+    else:
+        return ""
+def integration_time2(str):
+    """Reads CRAIC files' integration_time2 data"""
+    re1 = r"Int.Time2:(\d*.\d*)"
+    p = re.compile(re1)
+    m= p.match(str)
+    if m:
+        return m.group(1)
+    else:
+        return ""
+                
+def get_metadata_and_dataframe_CRAIC(file_location):
+        """Reads CRAIC files' dataframe and metadata"""
+        #definitions
+    
+        #Inicializa metadata dict
         metadata = {}
 
         #Read header
@@ -327,6 +329,7 @@ def get_metadata_and_dataframe_CRAIC(file_location):
         metadata["header"] = "".join(lines)
 
         #read_metadata
+
         #print(f"File: {file_location}")
         f = open(file_location, encoding= "latin1")
 
@@ -337,7 +340,7 @@ def get_metadata_and_dataframe_CRAIC(file_location):
         with f as data_file:
             for index, row in enumerate(data_file): #0-89
                 row_str = row.strip()
-                print(f"{row_str=}")
+                #print(f"{row_str=}")
                 if index +1 == 1: #First line
                     metadata["time1"], metadata["average1"], metadata["objective"], metadata["aperture"], metadata["date"], metadata["time"] =first_line(row_str)
                 if index + 1 == 3: #Mode(reflectance, transmittance, absorptance, fluorescence)
@@ -351,15 +354,29 @@ def get_metadata_and_dataframe_CRAIC(file_location):
                     metadata["integration_time2"]= integration_time2(row_str)
                     break
         f = open(file_location, encoding= "latin1")
+
+        """This section reads the dataframe"""
+
         with f as data_file:
-            df = pd.read_csv(f, sep="	", decimal =".", names=["wavelength", metadata["operating_mode"]], skiprows = 9).dropna()
+            print(f"{file_location}=")
+            #try reading using tabs as separator
+            df = pd.read_csv(f, sep="	", decimal =".", names=["wavelength", metadata["measuring_mode"]], skiprows = 9).dropna()
+            #try reading using comma as separator
+            if df.empty:
+                try:
+                    df = pd.read_csv(f, sep=",", decimal =".", names=["wavelength", metadata["measuring_mode"]], skiprows = 9).dropna()
+                except Exception as e:
+                    print(e)
+                    df = pd.DataFrame([])
+            #If nothing works show warning
             if df.empty:
                 warnings.warn(f"Dataframe is empty. File: {file_location}", UserWarning)
+                
             #wavelength is always measured in ms
             metadata["units"]= "nm"
             #CRAIC files are .csv files
-            df = pd.read_csv(f, sep=",", decimal =".", names=["wavelength", metadata["measuring_mode"]]).dropna()
-            #print(df) #debug
+            #df = pd.read_csv(f, sep=",", decimal =".", names=["wavelength", metadata["measuring_mode"]]).dropna()
+            print(df) #debug
             df["wavelength"],df[metadata["measuring_mode"]] = df["wavelength"].astype(float), df[metadata["measuring_mode"]].astype(float)
             df = df[df["wavelength"]<2000].reset_index()
             df = df.drop("index", axis=1)
@@ -691,6 +708,8 @@ class Spectrum:
 
     def __str__(self):
         return self.code
+
+    def
 
     def get_polarization(self):
         return self.polarization
