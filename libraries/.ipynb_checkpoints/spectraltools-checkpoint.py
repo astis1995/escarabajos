@@ -112,17 +112,34 @@ class Specimen_Collection:
         species = []
 
         for collection in collection_list:
-            if code in collection.get_codes():
-
-                return collection.get_metadata().loc()
+            codes = list(collection.get_codes())
+            
+            if code in codes:
+                metadata = collection.get_metadata()
+                genera = list(metadata.loc(metadata["code"] == code, "genus").values())[0]
+                print(f"{genera=}")
+                return genera
             else:
-                #raise ValueError("The provided code is not in the collection list")
+                raise ValueError("The provided code is not in the collection list")
                 #warnings.warn(f"The provided code ({code}) is not in the collection list:\n {collection_list} \n. Returning None instead", UserWarning)
                 return None
     def collection_lookup(code, collection_list):
-
+        
+        print("Collection lookup")
+        #convert code to int
+        code = int(code)
+        
+        
         for collection in collection_list:
-            if code in collection.get_codes():
+            codes = list(collection.get_codes())
+            codes = [int(num) for num in codes]
+            
+            #print(f"{type(codes)=}")
+            #print(f"{type(code)=}")
+            #print(f"{code in codes=}")
+            
+            if code in codes:
+                print(f"{collection}")
                 return collection
             else:
                 #raise ValueError("The provided code is not in the collection list")
@@ -199,6 +216,27 @@ def check_l1050_file(file):
         else:
             return False
 
+def check_empty_CRAIC_file(f):
+    try:
+        if pd.read_csv(f, sep="	", decimal =".", names=["wavelength", "measuring_mode"], skiprows = 9).empty:
+            return True
+    except:
+        pass
+    try:
+        if pd.read_csv(f, sep=",", decimal =".", names=["wavelength", "measuring_mode"], skiprows = 9).empty:
+            return True
+    except:
+        pass
+    return False
+    
+def check_empty_l1050_file(f):
+    try:
+        if pd.read_csv(f, sep="	", decimal =".", names=["wavelength", "measuring_mode"], skiprows = 90).empty:
+            return True
+    except:
+        pass
+    return False
+
 def read_l1050_file(file):
     return get_metadata_and_dataframe_l1050(file)
 
@@ -218,8 +256,10 @@ def read_spectrum_file(file):
 
     # Raise an exception if the file type is unknown
     else:
-        print(f"{file=}")
-        raise ValueError("The file is neither a valid L1050 nor CRAIC file.")
+        #print(f"{file=}")
+        
+        #raise ValueError("The file is neither a valid L1050 nor CRAIC file.")
+        pass
 def get_metadata_from_filename(file_location):
             """Returns the code and polarization from filename. Examples:
             BIOUCR0001_L code: BIOUCR0001 polarization: L
@@ -322,10 +362,15 @@ def get_metadata_and_dataframe_CRAIC(file_location):
         #Inicializa metadata dict
         metadata = {}
 
+        #formatting
+        formatting = ""
+    
         #Read header
         lines = []
         with open(file_location, encoding= "latin1") as myfile:
             lines = myfile.readlines()[0:8]
+            #check the format of the first line
+            first_data_line = myfile.readline()
         metadata["header"] = "".join(lines)
 
         #read_metadata
@@ -358,7 +403,7 @@ def get_metadata_and_dataframe_CRAIC(file_location):
         """This section reads the dataframe"""
 
         with f as data_file:
-            print(f"{file_location}=")
+            #print(f"{file_location}=")
             #try reading using tabs as separator
             df = pd.read_csv(f, sep="	", decimal =".", names=["wavelength", metadata["measuring_mode"]], skiprows = 9).dropna()
             #try reading using comma as separator
@@ -371,12 +416,13 @@ def get_metadata_and_dataframe_CRAIC(file_location):
             #If nothing works show warning
             if df.empty:
                 warnings.warn(f"Dataframe is empty. File: {file_location}", UserWarning)
+                pass #debug
                 
             #wavelength is always measured in ms
             metadata["units"]= "nm"
             #CRAIC files are .csv files
             #df = pd.read_csv(f, sep=",", decimal =".", names=["wavelength", metadata["measuring_mode"]]).dropna()
-            print(df) #debug
+            #print(df) #debug
             df["wavelength"],df[metadata["measuring_mode"]] = df["wavelength"].astype(float), df[metadata["measuring_mode"]].astype(float)
             df = df[df["wavelength"]<2000].reset_index()
             df = df.drop("index", axis=1)
@@ -700,6 +746,61 @@ class PeakList:
 # In[9]:
 
 
+def get_genus(code, collection):
+    #print("get_genus")
+    
+    #variables
+    collection_name = collection.get_name()
+    collection_metadata = collection.get_metadata()
+    
+    #Locate specimen
+    #print(f"{type(code)=}")
+    #print(collection_metadata["code"].astype(str)==code)
+    #print(f"{collection_metadata["code"]}")
+    specimen = collection_metadata.loc[collection_metadata["code"].astype(str)==(code),"genus"]
+    print(f"Genus {specimen=}")
+    
+    if specimen.empty:
+        print(f"No genus data for {code} in collection {collection_name}")
+        return ""
+    #print("not mt")
+    # print(f"specimen genus {specimen}")
+    result = specimen.iloc[0]
+    #print(f"genus, type{type(result)}")
+    
+    if isinstance(result,str):
+        return result
+    else:
+        return str(result)
+    
+def get_species(code, collection):
+    #print("get_species")
+    # print(f"code: {code}")
+    
+    #variables
+    collection_name = collection.get_name()
+    collection_metadata = collection.get_metadata()
+    
+    #Locate specimen
+    specimen = collection_metadata.loc[collection_metadata["code"]==str(code),"specimen"]
+    
+    if specimen.empty:
+        print(f"No species data for {code} in collection {collection_name}")
+        result = ""
+    #print("not mt")
+    #print(f"specimen species {specimen}")
+    try:
+        result = str(specimen.iloc[0])
+    except Exception as e:
+        print("Update specimen in the corresponding collection, please")
+        return "na"
+    #print(f"species, type{type(result)}")
+    if isinstance(result,str):
+        return result
+    else:
+        return str(result)
+                
+
 #Spectrum class
 class Spectrum:
     """This class represents the data and metadata for a L1050 file.
@@ -715,60 +816,8 @@ class Spectrum:
             return self.filename
     def get_filename(self):
             return self.filename
-
+        
     def __init__(self, file_location, collection):
-
-        import re
-
-        def get_genus(code, collection):
-            #print("get_genus")
-
-            #variables
-            collection_name = collection.get_name()
-            collection_metadata = collection.get_metadata()
-
-            #Locate specimen
-            specimen= collection_metadata.loc[collection_metadata["code"]==code]
-
-            if specimen.empty:
-                print(f"No data for {code} in collection {collection_name}")
-                return ""
-            #print("not mt")
-            # print(f"specimen genus {specimen}")
-            result = specimen.iloc[0]["genus"]
-            #print(f"genus, type{type(result)}")
-
-            if isinstance(result,str):
-                return result
-            else:
-                return str(result)
-
-        def get_species(code, collection):
-            #print("get_species")
-            # print(f"code: {code}")
-
-            #variables
-            collection_name = collection.get_name()
-            collection_metadata = collection.get_metadata()
-
-            #Locate specimen
-            specimen= collection_metadata.loc[collection_metadata["code"]==code]
-
-            if specimen.empty:
-                print(f"No data for {code} in collection {collection_name}")
-                result = ""
-            #print("not mt")
-            #print(f"specimen species {specimen}")
-            try:
-                result = str(specimen.iloc[0]["species"])
-            except Exception as e:
-                print("Update specimen in the corresponding collection, please")
-                return "na"
-            #print(f"species, type{type(result)}")
-            if isinstance(result,str):
-                return result
-            else:
-                return str(result)
 
         #attributes
         self.file_location = file_location
@@ -835,6 +884,9 @@ class Spectrum:
         peaks = PeakList(self).get_peaks()
         return peaks
 
+    def set_dataframe(self, df):
+        self.data = df
+        
     def get_dataframe(self):
         return self.data
     def get_data(self):
