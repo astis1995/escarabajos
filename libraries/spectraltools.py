@@ -17,15 +17,117 @@ import scipy
 import warnings
 from pathlib import Path
 
+#CONSTANTS
+min_craic_wv = 420 
+max_craic_wv = 950
+min_craic_wv_polarized = 420 
+max_craic_wv_polarized = 700
+#most common regex should go first
+regex_dict = {
+    "l1050_filename_regex" : r"([a-zA-Z]+\d{4})-*_*(\d)*(?:.Sample)*.(?:txt)*(?:ASC)*", #code #reading
+    "craic_data_comma_regex" : r"\d*.\d*,\d*.\d*",
+    "craic_data_tab_regex" : "\\d*.\\d*\t\\d*.\\d*",
+    "craic_filename_regex_1" :  r"(\d+?)([RLO])+(\d)*.csv", #code #polarization #reading
+    "craic_filename_regex_2" : r"([a-zA-Z\d]+)_([RLO])+.csv", # "code #polarization
+    "craic_filename_regex_3" :  r"(\d+?)-(\d)*.csv" #code #reading
+    }
+
+#log
+import logging
+
+# Configure logging
+logging.basicConfig(filename='../../error.log', level=logging.ERROR , #escarabajos/libraries/spectraltools.py
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 #COLECCIONS
+
+#plot rainbow
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
+import colorsys
+
+def integer_generator(start=0):
+    if(start%100==0):
+        print(f"{start=}")
+    while True:
+        yield start
+        start += 1
+gen = integer_generator()
+
+def get_contrasting_color():
+    index = next(gen)
+    # Ensure the index is a non-negative integer
+    if index < 0:
+        raise ValueError("Index must be a non-negative integer.")
+    
+    # Number of colors to generate
+    total_colors = 360  # Using full circle of hue (0-360)
+    
+    # Calculate the hue based on the index
+    hue = (index * 137.508) % total_colors  # Use golden angle for good contrast
+    saturation = 0.8  # Keep saturation high for vibrant colors
+    lightness = 0.5   # Keep lightness moderate
+
+    # Convert HSL to RGB
+    r, g, b = colorsys.hls_to_rgb(hue / 360.0, lightness, saturation)
+    
+    # Convert RGB values to 0-255 range
+    return (r , g , b )
+
+
+def draw_rainbow_background():
+    """
+    Plots wavelength vs intensity with a custom background gradient.
+
+    Parameters:
+        longitudes_de_onda (array-like): Wavelengths in nm.
+        intensidad (array-like): Intensity values.
+    """
+    # Create the figure and axes
+    fig, ax = plt.subplots()
+
+    # Create a custom colormap from violet to red
+    colors = [
+        "#8A2BE2",  # Violet
+        "#0000FF",  # Blue
+        "#00FF00",  # Green
+        "#FFFF00",  # Yellow
+        "#FFA500",  # Orange
+        "#FF0000"   # Red
+    ]
+    custom_cmap = LinearSegmentedColormap.from_list("violet_to_red", colors, N=256)
+
+    # Create a gradient for the background
+    gradient = np.linspace(0, 1, 256)
+    gradient = np.vstack((gradient, gradient))
+
+    # Show the background with the custom colormap
+    ax.imshow(gradient, aspect='auto', cmap=custom_cmap, extent=[380, 750, 0, 200], alpha=0.15)
+
+    # Plot the data# Plot the data
+    #df = dataframe
+    #x = df["wavelength"]
+    #y = df[metadata["measuring_mode"]]
+    
+    #if kind == "scatter":
+    #    scatter = ax.scatter(x, y, color=color, alpha=alpha, label=label)
+    #    scatter.set_sizes([s])
+    #else:
+    #    ax.plot(df["wavelength"], df[metadata["measuring_mode"]], color=get_contrasting_color(), label=label)
+
+    
+
+
+# Call the function
+
 
 #decorator
 def plot_wrapper(func):
     def wrapper(*args, **kwargs):
-        #print("Something is happening before the function is called.")
+        #pri*nt("Something is happening before the function is called.")
         plt.figure(figsize=(10, 5))
         result = func(*args, **kwargs)
-        #print("Something is happening after the function is called.")
+        #pri*nt("Something is happening after the function is called.")
         plt.grid(True)
         plt.show()
         return result
@@ -57,7 +159,8 @@ class Specimen_Collection:
     def get_codes(self):
 
         codes = set(self.metadata["code"].values)
-        #print(f"{codes=}")
+        codes = list(map(str, codes))
+        #pri*nt(f"{codes=}")
         return codes
 
     def get_species():
@@ -107,25 +210,43 @@ class Specimen_Collection:
             spectra.append(spectrum)
         return spectra
 
-    def genera_species_lookup(code, collection_list):
+    def genus_species_lookup(code, collection_list):
         genera = []
         species = []
-
+        #print(f"{type(code)=}")
         for collection in collection_list:
             codes = list(collection.get_codes())
-            
+            #print(f"{codes=}")
+            #print(f"{type(codes[0])=}")
             if code in codes:
+                #print(f"It is in codes")
                 metadata = collection.get_metadata()
-                genera = list(metadata.loc(metadata["code"] == code, "genus").values())[0]
-                print(f"{genera=}")
-                return genera
+                #print(f"{metadata["code"]}")
+                try:
+                    genera = list(metadata.loc[metadata["code"].astype(str) == code, "genus"].values)[0]
+                
+                except Exception as e:
+                    print(e)
+                    genera = "na"
+                    
+                try:
+                    species = list(metadata.loc[metadata["code"].astype(str) == code, "species"].values)[0]
+                except Exception as e:
+                    print(e)
+                    species = "na"
+                
+                #print(f"{genera=}{species=}")
+                return genera,species
             else:
-                raise ValueError("The provided code is not in the collection list")
-                #warnings.warn(f"The provided code ({code}) is not in the collection list:\n {collection_list} \n. Returning None instead", UserWarning)
-                return None
+                err_msj = f"The provided code ({code}) is not in the collection list:\n {collection_list} \n. Returning None instead"
+                #raise ValueError(err_msj)
+                #warnings.warn(f"{err_msj}", UserWarning)
+                #logging.error(f'An error occurred: {err_msj}')
+                print(err_msj)
+                return "na", "na"
     def collection_lookup(code, collection_list):
         
-        print("Collection lookup")
+        #pri*nt("Collection lookup")
         #convert code to int
         code = int(code)
         
@@ -134,16 +255,20 @@ class Specimen_Collection:
             codes = list(collection.get_codes())
             codes = [int(num) for num in codes]
             
-            #print(f"{type(codes)=}")
-            #print(f"{type(code)=}")
-            #print(f"{code in codes=}")
+            #pri*nt(f"{type(codes)=}")
+            #pri*nt(f"{type(code)=}")
+            #pri*nt(f"{code in codes=}")
             
             if code in codes:
-                print(f"{collection}")
+                #pri*nt(f"{collection}")
                 return collection
             else:
-                #raise ValueError("The provided code is not in the collection list")
-                #warnings.warn(f"The provided code ({code}) is not in the collection list:\n {collection_list} \n. Returning None instead", UserWarning)
+                
+                err_msj = f"The provided code ({code}) is not in the collection list:\n {collection_list} \n. Returning None instead"
+                #raise ValueError(err_msj)
+                #warnings.warn(f"{err_msj}", UserWarning)
+                print(err_msj)
+                ##logging.error(f'An error occurred: {err_msj}')
                 return None
     def __str__(self):
         try:
@@ -157,19 +282,15 @@ class Specimen_Collection:
             return "None"
 
 
-# In[6]:
 
 
 #test collection class
 def test_collection_class():
     angsol_collection = Specimen_Collection("ANGSOL", angsol_collection_path, angsol_collection_metadata, "HIGH")
-    #print(f"{angsol_collection.get_metadata()=} \n" )
-    #print(f"{angsol_collection.get_data_folder_path()=} \n" )
-    #print(f"{angsol_collection.get_data_filenames()=} \n" )
+    #pri*nt(f"{angsol_collection.get_metadata()=} \n" )
+    #pri*nt(f"{angsol_collection.get_data_folder_path()=} \n" )
+    #pri*nt(f"{angsol_collection.get_data_filenames()=} \n" )
 #test_collection_class()
-
-
-# In[7]:
 
 
 def create_path_if_not_exists(path):
@@ -177,9 +298,10 @@ def create_path_if_not_exists(path):
         if not os.path.exists(path):
             # Create the directory and any missing parent directories
             os.makedirs(path)
-            print(f"Directory '{path}' created successfully.")
+            #pri*nt(f"Directory '{path}' created successfully.")
         else:
-            print(f"Directory '{path}' already exists.")
+            pass
+            #pri*nt(f"Directory '{path}' already exists.")
 
 
 # In[8]:
@@ -191,10 +313,10 @@ def check_CRAIC_file(file):
     if not Path(file).name.endswith(".csv"):
         return False
     #check if it is a CRAIC file
-    #print(f"{file=}")
+    #pri*nt(f"{file=}")
     with open(file) as f:
         first_line = (f.readline())
-        #print(f"{first_line=}")
+        #pri*nt(f"{first_line=}")
         regex = r"Time1=\d*ms:Average1=\d*:Objective=\d*X:Aperture=\d*: \(\d*/\d*/\d* \d*:\d*:\d* (?:AM)*(?:PM)*\)"
         match = re.search(regex, first_line)
         if match:
@@ -206,9 +328,12 @@ def check_l1050_file(file):
     #check if it is a hidden file
     if Path(file).name.startswith("."):
         return False
+    if not (Path(file).name.endswith(".txt") or Path(file).name.endswith(".ASC")) :
+        return False
     with open(file) as f:
+        #pri*nt(f"{file=}")
         first_line = (f.readline())
-        #print(f"{first_line=}")
+        #pri*nt(f"{first_line=}")
         regex = r"PE UV       SUBTECH     SPECTRUM    ASCII       PEDS        .*"
         match = re.search(regex, first_line)
         if match:
@@ -246,17 +371,17 @@ def read_CRAIC_file(file):
 def read_spectrum_file(file):
     # Check if the file is an L1050 type
     if check_l1050_file(file):
-        #print("l1050 file")
+        #pri*nt("l1050 file")
         return read_l1050_file(file)
 
     # Check if the file is a CRAIC type
     elif check_CRAIC_file(file):
-        #print("CRAIC file")
+        #pri*nt("CRAIC file")
         return read_CRAIC_file(file)
 
     # Raise an exception if the file type is unknown
     else:
-        #print(f"{file=}")
+        #pri*nt(f"{file=}")
         
         #raise ValueError("The file is neither a valid L1050 nor CRAIC file.")
         pass
@@ -268,8 +393,11 @@ def get_metadata_from_filename(file_location):
             BIOUCR0001_0 code: BIOUCR0001 polarization: 0 (degrees)
             BIOUCR0001_0 code: BIOUCR0001 polarization: 90 (degrees)
             1037298L2 code: 1037298 polarization L """
-            #print("string")
-            #print(file_location)
+
+            #initialize
+            code = "na"
+            polarization = "O"
+            #pri*nt(file_location)
             basename = os.path.basename(file_location)
             #re1 = r"([a-zA-Z\d]+)_(R)*(L)*(O)*.csv"
             regexs = [ r"([\d]+?)([RLO])+\d*.csv", r"([a-zA-Z\d]+)_([RLO])+.csv",]
@@ -277,38 +405,42 @@ def get_metadata_from_filename(file_location):
                 #Names are in the form CODE-MEASUREMENTNUMBER.TXT
                 p = re.compile(regex)
                 m = p.match(basename)
-                # print(f"match basename: {m}")
+                # pri*nt(f"match basename: {m}")
+                code = get_code_from_filename(file_location)
                 if m:
-                    #print(f"group 2: {m.group(2)}")
-                    code = (m.group(1))
+                    #pri*nt(f"group 2: {m.group(2)}")
                     polarization = (m.group(2))
                     return code, polarization
 
-            print("No code information from filename. Check file: f{file_location}")
-            return "NA","NA"
+                err_msj = f"No code information from filename. Check file: f{file_location}"
+                #raise ValueError(err_msj)
+                #warnings.warn(f"{err_msj}", UserWarning)
+                print(err_msj)
+                ##logging.error(f'An error occurred: {err_msj}')
+            return code, polarization
 
 
 def first_line(str):
-    #print(f"{str=}")
+    #pri*nt(f"{str=}")
     #re1 = r"Time1=(\d)*ms:Average1=(\d)*:Objective=(\d)*X:Aperture=(\d)*: (((\d)*/(\d)*/(\d)*) ((\d)*:(\d)*:(\d)* (AM)*(PM)*))"
     #re1 = "Time1=43ms:Average1=10:Objective=10X:Aperture=1: (3/5/2024 8:54:50 AM)"
     re1 = r"Time1=(\d*)ms:Average1=(\d*).*:Objective=(\d*X):Aperture=(\d*): \((\d*/\d*/\d*) (\d*:\d*:\d* (AM)*(PM)*)\)"
     p = re.compile(re1)
     m= p.match(str)
     if m:
-        #print("match!")
+        #pri*nt("match!")
         time1 = m.group(1)
-        #print(f"{time1=}")
+        #pri*nt(f"{time1=}")
         average1 = m.group(2)
-        #print(f"{average1=}")
+        #pri*nt(f"{average1=}")
         objective = m.group(3)
-        #print(f"{objective=}")
+        #pri*nt(f"{objective=}")
         aperture = m.group(4)
-        #print(f"{aperture=}")
+        #pri*nt(f"{aperture=}")
         date = m.group(5)
-        #print(f"{date=}")
+        #pri*nt(f"{date=}")
         time = m.group(6)
-        #print(f"{time=}")
+        #pri*nt(f"{time=}")
         return time1, average1, objective, aperture, date, time
     else:
         return "",""
@@ -354,7 +486,105 @@ def integration_time2(str):
         return m.group(1)
     else:
         return ""
-                
+
+def get_format(string_line):
+    
+    #pri*nt(f"{string_line}")
+    format_type = None
+    for element in regex_dict:
+        #print(f"{element=}")
+        #print(f"{regex_dict[element]=}")
+        if re.search(regex_dict[element], string_line):
+            format_type = element
+            #pri*nt(f"{format_type=}")
+            return format_type
+    return None
+def get_CRAIC_info_from_filename(file):
+    basename = Path(file).name
+    #pri*nt(f"{basename}")
+    return get_info_from_format(basename)
+    
+def get_code_from_filename(file):
+    basename = Path(file).name
+    #pri*nt(f"{basename}")
+    return get_code_from_format(basename)
+    
+def get_codes_from_filenames(files):
+    codes = []
+    for file in files:
+        code = get_code_from_filename(file)
+        if code:
+            codes.append(code)
+    codes = set(codes)
+    codes = sorted(codes)
+    return codes
+
+def get_code_from_format(string_line):
+    code, _ , _ = get_info_from_format(string_line)
+    return str(code)
+def get_polarization_from_format(string_line):
+    _, polarization, _ = get_info_from_format(string_line)
+    return code
+def get_reading_from_format(string_line):
+    _, _, reading = get_info_from_format(string_line)
+    return code
+
+def get_info_from_format(string_line):
+
+    format_type = get_format(string_line)
+   
+    code = None
+    polarization = None
+    reading = None
+    
+    if format_type == "craic_filename_regex_3":
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.match(string_line)
+        if m:
+            code = m.group(1)
+            polarization = m.group(2)
+            reading = None
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            return code, polarization, reading
+    if format_type == "craic_filename_regex_1":
+        regex = regex_dict[format_type]
+        p = re.compile(regex)
+        m = p.match(string_line)
+        #pri*nt(f"{m}")
+        if m:
+            code = m.group(1)
+            polarization = m.group(2)
+            reading = m.group(3)
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}{m.group(0)=}{m.group(1)=}{m.group(2)=}")
+            return code, polarization, reading
+    if format_type == "craic_filename_regex_2":
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.match(string_line)
+        if m:
+            code = m.group(1)
+            polarization = m.group(2)
+            reading = None
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            return code, polarization, reading
+    
+    if format_type == "l1050_filename_regex":
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.match(string_line)
+        if m:
+            code = m.group(1)
+            polarization = None
+            reading =  m.group(2)
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            return code, polarization, reading
+    return code, polarization, reading
+            
+####################################################################################################################################################
 def get_metadata_and_dataframe_CRAIC(file_location):
         """Reads CRAIC files' dataframe and metadata"""
         #definitions
@@ -366,16 +596,27 @@ def get_metadata_and_dataframe_CRAIC(file_location):
         formatting = ""
     
         #Read header
+        first_data_line = ""
         lines = []
+        header = []
+    
         with open(file_location, encoding= "latin1") as myfile:
-            lines = myfile.readlines()[0:8]
+            
+            lines = myfile.readlines()[0:] #reads lines from 1 to n
+            #pri*nt(f"4. get_metadata_and_dataframe_CRAIC: {lines=}")
             #check the format of the first line
-            first_data_line = myfile.readline()
-        metadata["header"] = "".join(lines)
+            first_data_line = lines[9]
+            #pri*nt(f"4. get_metadata_and_dataframe_CRAIC: {first_data_line=}")
+            #header
+            header = "".join(lines[0:8])
+        metadata["header"] = header
 
-        #read_metadata
+        #check CRAIC format
+        
+        format_type = get_format(first_data_line)
+        
 
-        #print(f"File: {file_location}")
+        #pri*nt(f"File: {file_location}")
         f = open(file_location, encoding= "latin1")
 
         df = pd.DataFrame()
@@ -385,12 +626,12 @@ def get_metadata_and_dataframe_CRAIC(file_location):
         with f as data_file:
             for index, row in enumerate(data_file): #0-89
                 row_str = row.strip()
-                #print(f"{row_str=}")
+                #pri*nt(f"{row_str=}")
                 if index +1 == 1: #First line
                     metadata["time1"], metadata["average1"], metadata["objective"], metadata["aperture"], metadata["date"], metadata["time"] =first_line(row_str)
                 if index + 1 == 3: #Mode(reflectance, transmittance, absorptance, fluorescence)
                     metadata["measuring_mode"]= measuring_mode(row_str)
-                    #print(f"{measuring_mode(row_str)=}")
+                    #pri*nt(f"{measuring_mode(row_str)=}")
                 if index + 1 == 7:#average2
                     metadata["average2"]= average_2(row_str)
                 if index + 1 == 8:#int. Time1
@@ -403,44 +644,51 @@ def get_metadata_and_dataframe_CRAIC(file_location):
         """This section reads the dataframe"""
 
         with f as data_file:
-            #print(f"{file_location}=")
+            #pri*nt(f"{file_location=}")
             #try reading using tabs as separator
-            df = pd.read_csv(f, sep="	", decimal =".", names=["wavelength", metadata["measuring_mode"]], skiprows = 9).dropna()
+            #df = pd.DataFrame([])
+
+            #pri*nt(f"{format_type=}")
             #try reading using comma as separator
-            if df.empty:
-                try:
-                    df = pd.read_csv(f, sep=",", decimal =".", names=["wavelength", metadata["measuring_mode"]], skiprows = 9).dropna()
-                except Exception as e:
-                    print(e)
-                    df = pd.DataFrame([])
+            if format_type == "craic_data_comma_regex":
+                df = pd.read_csv(file_location, sep=",", decimal =".", names=["wavelength", metadata["measuring_mode"]], skiprows = 9).dropna()
             #If nothing works show warning
+            if format_type == "craic_data_tab_regex":
+                df = pd.read_csv(file_location, sep="\t", decimal =".", names=["wavelength", metadata["measuring_mode"]], skiprows = 9).dropna()
             if df.empty:
                 warnings.warn(f"Dataframe is empty. File: {file_location}", UserWarning)
                 pass #debug
-                
+
+            #pri*nt(f"get_metadata_and_: {df=}")
             #wavelength is always measured in ms
             metadata["units"]= "nm"
-            #CRAIC files are .csv files
-            #df = pd.read_csv(f, sep=",", decimal =".", names=["wavelength", metadata["measuring_mode"]]).dropna()
-            #print(df) #debug
-            df["wavelength"],df[metadata["measuring_mode"]] = df["wavelength"].astype(float), df[metadata["measuring_mode"]].astype(float)
-            df = df[df["wavelength"]<2000].reset_index()
-            df = df.drop("index", axis=1)
-
             #get additional metadata info
             #from filename
+            metadata["polarization"] = "O"
             metadata["code"], metadata["polarization"]= get_metadata_from_filename(file_location)
-            #print(f"{metadata['code']=}")
-            #print(f"{metadata['polarization']=}")
+            #pri*nt(f"{metadata['code']=}")
+            #pri*nt(f"{metadata['polarization']=}")
             #from data analysis
             metadata["minimum_wavelength"]= df["wavelength"].min()
             metadata["maximum_wavelength"]= df["wavelength"].max()
-            #print(df["wavelength"].diff())
+            #pri*nt(df["wavelength"].diff())
             metadata["step"]= np.round(np.mean(df["wavelength"].diff()),8) #8 significant figures
-            #print(f"{metadata["step"]=}")
+            #pri*nt(f"{metadata["step"]=}")
             metadata["number_of_datapoints"]= len(df[metadata["measuring_mode"]])
             metadata["maximum_measurement"]=  df[metadata["measuring_mode"]].max()
             metadata["minimum_measurement"]= df[metadata["measuring_mode"]].min()
+            metadata["equipment"] = "CRAIC"
+            metadata["genus"] = "na"
+            metadata["species"] = "na"
+            #filter spurious wavelengths
+            
+            df["wavelength"],df[metadata["measuring_mode"]] = df["wavelength"].astype(float), df[metadata["measuring_mode"]].astype(float)
+            if metadata["polarization"] in ["R", "L"]:
+                #filter between 420 and 700 nm
+                df = df[(df["wavelength"]> min_craic_wv_polarized) &(df["wavelength"]<max_craic_wv_polarized)].reset_index()
+            else:
+                df = df[(df["wavelength"]> min_craic_wv) &(df["wavelength"]<max_craic_wv)].reset_index()
+            df = df.drop("index", axis=1)
 
             return metadata, df
 
@@ -453,29 +701,29 @@ def get_metadata_and_dataframe_l1050(file_location):
         import re
 
         def get_sample_code_from_filename(row_str, file_location):
-            #print("string")
-            #print(file_location)
+            #pri*nt("string")
+            #pri*nt(file_location)
             filename = os.path.basename(file_location)
             re1 = r"([a-zA-Z\d]+)(?:-\d)*(?:.Sample)*.(?:txt)*(?:ASC)*"
             #Names are in the form CODE-MEASUREMENTNUMBER.TXT
             p = re.compile(re1)
             m = p.match(filename)
-            # print(f"match filename: {m}")
+            # pri*nt(f"match filename: {m}")
             if m:
-                # print(f"group 1: {m.group(1)}")
+                # pri*nt(f"group 1: {m.group(1)}")
                 return(m.group(1))
             return get_sample_code(row_str)
 
         def get_sample_code(row_str):
             #Tries to get the sample code from the file, if it does not match
             #it tries to get it from the filename.
-            # print("string")
-            # print(row_str)
+            # pri*nt("string")
+            # pri*nt(row_str)
             re1 = r"([a-zA-Z\d]+)(?:-\d)*(?:.Sample)*.(?:txt)*(?:ASC)*"
             #Names are in the form CODE-MEASUREMENTNUMBER.TXT
             p = re.compile(re1)
             m = p.match(row_str)
-            # print(f"match: {m}")
+            # pri*nt(f"match: {m}")
             if m:
                 return(m.group(1))
             else:
@@ -516,7 +764,7 @@ def get_metadata_and_dataframe_l1050(file_location):
 
 
         #read_metadata
-        #print(f"File: {file_location}")
+        #pri*nt(f"File: {file_location}")
         f = open(file_location, encoding= "latin1")
 
         df = pd.DataFrame()
@@ -588,9 +836,11 @@ def get_metadata_and_dataframe_l1050(file_location):
                 if index +1 == 90:
                     break
             #normally l1050 spectrum does not have polarization
+            metadata["genus"] = "na"
+            metadata["species"] = "na"
             metadata["polarization"] = "O"
             df = pd.read_csv(f, sep="\t", decimal =",", names=["wavelength", metadata["measuring_mode"]]).dropna()
-            #print(df) #debug
+            #pri*nt(df) #debug
             df["wavelength"],df[metadata["measuring_mode"]] = df["wavelength"].astype(float), df[metadata["measuring_mode"]].astype(float)
             df = df[df["wavelength"]<2000].reset_index()
             df = df.drop("index", axis=1)
@@ -661,7 +911,7 @@ class PeakList:
 
         peaks = []
 
-        #print("peak called")
+        #pri*nt("peak called")
         for i in zip(max_x_values, max_y_values):
             max_peak = Peak(i[0], i[1])
             peaks.append(max_peak)
@@ -747,26 +997,28 @@ class PeakList:
 
 
 def get_genus(code, collection):
-    #print("get_genus")
+    #pri*nt("get_genus")
     
     #variables
     collection_name = collection.get_name()
     collection_metadata = collection.get_metadata()
     
     #Locate specimen
-    #print(f"{type(code)=}")
-    #print(collection_metadata["code"].astype(str)==code)
-    #print(f"{collection_metadata["code"]}")
+    #pri*nt(f"{type(code)=}")
+    #pri*nt(collection_metadata["code"].astype(str)==code)
+    #pri*nt(f"{collection_metadata["code"]}")
     specimen = collection_metadata.loc[collection_metadata["code"].astype(str)==(code),"genus"]
-    print(f"Genus {specimen=}")
+    #pri*nt(f"Genus {specimen=}")
     
     if specimen.empty:
-        print(f"No genus data for {code} in collection {collection_name}")
+        err_msj = (f"No genus data for {code} in collection {collection_name}")
+        ##logging.error(f'An error occurred: {err_msj}')
+        print(err_msj)
         return ""
-    #print("not mt")
-    # print(f"specimen genus {specimen}")
+    #pri*nt("not mt")
+    # pri*nt(f"specimen genus {specimen}")
     result = specimen.iloc[0]
-    #print(f"genus, type{type(result)}")
+    #pri*nt(f"genus, type{type(result)}")
     
     if isinstance(result,str):
         return result
@@ -774,27 +1026,32 @@ def get_genus(code, collection):
         return str(result)
     
 def get_species(code, collection):
-    #print("get_species")
-    # print(f"code: {code}")
+    #pri*nt("get_species")
+    # pri*nt(f"code: {code}")
     
     #variables
     collection_name = collection.get_name()
     collection_metadata = collection.get_metadata()
     
     #Locate specimen
-    specimen = collection_metadata.loc[collection_metadata["code"]==str(code),"specimen"]
+    specimen = collection_metadata.loc[collection_metadata["code"].astype(str)==str(code),"species"]
     
     if specimen.empty:
-        print(f"No species data for {code} in collection {collection_name}")
+        err_msj = (f"No species data for {code} in collection {collection_name}")
+        
+        ##logging.error(f'An error occurred: {err_msj}')
+        print(err_msj)
         result = ""
-    #print("not mt")
-    #print(f"specimen species {specimen}")
+    #pri*nt("not mt")
+    #pri*nt(f"specimen species {specimen}")
     try:
         result = str(specimen.iloc[0])
     except Exception as e:
-        print("Update specimen in the corresponding collection, please")
+        err_msj = ("Update specimen in the corresponding collection, please")
+        #logging.error(f'An error occurred: {err_msj}')
+        print(err_msj)
         return "na"
-    #print(f"species, type{type(result)}")
+    #pri*nt(f"species, type{type(result)}")
     if isinstance(result,str):
         return result
     else:
@@ -817,14 +1074,14 @@ class Spectrum:
     def get_filename(self):
             return self.filename
         
-    def __init__(self, file_location, collection):
+    def __init__(self, file_location, collection, genus = None, species = None):
 
         #attributes
         self.file_location = file_location
         self.collection = collection
         #read file
         self.metadata, self.data = read_spectrum_file(file_location)
-        #print(self.metadata)
+        #pri*nt(self.metadata)
 
         self.filename =  file_location
         try:
@@ -840,11 +1097,17 @@ class Spectrum:
         except:
             self.measuring_mode = "na"
         try:
-            self.genus = get_genus(self.code, collection)
+            if not genus:
+                self.genus = get_genus(self.code, collection)
+            else:
+                self.genus = genus
         except:
             self.genus = "na"
         try:
-            self.species = get_species(self.code, collection)
+            if not species:
+                self.species = get_species(self.code, collection)
+            else:
+                self.species = species
         except:
             self.species = "na"
 
@@ -935,5 +1198,5 @@ def test_peak_class():
     for spectrum in spectra:
         peaklist1 = PeakList(spectrum)
         #peaklist1.plot()
-        #print(peaklist1)
-        #print(peaklist1.plot())
+        #pri*nt(peaklist1)
+        #pri*nt(peaklist1.plot())
