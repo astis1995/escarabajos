@@ -29,7 +29,7 @@ regex_dict = {
     "craic_data_tab_regex" : "\\d*.\\d*\t\\d*.\\d*",
     "craic_filename_regex_1" :  r"(\d+?)([RLO])+(\d)*.csv", #code #polarization #reading
     "craic_filename_regex_2" : r"([a-zA-Z\d]+)_([RLO])+.csv", # "code #polarization
-    "craic_filename_regex_3" :  r"(\d+?)-(\d)*.csv" #code #reading
+    "craic_filename_regex_3" :  r"(\d+)-(\d)*.csv" #code #reading
     }
 
 #log
@@ -248,12 +248,12 @@ class Specimen_Collection:
         
         #pri*nt("Collection lookup")
         #convert code to int
-        code = int(code)
+        code = str(code)
         
         
         for collection in collection_list:
             codes = list(collection.get_codes())
-            codes = [int(num) for num in codes]
+            codes = [str(num) for num in codes]
             
             #pri*nt(f"{type(codes)=}")
             #pri*nt(f"{type(code)=}")
@@ -262,14 +262,15 @@ class Specimen_Collection:
             if code in codes:
                 #pri*nt(f"{collection}")
                 return collection
-            else:
+            
                 
-                err_msj = f"The provided code ({code}) is not in the collection list:\n {collection_list} \n. Returning None instead"
-                #raise ValueError(err_msj)
-                #warnings.warn(f"{err_msj}", UserWarning)
-                print(err_msj)
-                ##logging.error(f'An error occurred: {err_msj}')
-                return None
+                
+        #raise ValueError(err_msj)
+        #warnings.warn(f"{err_msj}", UserWarning)
+        err_msj = f"The provided code ({code}) is not in the collection list:\n {collection_list} \n. Returning None instead"
+        print(err_msj)
+        ##logging.error(f'An error occurred: {err_msj}')
+        return None
     def __str__(self):
         try:
             return self.name
@@ -398,12 +399,15 @@ def get_metadata_from_filename(file_location):
             code = "na"
             polarization = "O"
             #pri*nt(file_location)
-            basename = os.path.basename(file_location)
+            basename = Path(file_location).name
             #re1 = r"([a-zA-Z\d]+)_(R)*(L)*(O)*.csv"
-            regexs = [ r"([\d]+?)([RLO])+\d*.csv", r"([a-zA-Z\d]+)_([RLO])+.csv",]
-            for regex in regexs:
+            
+            for regex in regex_dict:
                 #Names are in the form CODE-MEASUREMENTNUMBER.TXT
-                p = re.compile(regex)
+                
+                #print(f"{regex_dict[regex]=}")
+                #print(f"{basename=}")
+                p = re.compile(regex_dict[regex])
                 m = p.match(basename)
                 # pri*nt(f"match basename: {m}")
                 code = get_code_from_filename(file_location)
@@ -412,11 +416,16 @@ def get_metadata_from_filename(file_location):
                     polarization = (m.group(2))
                     return code, polarization
 
-                err_msj = f"No code information from filename. Check file: f{file_location}"
+                
                 #raise ValueError(err_msj)
                 #warnings.warn(f"{err_msj}", UserWarning)
-                print(err_msj)
+               
                 ##logging.error(f'An error occurred: {err_msj}')
+            err_msj = f"No code information from filename. Check file: f{file_location}"
+            print(err_msj)
+            #save code into error.log
+            err_info = f"Missing code\t{code}"
+            logging.error(err_info)
             return code, polarization
 
 
