@@ -157,10 +157,9 @@ class Specimen_Collection:
         return self.metadata
 
     def get_codes(self):
-
         codes = set(self.metadata["code"].values)
         codes = list(map(str, codes))
-        #pri*nt(f"{codes=}")
+        #print(f"{codes=}")
         return codes
 
     def get_species():
