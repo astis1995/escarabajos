@@ -27,9 +27,26 @@ regex_dict = {
     "l1050_filename_regex" : r"([a-zA-Z]+\d{4})-*_*(\d)*(?:.Sample)*.(?:txt)*(?:ASC)*", #code #reading
     "craic_data_comma_regex" : r"\d*.\d*,\d*.\d*",
     "craic_data_tab_regex" : "\\d*.\\d*\t\\d*.\\d*",
-    "craic_filename_regex_1" :  r"(\d+?)([RLO])+(\d)*.csv", #code #polarization #reading
-    "craic_filename_regex_2" : r"([a-zA-Z\d]+)_([RLO])+.csv", # "code #polarization
-    "craic_filename_regex_3" :  r"(\d+)-(\d)*.csv" #code #reading
+    "craic_filename_regex_1" :  r"(\d+?)([RLO])(\d+).csv", #code #polarization #reading
+    "craic_filename_regex_2" : r"([a-zA-Z\d]+)_([RLO]).csv", # "code #polarization
+    "craic_filename_regex_3" :  r"(\d+)-(\d)*.csv", #code #reading
+    ###Estudio-spectral-escarabajos
+    "craic_filename_regex_4": r"(\d+?)([RLOT])(\d+)-(?:(elytrum)*(pronotum)*(escutelo)*).csv", #code #polarization #reading-#location
+    "craic_filename_regex_5": r"(\d+?)-variacion(\d+).csv", #code #polarization #reading-#location
+    "craic_filename_regex_6" : "(\d+)(?:(escutelo)*(pronoto)*)([RLOT])(\d+)", 
+    "macraspis-blue-1": "(\d+)-macraspis-blue-average([TOLR]).csv", #reading pol
+    "sinnumero-rojo": "sinnumero-rojo-(\d+)", #reading
+    "macraspis-green": "(\d+)-macraspis-green-average([LRTO]).csv", #reading polarization,
+    "macraspis-chrysis": "1-macraspis-chrysis-average([LR](tot)).csv", #reading polarization,
+    "calomacraspis-1": "calomacraspis-(?:(elytrum)*(pronotum)*(escutelo)*)-std([LRTO]).csv", #location, polarization,
+    "calomacraspis-2": "calomacraspis-(?:(elytrum)*(pronotum)*(escutelo)*(scutellum)*)([LRTO]).csv", #location, polarization,
+    "calomacraspis-2": "calomacraspis-(?:(elytrum)*(pronotum)*(escutelo)*(scutellum)*)([LRTO]).csv", #location, polarization,
+    "calomacraspis-2": "calomacraspis-(?:(elytrum)*(pronotum)*(escutelo)*(scutellum)*)([LRTO]).csv", #location, polarization,
+    "cupreomarginata-1": "cupreo-average([LROT]).csv", #location, polarization,
+    "cupreomarginata-2": "cupreo([LROT])-std.csv", #location, polarization,
+    "cupreomarginata-3": "cupreoT-averageL.csv", #location, polarization,
+    "cupreomarginata-4": "(ojo)-ccupreomarginata-izquierdo-([LRTO]).csv", #location, polarization,
+    "resplendens-CVG": "resplendensCVG([LOTR](total)*)CP.csv", #location, polarization,
     }
 
 #log
@@ -393,40 +410,34 @@ def get_metadata_from_filename(file_location):
             BIOUCR0001_0 code: BIOUCR0001 polarization: 0 (degrees)
             BIOUCR0001_0 code: BIOUCR0001 polarization: 90 (degrees)
             1037298L2 code: 1037298 polarization L """
+            basename = Path(file_location).name
+            code , polarization = get_metadata_from_basename(basename)
+            return code, polarization
+    
+def get_metadata_from_basename(basename):
+            """Returns the code and polarization from filename. Examples:
+            BIOUCR0001_L code: BIOUCR0001 polarization: L
+            BIOUCR0001_R code: BIOUCR0001 polarization: R
+            BIOUCR0001_O code: BIOUCR0001 polarization: O (no polarization)
+            BIOUCR0001_0 code: BIOUCR0001 polarization: 0 (degrees)
+            BIOUCR0001_0 code: BIOUCR0001 polarization: 90 (degrees)
+            1037298L2 code: 1037298 polarization L """
 
             #initialize
             code = "na"
-            polarization = "O"
+            polarization = "T"
             #pri*nt(file_location)
-            basename = Path(file_location).name
-            #re1 = r"([a-zA-Z\d]+)_(R)*(L)*(O)*.csv"
             
-            for regex in regex_dict:
-                #Names are in the form CODE-MEASUREMENTNUMBER.TXT
-                
-                #print(f"{regex_dict[regex]=}")
-                #print(f"{basename=}")
-                p = re.compile(regex_dict[regex])
-                m = p.match(basename)
-                # pri*nt(f"match basename: {m}")
-                code = get_code_from_filename(file_location)
-                if m:
-                    #pri*nt(f"group 2: {m.group(2)}")
-                    polarization = (m.group(2))
-                    return code, polarization
+            #re1 = r"([a-zA-Z\d]+)_(R)*(L)*(O)*.csv"
 
-                
-                #raise ValueError(err_msj)
-                #warnings.warn(f"{err_msj}", UserWarning)
-               
-                ##logging.error(f'An error occurred: {err_msj}')
-            err_msj = f"No code information from filename. Check file: f{file_location}"
-            print(err_msj)
-            #save code into error.log
-            err_info = f"Missing code\t{code}"
-            logging.error(err_info)
+            info = get_info_from_format(basename)
+            
+            code = info["code"]
+            polarization = info["polarization"]
+            
+            if not polarization:
+                polarization = "T"
             return code, polarization
-
 
 def first_line(str):
     #pri*nt(f"{str=}")
@@ -528,69 +539,171 @@ def get_codes_from_filenames(files):
     return codes
 
 def get_code_from_format(string_line):
-    code, _ , _ = get_info_from_format(string_line)
+    info = get_info_from_format(string_line)
+    code = info["code"]
     return str(code)
+    
 def get_polarization_from_format(string_line):
-    _, polarization, _ = get_info_from_format(string_line)
-    return code
+    info = get_info_from_format(string_line)
+    polarization = info["polarization"]
+    return polarization
+    
 def get_reading_from_format(string_line):
-    _, _, reading = get_info_from_format(string_line)
-    return code
+    reading = get_info_from_format(string_line)
+    polarization = info["reading"]
+    return reading
 
 def get_info_from_format(string_line):
-
+    print(f"{string_line=}")
     format_type = get_format(string_line)
-   
-    code = None
-    polarization = None
-    reading = None
-    
+    print(f"{format_type=}")
+    info = {
+        "code": None,
+        "polarization": None,
+        "reading" : None,
+        "location" : None,
+        "genus":None,
+        "species":None,
+    }
+    print(f"{string_line=}")
     if format_type == "craic_filename_regex_3":
         regex = regex_dict[format_type]
         #pri*nt(f"{regex=}")
         p = re.compile(regex)
         m = p.match(string_line)
         if m:
-            code = m.group(1)
-            polarization = m.group(2)
-            reading = None
+            info["code"] = m.group(1)
+            info["polarization"] = None
+            info["reading"] = m.group(2)
             #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
-            return code, polarization, reading
+            
+            return info
     if format_type == "craic_filename_regex_1":
         regex = regex_dict[format_type]
         p = re.compile(regex)
         m = p.match(string_line)
         #pri*nt(f"{m}")
         if m:
-            code = m.group(1)
-            polarization = m.group(2)
-            reading = m.group(3)
+            info["code"] = m.group(1)
+            info["polarization"] = m.group(2)
+            info["reading"] = m.group(3)
             #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}{m.group(0)=}{m.group(1)=}{m.group(2)=}")
-            return code, polarization, reading
+            return info
     if format_type == "craic_filename_regex_2":
         regex = regex_dict[format_type]
         #pri*nt(f"{regex=}")
         p = re.compile(regex)
         m = p.match(string_line)
         if m:
-            code = m.group(1)
-            polarization = m.group(2)
-            reading = None
+            info["code"] = m.group(1)
+            info["polarization"] = m.group(2)
+            info["reading"] = None
             #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
-            return code, polarization, reading
-    
+            return info
+            
+    if format_type == "craic_filename_regex_4":
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.match(string_line)
+        if m:
+            info["code"] = m.group(1)
+            info["polarization"] = m.group(2)
+            info["reading"] = m.group(3)
+            info["location"] = m.group(4)
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            return info
+    if format_type == "craic_filename_regex_5":
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.match(string_line)
+        if m:
+            info["code"] = m.group(1)
+            info["polarization"] = "T"
+            info["reading"] = m.group(2)
+            info["location"] = None
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            return info
+    if format_type == "craic_filename_regex_6":
+        #"craic_filename_regex_6" : "(\d+)(?:(escutelo)*(pronoto)*)([RLOT])(\d+)"
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.match(string_line)
+        if m:
+            info["code"] = m.group(1)
+            info["polarization"] = m.group(3)
+            info["reading"] = m.group(4)
+            info["location"] = m.group(2)
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            return info
+            
+            
+    if format_type == "sinnumero-rojo":
+        # "sinnumero-rojo": "sinnumero-rojo-(\d+)"
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.match(string_line)
+        if m:
+            info["code"] = "sinnumero-rojo"
+            info["polarization"] = "T"
+            info["reading"] = m.group(1)
+            info["location"] = None
+            info["species"] = "boucardi"
+            info["genus"] = "Chrysina"
+            
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            return info
+    if format_type == "macraspis-blue-1":
+        # "macraspis-blue-1": "(\d+)-macraspis-blue-average([TOLR]).csv"
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.match(string_line)
+        if m:
+            info["code"] = "sinnumero-rojo"
+            info["polarization"] = m.group(2)
+            info["reading"] = m.group(1)
+            info["location"] = None
+            info["species"] = "sp."
+            info["genus"] = "Macraspis"
+            info["color"] = "blue"
+            
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            return info
+    if format_type == "macraspis-green":
+        # "macraspis-blue-1": "(\d+)-macraspis-blue-average([TOLR]).csv"
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.match(string_line)
+        if m:
+            info["code"] = "macraspis-green"
+            info["polarization"] = m.group(2)
+            info["reading"] = m.group(1)
+            info["location"] = None
+            info["species"] = "sp."
+            info["genus"] = "Macraspis"
+            info["color"] = "green"
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            return info
+            
+    #macraspis-green
     if format_type == "l1050_filename_regex":
         regex = regex_dict[format_type]
         #pri*nt(f"{regex=}")
         p = re.compile(regex)
         m = p.match(string_line)
         if m:
-            code = m.group(1)
-            polarization = None
-            reading =  m.group(2)
+            info["code"] = m.group(1)
+            info["polarization"] = None
+            info["reading"] =  m.group(2)
+            
             #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
-            return code, polarization, reading
-    return code, polarization, reading
+            return info
+    return info
             
 ####################################################################################################################################################
 def get_metadata_and_dataframe_CRAIC(file_location):
@@ -669,6 +782,7 @@ def get_metadata_and_dataframe_CRAIC(file_location):
 
             #pri*nt(f"get_metadata_and_: {df=}")
             #wavelength is always measured in ms
+            metadata["filename"]= file_location
             metadata["units"]= "nm"
             #get additional metadata info
             #from filename
@@ -781,7 +895,7 @@ def get_metadata_and_dataframe_l1050(file_location):
 
                 row_str = row.strip()
                 if index +1 == 3: #Filename and extension
-                    metadata["filename"]= row_str
+                    metadata["filename"]= file_location
                     metadata["code"] = get_sample_code_from_filename(row_str, file_location)
                 if index + 1 == 4: #date DD/MM/YYYY
                     metadata["date"]= row_str
@@ -846,7 +960,7 @@ def get_metadata_and_dataframe_l1050(file_location):
             #normally l1050 spectrum does not have polarization
             metadata["genus"] = "na"
             metadata["species"] = "na"
-            metadata["polarization"] = "O"
+            metadata["polarization"] = "T"
             df = pd.read_csv(f, sep="\t", decimal =",", names=["wavelength", metadata["measuring_mode"]]).dropna()
             #pri*nt(df) #debug
             df["wavelength"],df[metadata["measuring_mode"]] = df["wavelength"].astype(float), df[metadata["measuring_mode"]].astype(float)
