@@ -24,20 +24,21 @@ min_craic_wv_polarized = 420
 max_craic_wv_polarized = 700
 #most common regex should go first
 regex_dict = {
-    "l1050_filename_regex" : r"([a-zA-Z]+\d{4})-*_*(\d)*(?:.Sample)*.(?:txt)*(?:ASC)*", #code #reading
-    "craic_data_comma_regex" : r"\d*.\d*,\d*.\d*",
+    "l1050_filename_regex" : "([a-zA-Z]+\\d{4})-*_*(\\d)*(?:.Sample)*.(?:txt)*(?:ASC)*", #code #reading
+    "craic_data_comma_regex" : "\\d*.\\d*,\\d*.\\d*\n",
     "craic_data_tab_regex" : "\\d*.\\d*\t\\d*.\\d*",
-    "craic_filename_regex_1" :  r"(\d+?)([RLO])(\d+).csv", #code #polarization #reading
-    "craic_filename_regex_2" : r"([a-zA-Z\d]+)_([RLO]).csv", # "code #polarization
-    "craic_filename_regex_3" :  r"(\d+)-(\d)*.csv", #code #reading
+    "craic_filename_regex_0" :  "(\\d+?).csv", #codes
+    "craic_filename_regex_1" :  "(\\d+?)([RLOT])(\\d+).csv", #code #polarization #reading
+    "craic_filename_regex_2" : "([a-zA-Z\\d]+)_([RLOT]).csv", # "code #polarization
+    "craic_filename_regex_3" :  "(\\d+?)-(\\d+)*.csv", #code #reading
     ###Estudio-spectral-escarabajos
-    "craic_filename_regex_4": r"(\d+?)([RLOT])(\d+)-(?:(elytrum)*(pronotum)*(escutelo)*).csv", #code #polarization #reading-#location
-    "craic_filename_regex_5": r"(\d+?)-variacion(\d+).csv", #code #polarization #reading-#location
-    "craic_filename_regex_6" : "(\d+)(?:(escutelo)*(pronoto)*)([RLOT])(\d+)", 
-    "macraspis-blue-1": "(\d+)-macraspis-blue-average([TOLR]).csv", #reading pol
-    "sinnumero-rojo": "sinnumero-rojo-(\d+)", #reading
-    "macraspis-green": "(\d+)-macraspis-green-average([LRTO]).csv", #reading polarization,
-    "macraspis-chrysis": "1-macraspis-chrysis-average([LR](tot)).csv", #reading polarization,
+    "craic_filename_regex_4": "(\\d+?)([RLOT])(\\d+)-(?:(elytrum)*(pronotum)*(escutelo)*).csv", #code #polarization #reading-#location
+    "craic_filename_regex_5": "(\\d+?)-variacion(\\d+).csv", #code #polarization #reading-#location
+    "craic_filename_regex_6" : "(\\d+)(?:(escutelo)*(pronoto)*)([RLOT])(\\d+)", 
+    "macraspis-blue-1": "(\\d+)-macraspis-blue-average([TOLR]).csv", #reading pol
+    "sinnumero-rojo": "sinnumero-rojo-(\\d+)", #reading
+    "macraspis-green": "(\\d+)-macraspis-green-average([LRTO]).csv", #reading polarization,
+    "macraspis-chrysis": r"1-macraspis-chrysis-average([LR](tot)).csv", #reading polarization,
     "calomacraspis-1": "calomacraspis-(?:(elytrum)*(pronotum)*(escutelo)*)-std([LRTO]).csv", #location, polarization,
     "calomacraspis-2": "calomacraspis-(?:(elytrum)*(pronotum)*(escutelo)*(scutellum)*)([LRTO]).csv", #location, polarization,
     "calomacraspis-2": "calomacraspis-(?:(elytrum)*(pronotum)*(escutelo)*(scutellum)*)([LRTO]).csv", #location, polarization,
@@ -64,7 +65,7 @@ from matplotlib.colors import LinearSegmentedColormap
 import colorsys
 
 def integer_generator(start=0):
-    if(start%100==0):
+    if(start%10==0):
         print(f"{start=}")
     while True:
         yield start
@@ -212,18 +213,22 @@ class Specimen_Collection:
 
         return filtered_list
 
-    def read_spectrum(self, file_path, collection):
+    def read_spectrum(self, file_path, collection, min_wavelength = None, max_wavelength = None):
 
-        spectrum = Spectrum(file_path, collection)
+        spectrum = Spectrum(file_path, collection, min_wavelength, max_wavelength)
 
         return spectrum
 
-    def get_spectra(self):
+    def get_spectra(self, min_wavelength = None, max_wavelength = None):
         filenames = self.get_data_filenames()
         spectra = []
+        #print(f"data filenames: {filenames}")
         for filename in filenames:
-            spectrum = Spectrum(filename, self)
-            spectra.append(spectrum)
+            spectrum = Spectrum(filename, self, min_wavelength, max_wavelength)
+            if spectrum:
+                spectra.append(spectrum)
+            else:
+                print(f"The following filename {filename} was not converted into an spectrum. Check it")
         return spectra
 
     def genus_species_lookup(code, collection_list):
@@ -401,7 +406,8 @@ def read_spectrum_file(file):
         #pri*nt(f"{file=}")
         
         #raise ValueError("The file is neither a valid L1050 nor CRAIC file.")
-        pass
+        print(f"The file {file} is neither a valid L1050 nor CRAIC file.")
+        return (None, None)
 def get_metadata_from_filename(file_location):
             """Returns the code and polarization from filename. Examples:
             BIOUCR0001_L code: BIOUCR0001 polarization: L
@@ -425,7 +431,7 @@ def get_metadata_from_basename(basename):
 
             #initialize
             code = "na"
-            polarization = "T"
+            
             #pri*nt(file_location)
             
             #re1 = r"([a-zA-Z\d]+)_(R)*(L)*(O)*.csv"
@@ -513,7 +519,7 @@ def get_format(string_line):
     for element in regex_dict:
         #print(f"{element=}")
         #print(f"{regex_dict[element]=}")
-        if re.search(regex_dict[element], string_line):
+        if re.fullmatch(regex_dict[element], string_line):
             format_type = element
             #pri*nt(f"{format_type=}")
             return format_type
@@ -521,12 +527,192 @@ def get_format(string_line):
 def get_CRAIC_info_from_filename(file):
     basename = Path(file).name
     #pri*nt(f"{basename}")
+    
     return get_info_from_format(basename)
+def get_info_from_format(string_line):
+    #print(f"3 {string_line=}")
+    format_type = get_format(string_line)
+    #print(f"3 {format_type=}")
+    info = {
+        "code": None,
+        "polarization": None,
+        "reading" : None,
+        "location" : None,
+        "genus":None,
+        "species":None,
+        "original": None
+    }
+    #print(f"{string_line=}")
+    
+    if format_type == "craic_filename_regex_0":
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.fullmatch(string_line)
+        if m:
+            info["code"] = m.group(1)
+            info["polarization"] = "T"
+            info["reading"] = 0 #zero means that it is an average
+            info["original"] = False #it is an average
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            return info
+    if format_type == "craic_filename_regex_3":
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.fullmatch(string_line)
+        if m:
+            info["code"] = m.group(1)
+            info["polarization"] = None
+            info["reading"] = m.group(2)
+            info["original"] = True #it an original file
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            
+            return info
+    if format_type == "craic_filename_regex_1":
+        regex = regex_dict[format_type]
+        p = re.compile(regex)
+        m = p.fullmatch(string_line)
+        #pri*nt(f"{m}")
+        if m:
+            info["code"] = m.group(1)
+            info["polarization"] = m.group(2)
+            info["reading"] = m.group(3)
+            info["original"] = True #it an original file
+            return info
+    if format_type == "craic_filename_regex_2":
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.fullmatch(string_line)
+        if m:
+            info["code"] = m.group(1)
+            info["polarization"] = m.group(2)
+            info["reading"] = None
+            info["original"] = True #it an original file
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            return info
+            
+    if format_type == "craic_filename_regex_4":
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.fullmatch(string_line)
+        if m:
+            info["code"] = m.group(1)
+            info["polarization"] = m.group(2)
+            info["reading"] = m.group(3)
+            info["location"] = m.group(4)
+            info["original"] = True #it an original file
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            return info
+    if format_type == "craic_filename_regex_5":
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.fullmatch(string_line)
+        if m:
+            info["code"] = m.group(1)
+            info["polarization"] = "T"
+            info["reading"] = m.group(2)
+            info["location"] = None
+            info["original"] = True #it an original file
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            return info
+    if format_type == "craic_filename_regex_6":
+        #"craic_filename_regex_6" : "(\d+)(?:(escutelo)*(pronoto)*)([RLOT])(\d+)"
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.fullmatch(string_line)
+        if m:
+            info["code"] = m.group(1)
+            info["polarization"] = m.group(3)
+            info["reading"] = m.group(4)
+            info["location"] = m.group(2)
+            info["original"] = True #it an original file
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            return info
+            
+            
+    if format_type == "sinnumero-rojo":
+        # "sinnumero-rojo": "sinnumero-rojo-(\d+)"
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.fullmatch(string_line)
+        if m:
+            info["code"] = "sinnumero-rojo"
+            info["polarization"] = "T"
+            info["reading"] = m.group(1)
+            info["location"] = None
+            info["species"] = "boucardi"
+            info["genus"] = "Chrysina"
+            info["original"] = True #it an original file
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            return info
+    if format_type == "macraspis-blue-1":
+        # "macraspis-blue-1": "(\d+)-macraspis-blue-average([TOLR]).csv"
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.fullmatch(string_line)
+        if m:
+            info["code"] = "sinnumero-rojo"
+            info["polarization"] = m.group(2)
+            info["reading"] = m.group(1)
+            info["location"] = None
+            info["species"] = "sp."
+            info["genus"] = "Macraspis"
+            info["color"] = "blue"
+            info["original"] = True #it an original file
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            return info
+    if format_type == "macraspis-green":
+        # "macraspis-blue-1": "(\d+)-macraspis-blue-average([TOLR]).csv"
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.fullmatch(string_line)
+        if m:
+            info["code"] = "macraspis-green"
+            info["polarization"] = m.group(2)
+            info["reading"] = m.group(1)
+            info["location"] = None
+            info["species"] = "sp."
+            info["genus"] = "Macraspis"
+            info["color"] = "green"
+            info["original"] = True #it an original file
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            return info
+            
+    #macraspis-green
+    if format_type == "l1050_filename_regex":
+        regex = regex_dict[format_type]
+        #pri*nt(f"{regex=}")
+        p = re.compile(regex)
+        m = p.fullmatch(string_line)
+        if m:
+            info["code"] = m.group(1)
+            info["polarization"] = None
+            info["reading"] =  m.group(2)
+            info["original"] = True #it an original file
+            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
+            return info
+    return info
+    
+def get_code_from_format(string_line):
+    info = get_info_from_format(string_line)
+    code = info["code"]
+    #print(f"{string_line=} {info=} {code=}")
+    return str(code)
     
 def get_code_from_filename(file):
     basename = Path(file).name
-    #pri*nt(f"{basename}")
-    return get_code_from_format(basename)
+    #print(f"1 {basename=}")
+    code = get_code_from_format(basename)
+    #print(f" 1 {code=}")
+    return code
     
 def get_codes_from_filenames(files):
     codes = []
@@ -538,10 +724,7 @@ def get_codes_from_filenames(files):
     codes = sorted(codes)
     return codes
 
-def get_code_from_format(string_line):
-    info = get_info_from_format(string_line)
-    code = info["code"]
-    return str(code)
+
     
 def get_polarization_from_format(string_line):
     info = get_info_from_format(string_line)
@@ -553,159 +736,10 @@ def get_reading_from_format(string_line):
     polarization = info["reading"]
     return reading
 
-def get_info_from_format(string_line):
-    print(f"{string_line=}")
-    format_type = get_format(string_line)
-    print(f"{format_type=}")
-    info = {
-        "code": None,
-        "polarization": None,
-        "reading" : None,
-        "location" : None,
-        "genus":None,
-        "species":None,
-    }
-    print(f"{string_line=}")
-    if format_type == "craic_filename_regex_3":
-        regex = regex_dict[format_type]
-        #pri*nt(f"{regex=}")
-        p = re.compile(regex)
-        m = p.match(string_line)
-        if m:
-            info["code"] = m.group(1)
-            info["polarization"] = None
-            info["reading"] = m.group(2)
-            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
-            
-            return info
-    if format_type == "craic_filename_regex_1":
-        regex = regex_dict[format_type]
-        p = re.compile(regex)
-        m = p.match(string_line)
-        #pri*nt(f"{m}")
-        if m:
-            info["code"] = m.group(1)
-            info["polarization"] = m.group(2)
-            info["reading"] = m.group(3)
-            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}{m.group(0)=}{m.group(1)=}{m.group(2)=}")
-            return info
-    if format_type == "craic_filename_regex_2":
-        regex = regex_dict[format_type]
-        #pri*nt(f"{regex=}")
-        p = re.compile(regex)
-        m = p.match(string_line)
-        if m:
-            info["code"] = m.group(1)
-            info["polarization"] = m.group(2)
-            info["reading"] = None
-            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
-            return info
-            
-    if format_type == "craic_filename_regex_4":
-        regex = regex_dict[format_type]
-        #pri*nt(f"{regex=}")
-        p = re.compile(regex)
-        m = p.match(string_line)
-        if m:
-            info["code"] = m.group(1)
-            info["polarization"] = m.group(2)
-            info["reading"] = m.group(3)
-            info["location"] = m.group(4)
-            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
-            return info
-    if format_type == "craic_filename_regex_5":
-        regex = regex_dict[format_type]
-        #pri*nt(f"{regex=}")
-        p = re.compile(regex)
-        m = p.match(string_line)
-        if m:
-            info["code"] = m.group(1)
-            info["polarization"] = "T"
-            info["reading"] = m.group(2)
-            info["location"] = None
-            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
-            return info
-    if format_type == "craic_filename_regex_6":
-        #"craic_filename_regex_6" : "(\d+)(?:(escutelo)*(pronoto)*)([RLOT])(\d+)"
-        regex = regex_dict[format_type]
-        #pri*nt(f"{regex=}")
-        p = re.compile(regex)
-        m = p.match(string_line)
-        if m:
-            info["code"] = m.group(1)
-            info["polarization"] = m.group(3)
-            info["reading"] = m.group(4)
-            info["location"] = m.group(2)
-            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
-            return info
-            
-            
-    if format_type == "sinnumero-rojo":
-        # "sinnumero-rojo": "sinnumero-rojo-(\d+)"
-        regex = regex_dict[format_type]
-        #pri*nt(f"{regex=}")
-        p = re.compile(regex)
-        m = p.match(string_line)
-        if m:
-            info["code"] = "sinnumero-rojo"
-            info["polarization"] = "T"
-            info["reading"] = m.group(1)
-            info["location"] = None
-            info["species"] = "boucardi"
-            info["genus"] = "Chrysina"
-            
-            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
-            return info
-    if format_type == "macraspis-blue-1":
-        # "macraspis-blue-1": "(\d+)-macraspis-blue-average([TOLR]).csv"
-        regex = regex_dict[format_type]
-        #pri*nt(f"{regex=}")
-        p = re.compile(regex)
-        m = p.match(string_line)
-        if m:
-            info["code"] = "sinnumero-rojo"
-            info["polarization"] = m.group(2)
-            info["reading"] = m.group(1)
-            info["location"] = None
-            info["species"] = "sp."
-            info["genus"] = "Macraspis"
-            info["color"] = "blue"
-            
-            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
-            return info
-    if format_type == "macraspis-green":
-        # "macraspis-blue-1": "(\d+)-macraspis-blue-average([TOLR]).csv"
-        regex = regex_dict[format_type]
-        #pri*nt(f"{regex=}")
-        p = re.compile(regex)
-        m = p.match(string_line)
-        if m:
-            info["code"] = "macraspis-green"
-            info["polarization"] = m.group(2)
-            info["reading"] = m.group(1)
-            info["location"] = None
-            info["species"] = "sp."
-            info["genus"] = "Macraspis"
-            info["color"] = "green"
-            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
-            return info
-            
-    #macraspis-green
-    if format_type == "l1050_filename_regex":
-        regex = regex_dict[format_type]
-        #pri*nt(f"{regex=}")
-        p = re.compile(regex)
-        m = p.match(string_line)
-        if m:
-            info["code"] = m.group(1)
-            info["polarization"] = None
-            info["reading"] =  m.group(2)
-            
-            #pri*nt(f"{string_line=}{format_type=}{m=}{m.groups()=}")
-            return info
-    return info
+
             
 ####################################################################################################################################################
+
 def get_metadata_and_dataframe_CRAIC(file_location):
         """Reads CRAIC files' dataframe and metadata"""
         #definitions
@@ -727,9 +761,9 @@ def get_metadata_and_dataframe_CRAIC(file_location):
             #pri*nt(f"4. get_metadata_and_dataframe_CRAIC: {lines=}")
             #check the format of the first line
             first_data_line = lines[9]
-            #pri*nt(f"4. get_metadata_and_dataframe_CRAIC: {first_data_line=}")
+            #print(f"4. get_metadata_and_dataframe_CRAIC: {first_data_line=}")
             #header
-            header = "".join(lines[0:8])
+            header = "".join(lines[0:9])
         metadata["header"] = header
 
         #check CRAIC format
@@ -765,11 +799,11 @@ def get_metadata_and_dataframe_CRAIC(file_location):
         """This section reads the dataframe"""
 
         with f as data_file:
-            #pri*nt(f"{file_location=}")
+            #print(f"{file_location=}")
             #try reading using tabs as separator
             #df = pd.DataFrame([])
 
-            #pri*nt(f"{format_type=}")
+            #print(f"5 {format_type=}")
             #try reading using comma as separator
             if format_type == "craic_data_comma_regex":
                 df = pd.read_csv(file_location, sep=",", decimal =".", names=["wavelength", metadata["measuring_mode"]], skiprows = 9).dropna()
@@ -780,13 +814,13 @@ def get_metadata_and_dataframe_CRAIC(file_location):
                 warnings.warn(f"Dataframe is empty. File: {file_location}", UserWarning)
                 pass #debug
 
-            #pri*nt(f"get_metadata_and_: {df=}")
+            #print(f"get_metadata_and_: {df=}")
             #wavelength is always measured in ms
             metadata["filename"]= file_location
             metadata["units"]= "nm"
             #get additional metadata info
             #from filename
-            metadata["polarization"] = "O"
+            metadata["polarization"] = "T"
             metadata["code"], metadata["polarization"]= get_metadata_from_filename(file_location)
             #pri*nt(f"{metadata['code']=}")
             #pri*nt(f"{metadata['polarization']=}")
@@ -969,151 +1003,6 @@ def get_metadata_and_dataframe_l1050(file_location):
             return metadata, df
 
 
-class Peak:
-        def __init__(self, x, y):
-            self.x_value = x
-            self.y_value = y
-        def __lt__(self, other):
-            return self.x_value < other.x_value
-        def __str__(self):
-            return f"({self.x_value}, {self.y_value})"
-        def __repr__(self):
-            return f"({self.x_value}, {self.y_value})"
-        def get_x(self):
-            return self.x_value
-        def get_y(self):
-            return self.y_value
-
-class PeakList:
-    prominence_threshold_min = 0.15
-    prominence_threshold_max = 0.40
-    min_height_threshold_denominator = 3.0
-    max_height_threshold_denominator = 3.3
-    min_distance_between_peaks = 50 #nm
-    max_distance_between_peaks = 50 #min distance
-
-    def set_parameters(prominence_threshold_min = None, prominence_threshold_max = None, min_height_threshold_denominator = None, max_height_threshold_denominator = None,
-    min_distance_between_peaks = None, max_distance_between_peaks = None ):
-        if prominence_threshold_min:
-            self.prominence_threshold_min = prominence_threshold_min
-        if prominence_threshold_max:
-            self.prominence_threshold_max = prominence_threshold_max
-        if min_height_threshold_denominator:
-            self.min_height_threshold_denominator = min_height_threshold_denominator
-        if max_height_threshold_denominator:
-            self.max_height_threshold_denominator = max_height_threshold_denominator
-        if min_distance_between_peaks:
-            self.min_distance_between_peaks = min_distance_between_peaks
-        if max_distance_between_peaks:
-            self.max_distance_between_peaks = max_distance_between_peaks
-
-
-    def __init__(self, spectrum):
-        self.spectrum = spectrum
-        self.peaks = self.get_peaks()
-
-    def get_spectrum(self):
-        return self.spectrum
-
-    def get_peaks_as_object(self):
-        import scipy
-        #get info
-        x = self.spectrum.data["wavelength"].values
-        y = self.spectrum.data[self.spectrum.metadata["measuring_mode"]].values
-
-        #parameters
-        min_height = y.max()/self.max_height_threshold_denominator
-
-        width_t = 50.00
-
-        #get peaks
-
-        min_i, min_x_values, min_y_values = self.get_minima()
-        max_i, max_x_values, max_y_values = self.get_maxima()
-
-        peaks = []
-
-        #pri*nt("peak called")
-        for i in zip(max_x_values, max_y_values):
-            max_peak = Peak(i[0], i[1])
-            peaks.append(max_peak)
-        for i in zip(min_x_values, min_y_values):
-            min_peak = Peak(i[0], i[1])
-            peaks.append(min_peak)
-
-        peaks = sorted(peaks)
-        return peaks
-
-    def get_peaks(self):
-        peaks = self.get_peaks_as_object()
-        x = []
-        y = []
-        for peak in peaks:
-            if not ((peak.get_x() > 855)&(peak.get_x() < 869)):
-                x.append(peak.get_x())
-                y.append(peak.get_y())
-
-        return x, y
-
-
-    def plot_settings(self):
-        self.spectrum.plot_settings()
-        x_values, y_values = self.get_peaks()
-
-        return plt.scatter(x_values, y_values, color="r")
-
-    @plot_wrapper
-    def plot(self):
-        self.plot_settings()
-
-
-    def get_minima(self):
-        """This method returns the index, x values and y values of every minimum in a spectrum"""
-
-        #Get minimum
-        spectrum = self.get_spectrum()
-        #get wavelength and height of measurements
-        x = spectrum.data["wavelength"].values
-        y = spectrum.data[spectrum.metadata["measuring_mode"]].values
-
-        #reflect plot across x axis and displace it upwards
-        y_max = y.max()
-        y_inverted = -y + y_max
-
-        #maximum height
-        # This prevents  minima less than 40%
-        maximum_height = y_inverted.max() * 0.60
-
-        minimum_height = 0
-        #get minima
-        peaks_funct = scipy.signal.find_peaks(y_inverted, distance= self.min_distance_between_peaks, prominence=self.prominence_threshold_min, height = (minimum_height, maximum_height))
-        peaks_index = peaks_funct[0]
-        x_values = x[peaks_index]
-        y_values = y[peaks_index]
-
-        return peaks_index, x_values, y_values
-
-    def get_maxima(self):
-        """This method returns the index, x values and y values of every maxima in a spectrum"""
-        spectrum = self.get_spectrum()
-        #get wavelength and height of measurements
-        x = spectrum.data["wavelength"].values
-        y = spectrum.data[spectrum.metadata["measuring_mode"]].values
-
-        #define minimum height and min distance between minima
-        min_height = y.max()/self.min_height_threshold_denominator
-        min_distance = 50 #nm
-        max_distance = 100.00
-        width_t = 50.00
-
-        #get maxima
-        peaks_funct = scipy.signal.find_peaks(y, height= min_height, distance= self.max_distance_between_peaks, prominence= self.prominence_threshold_max)
-        peaks_index = peaks_funct[0] #indices
-        x_values = x[peaks_index]   #x values
-        y_values = y[peaks_index]    #y values
-
-        return peaks_index, x_values, y_values
-
 
 # In[9]:
 
@@ -1126,9 +1015,9 @@ def get_genus(code, collection):
     collection_metadata = collection.get_metadata()
     
     #Locate specimen
-    #pri*nt(f"{type(code)=}")
-    #pri*nt(collection_metadata["code"].astype(str)==code)
-    #pri*nt(f"{collection_metadata["code"]}")
+    #print(f"{type(code)=} {code=}")
+    
+    #print(f"{type(collection_metadata["code"])} {collection_metadata["code"]}")
     specimen = collection_metadata.loc[collection_metadata["code"].astype(str)==(code),"genus"]
     #pri*nt(f"Genus {specimen=}")
     
@@ -1196,7 +1085,16 @@ class Spectrum:
     def get_filename(self):
             return self.filename
         
-    def __init__(self, file_location, collection, genus = None, species = None):
+    def __init__(self, file_location, collection, genus = None, 
+                 species = None, 
+                 prominence_threshold_min = 0.15, 
+                 prominence_threshold_max = 0.40, 
+                 min_height_threshold_denominator = 3.0, 
+                 max_height_threshold_denominator = 3.3,
+                 min_distance_between_peaks = 160, 
+                 max_distance_between_peaks = 160, 
+                 min_wavelength = None, 
+                 max_wavelength = None):
 
         #attributes
         self.file_location = file_location
@@ -1233,23 +1131,37 @@ class Spectrum:
         except:
             self.species = "na"
 
+        self.peaklist = PeakList(self,
+                                prominence_threshold_min, 
+                                     prominence_threshold_max, 
+                                     min_height_threshold_denominator, 
+                                     max_height_threshold_denominator,
+                                     min_distance_between_peaks, 
+                                     max_distance_between_peaks,
+                                     min_wavelength,
+                                     max_wavelength,
+                                     )
+        
 
     def plot_settings(self):
+        
         measuring_mode = self.metadata["measuring_mode"]
 
         df = self.data
-
+        #print(f"{df}")
         x = df["wavelength"]
         y = df[measuring_mode]
 
         plt.plot(x, y)
         plot = plt.title(f"{measuring_mode} for {self.genus} {self.species}, code {self.code}")
-
+        #print(f"plot 1: {plot}")
         return plot
 
     @plot_wrapper
     def plot(self):
-        self.plot_settings()
+        plot = self.plot_settings()
+        #print(f"plot 2: {plot}")
+        return 
 
     def get_normalized_spectrum(self):
         df = self.data[["wavelength", self.measuring_mode]]
@@ -1257,16 +1169,16 @@ class Spectrum:
         df.loc[:,self.measuring_mode] = df.loc[:,self.measuring_mode]/max_value
         return df
 
-    def get_maxima(self):
-        maxima_list = PeakList(self).get_maxima()
+    def get_maxima(self,min_wavelength = None, max_wavelength = None):
+        maxima_list = self.peaklist.get_maxima(min_wavelength , max_wavelength )
         return maxima_list
 
-    def get_minima(self):
-        minima_list = PeakList(self).get_minima()
+    def get_minima(self, min_wavelength = None, max_wavelength = None):
+        minima_list = self.peaklist.get_minima(min_wavelength , max_wavelength )
         return minima_list
 
-    def get_critical_points(self):
-        peaks = PeakList(self).get_peaks()
+    def get_critical_points(self, min_wavelength = None, max_wavelength = None):
+        peaks = self.peaklist.get_peaks(min_wavelength, max_wavelength)
         return peaks
 
     def set_dataframe(self, df):
@@ -1294,31 +1206,184 @@ class Spectrum:
         return alphanum_key(self.code) < alphanum_key(other.code)
 
 
-####
+########################################################################################################################
+
+class Peak:
+        def __init__(self, x, y):
+            self.x_value = x
+            self.y_value = y
+        def __lt__(self, other):
+            return self.x_value < other.x_value
+        def __str__(self):
+            return f"({self.x_value}, {self.y_value})"
+        def __repr__(self):
+            return f"({self.x_value}, {self.y_value})"
+        def get_x(self):
+            return self.x_value
+        def get_y(self):
+            return self.y_value
+
+class PeakList:
+
+    def set_parameters(self, prominence_threshold_min = None, prominence_threshold_max = None, min_height_threshold_denominator = None, max_height_threshold_denominator = None,
+    min_distance_between_peaks = None, max_distance_between_peaks =None ):
+        if prominence_threshold_min:
+            self.prominence_threshold_min = prominence_threshold_min
+        if prominence_threshold_max:
+            self.prominence_threshold_max = prominence_threshold_max
+        if min_height_threshold_denominator:
+            self.min_height_threshold_denominator = min_height_threshold_denominator
+        if max_height_threshold_denominator:
+            self.max_height_threshold_denominator = max_height_threshold_denominator
+        if min_distance_between_peaks:
+            self.min_distance_between_peaks = min_distance_between_peaks
+        if max_distance_between_peaks:
+            self.max_distance_between_peaks = max_distance_between_peaks
+            
+
+    def __init__(self, spectrum, 
+                 prominence_threshold_min = 0.15, 
+                 prominence_threshold_max = 0.40, 
+                 min_height_threshold_denominator = 3.0, 
+                 max_height_threshold_denominator = 3.3,
+                 min_distance_between_peaks = 160, 
+                 max_distance_between_peaks = 160,
+                 min_wavelength = None, 
+                 max_wavelength = None):
+        if prominence_threshold_min:
+            self.prominence_threshold_min = prominence_threshold_min
+        if prominence_threshold_max:
+            self.prominence_threshold_max = prominence_threshold_max
+        if min_height_threshold_denominator:
+            self.min_height_threshold_denominator = min_height_threshold_denominator
+        if max_height_threshold_denominator:
+            self.max_height_threshold_denominator = max_height_threshold_denominator
+        if min_distance_between_peaks:
+            self.min_distance_between_peaks = min_distance_between_peaks
+        if max_distance_between_peaks:
+            self.max_distance_between_peaks = max_distance_between_peaks
+            
+        self.spectrum = spectrum
+        self.peaks = self.get_peaks(min_wavelength, max_wavelength)
+
+    def get_spectrum(self):
+        return self.spectrum
+
+    def get_peaks_as_object(self, min_wavelength = None, max_wavelength = None):
+        import scipy
+        #get info
+        x = self.spectrum.data["wavelength"].values
+        y = self.spectrum.data[self.spectrum.metadata["measuring_mode"]].values
+
+        #parameters
+        min_height = y.max()/self.max_height_threshold_denominator
+
+        width_t = 50.00
+
+        #get peaks
+
+        min_i, min_x_values, min_y_values = self.get_minima(min_wavelength , max_wavelength )
+        max_i, max_x_values, max_y_values = self.get_maxima(min_wavelength, max_wavelength )
+
+        peaks = []
+
+        #pri*nt("peak called")
+        for i in zip(max_x_values, max_y_values):
+            max_peak = Peak(i[0], i[1])
+            peaks.append(max_peak)
+        for i in zip(min_x_values, min_y_values):
+            min_peak = Peak(i[0], i[1])
+            peaks.append(min_peak)
+
+        peaks = sorted(peaks)
+        return peaks
+
+    def get_peaks(self, min_wavelength = None, max_wavelength = None):
+        peaks = self.get_peaks_as_object(min_wavelength, max_wavelength)
+        x = []
+        y = []
+        #filter peaks far from the detector jump 
+        for peak in peaks:
+            if not ((peak.get_x() > 855)&(peak.get_x() < 869)):
+                x.append(peak.get_x())
+                y.append(peak.get_y())
+
+        return x, y
 
 
+    def plot_settings(self, min_wavelength = None, max_wavelength = None):
+        self.spectrum.plot_settings()
+        x_values, y_values = self.get_peaks(min_wavelength, max_wavelength )
 
-# In[10]:
+        return plt.scatter(x_values, y_values, color="r")
 
-
-def test_spectrum_class():
-    angsol_collection = Specimen_Collection("ANGSOL", angsol_collection_path, angsol_collection_metadata, "HIGH")
-    filenames = angsol_collection.get_data_filenames()
-    spectra = angsol_collection.get_spectra()
-    for spectrum in spectra:
-        spectrum.plot()
-#test_spectrum_class()
-
-
-# In[11]:
+    @plot_wrapper
+    def plot(self, min_wavelength = None, max_wavelength = None):
+        plot = self.plot_settings(min_wavelength , max_wavelength )
+        return plot
 
 
-def test_peak_class():
-    angsol_collection = Specimen_Collection("ANGSOL", angsol_collection_path, angsol_collection_metadata, "HIGH")
-    filenames = angsol_collection.get_data_filenames()
-    spectra = angsol_collection.get_spectra()
-    for spectrum in spectra:
-        peaklist1 = PeakList(spectrum)
-        #peaklist1.plot()
-        #pri*nt(peaklist1)
-        #pri*nt(peaklist1.plot())
+    def get_minima(self, min_wavelength = None, max_wavelength = None):
+        """This method returns the index, x values and y values of every minimum in a spectrum"""
+
+        #Get minimum
+        spectrum = self.get_spectrum()
+        #get wavelength and height of measurements
+        df = spectrum.data
+
+        #filter wavelengths
+        if min_wavelength:
+            df = df[df["wavelength"]>min_wavelength]
+        if max_wavelength:
+            df = df[df["wavelength"]<max_wavelength]
+            
+        #get wavelength and height of measurements
+        x = spectrum.data["wavelength"].values
+        y = spectrum.data[spectrum.metadata["measuring_mode"]].values
+
+        #reflect plot across x axis and displace it upwards
+        y_max = y.max()
+        y_inverted = -y + y_max
+
+        #maximum height
+        # This prevents  minima less than 40%
+        maximum_height = y_inverted.max() * 0.60
+
+        minimum_height = 0
+        #get minima
+        peaks_funct = scipy.signal.find_peaks(y_inverted, distance= self.min_distance_between_peaks, prominence=self.prominence_threshold_min, height = (minimum_height, maximum_height))
+        peaks_index = peaks_funct[0]
+        x_values = x[peaks_index]
+        y_values = y[peaks_index]
+
+        return peaks_index, x_values, y_values
+
+    def get_maxima(self, min_wavelength = None, max_wavelength = None):
+        """This method returns the index, x values and y values of every maxima in a spectrum"""
+        spectrum = self.get_spectrum( )
+        #get wavelength and height of measurements
+        df = spectrum.data
+
+        #filter wavelengths
+        if min_wavelength:
+            df = df[df["wavelength"]>min_wavelength]
+        if max_wavelength:
+            df = df[df["wavelength"]<max_wavelength]
+            
+        x = spectrum.data["wavelength"].values
+        y = spectrum.data[spectrum.metadata["measuring_mode"]].values
+
+        #define minimum height and min distance between minima
+        min_height = y.max()/self.min_height_threshold_denominator
+        min_distance = 50 #nm
+        max_distance = 100.00
+        width_t = 50.00
+
+        #get maxima
+        peaks_funct = scipy.signal.find_peaks(y, height= min_height, distance= self.max_distance_between_peaks, prominence= self.prominence_threshold_max)
+        peaks_index = peaks_funct[0] #indices
+        x_values = x[peaks_index]   #x values
+        y_values = y[peaks_index]    #y values
+
+        return peaks_index, x_values, y_values
+

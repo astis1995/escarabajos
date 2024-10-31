@@ -22,13 +22,13 @@ def get_paths():
     # Define common paths
     collection_tables_main_path = base_folder / "collections"
     collection_files_main_path = base_folder 
-    agregated_data_location = base_folder / "agregated_data"
+    agregated_data_location = base_folder / "aggregated_data"
 
     # Initialize paths dictionary
     #    paths are directories
     #    metadata are files
     paths = {
-        '2018_2019_inbio_collection_path': collection_files_main_path/ "CRAIC_data" / "Mediciones Chrysina",
+        '2018_2019_inbio_collection_path': collection_files_main_path/ "CRAIC_data"/"corrected_files"/"2024-10-30"/"Mediciones Chrysina",
         '2018_2019_inbio_collection_metadata': collection_tables_main_path / "datos_especimenes_chrysina.txt",
 
         'angsol_collection_path': collection_files_main_path / "L1050_data"/ "ANGSOL" / "average",
@@ -46,8 +46,9 @@ def get_paths():
         'bioucr_collection_path': collection_files_main_path/ "L1050_data" / "BIOUCR" / "average",
         'bioucr_metadata': collection_tables_main_path / "CICIMA-beetles-general-inventory - BIOUCR.txt",
 
-        'agregated_data_avg_path': agregated_data_location / "L1050_data"/ "peak_averages_krc.txt",
-        'agregated_data_std_dev_path': agregated_data_location/ "L1050_data" / "peak_std_krc.txt",
+        'aggregated_data_avg_path': agregated_data_location / "peak_averages_krc.txt",
+        'aggregated_data_std_path': agregated_data_location / "peak_std_krc.txt",
+        'aggregated_data_location': agregated_data_location,
 
         'report_location': base_folder / "reports" / "data_analysis"
     }
