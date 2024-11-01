@@ -2,11 +2,21 @@ import os
 from pathlib import Path
 import socket
 
-def get_paths():
+def trim_before_escarabajos(path):
+    if "escarabajos" in path:
+        return path.split("escarabajos", 1)[0] + "escarabajos"
+    else:
+        return path  # Return the original path if "escarabajos" is not found
+        
+def get_paths(name = None):
     """Selects paths based on the system hostname."""
     # Map hostnames to base folders
     hostname = socket.gethostname()
+    path = os.getcwd()
+    if name:
+        hostname = name
     base_folders = {
+        "anaconda_cloud":trim_before_escarabajos(path),
         "colaboratory": "/content/drive/My Drive/CICIMA/escarabajos_files/L1050_data",
         "Shannon": r"C:\Users\esteb\cicima\escarabajos",
         "CICIMA-EVSM": r"C:\Users\EstebanSoto\Jupyter\escarabajos",
