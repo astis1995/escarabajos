@@ -10,8 +10,9 @@ def get_paths():
         "colaboratory": "/content/drive/My Drive/CICIMA/escarabajos_files/L1050_data",
         "Shannon": r"C:\Users\esteb\cicima\escarabajos",
         "CICIMA-EVSM": r"C:\Users\EstebanSoto\Jupyter\escarabajos",
-        "cicima_laptop": "/home/vinicio/escarabajos"
-    }
+        "cicima_laptop": "/home/vinicio/escarabajos",
+	"juanca-Latitude-7480": "/home/juanca/Desktop/escarabajo/escarabajos/L1050_data" }
+    
 
     # Validate if the hostname is recognized
     if hostname not in base_folders:
