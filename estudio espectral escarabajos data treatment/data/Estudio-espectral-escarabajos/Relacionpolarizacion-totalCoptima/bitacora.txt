@@ -1,0 +1,6 @@
+Relacion espectros polarizdos circularmente y total para C.optima
+Normalizacion con espejo sin filtros 10x, 43 ms, lampara 11.5 A1
+
+total.msp->sin filtro
+LCP-> analizador izquierdo
+RCP-> analizador derecho
