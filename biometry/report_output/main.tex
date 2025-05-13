@@ -1,0 +1,117 @@
+
+%\documentclass[aps,twocolumn,secnumarabic,nobalancelastpage,amsmath,amssymb,nofootinbib]{revtex4}
+\documentclass[aps,secnumarabic,nobalancelastpage,amsmath,amssymb,nofootinbib]{revtex4}
+\usepackage{gensymb} 
+\usepackage{multirow}
+\usepackage{graphics}      
+\usepackage{graphicx}      
+\usepackage{longtable}     
+\usepackage{url}           
+\usepackage{bm}            
+\usepackage[utf8]{inputenc}
+\usepackage{comment}
+\usepackage{pdflscape}
+\usepackage{rotating}
+
+\usepackage[letterpaper,top= 2.75cm,bottom=3.5cm,left=1.8cm,right=1.8cm]{geometry}
+\usepackage{ifsym}                        
+\usepackage{amssymb}                      
+\usepackage{amsmath}                      
+\usepackage{amsthm}                       
+\usepackage{color}                        
+\usepackage{multienum}                    
+\usepackage{tabularx}                     
+\usepackage{booktabs}                     
+\usepackage{fancyhdr}
+\usepackage{pgf}
+\usepackage{tikz}
+\tikzstyle{guiones}+=[dashed]
+\usetikzlibrary{patterns,arrows,snakes,shapes,automata,plotmarks,backgrounds}
+\usepackage{lscape}
+\usepackage{titlesec}
+\usepackage{array,ragged2e}
+\newcolumntype{P}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+\usepackage{float}
+\usepackage{placeins}
+\usepackage{pdfpages} % Required for including PDF files
+
+\setlength{\columnsep}{7.5mm} 
+\titleformat*{\section}{\normalsize\bfseries}
+\titleformat*{\subsection}{\normalsize\bfseries}  
+
+\def\bibsection{\section*{\refname}} 
+\usepackage[pdfborder={0 0 0},colorlinks=false]{hyperref}
+\usepackage{xurl} 
+\usepackage{adjustbox}
+\usepackage{titlesec}
+
+% Cambiar tamaño de letra manteniendo la negrita
+\titleformat{\section}
+  {\normalfont\large\bfseries}  % Negrita y tamaño grande
+  {\thesection}{1em}{}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}  % Negrita y tamaño mediano
+  {\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}
+  {\normalfont\fontsize{11}{14}\selectfont\bfseries\itshape}  % Negrita y tamaño normal
+  {\thesubsubsection}{1em}{}
+
+\usepackage{hyperref}
+
+\newcommand{\displayboxplot}[1]{%
+    \begin{figure}[H]
+        \centering
+        \includegraphics[trim=0cm 0cm 0cm 0.9cm, clip, width=0.9\linewidth]{images/boxplot/boxplot_#1.png}
+        \vspace{-0.4cm}
+        \caption{Boxplot and specimen distribution (superposed) for the metric $#1$, by species.}
+    \end{figure}
+}
+%Para los ratios, el comando displayboxplot hará mal la caption (por los $$, pero me parecen necesarios), no es imposible de arreglar, pero tampoco hay tantos ratios.
+
+\begin{document}
+
+{\begin{flushleft}
+\vskip-25pt 
+{\includegraphics[width = 0.15\textwidth]{images/escudos/firma-promocional-con-texto-negro.png}}
+\end{flushleft}}
+
+\title{{\Large Biometry report}}
+\author{Dra. Marcela Hernández}
+\author{Dr. Esteban Bermúdez Ureña}
+\author{Esteban Soto}
+\author{Ángel Aguirre}
+\email{marcela.hernandezjimenez@ucr.ac.cr}
+\email{esteban.bermudezurena@ucr.ac.cr}
+\email{esteban.sotomonge@ucr.ac.cr}
+\email{angel.aguirre@ucr.ac.cr}
+
+%Hay que mejorar como se ven los correos
+
+\affiliation{Centro de Investigación en Ciencia e Ingeniería de los Materiales, Universidad de Costa Rica}
+\date{\today} 
+
+\input{Abstract}
+
+\maketitle
+\newpage
+%\input{Introduction}
+
+%\input{Methodology}
+
+%\input{Analysis}
+
+%\input{Claims}
+%\newpage
+\input{Tables}
+%\input{Results}
+
+\bibliographystyle{apsrev4-1}
+\bibliographystyle{plain}
+\bibliography{ref}
+
+%\section{Anexos}
+%\appendix
+
+\end{document}
