@@ -1,0 +1,23 @@
+metric;description
+A1;Vertical length of the head: measured from the center of the clipeus down to the middle of the back of the head.
+A2;Horizontal length between the left and right sutures
+A3;Horizontal length between the left and right eye’s canthus
+A4;Vertical ortogonal length of the clipeus measured from the front down to A2 line
+A5;Vertical ortogonal length of the clipeus measured from the front down to A3 line
+B1;Horizontal length between the pronotum’s frontal angles
+B2;Horizontal length between the pronotum’s middle angles
+B3;Horizontal length between the pronotum’s hind angles
+B4;Vertical length of the pronotum’s measured from the middle point of its front down to the middlepoint of its rear
+B5;Angle of its side measured between the tangent lines to its straightest sections in the front and back, as seen from the top 
+C1;Angle of its side measured between the tangent lines to its straightest sections in the front and back as seen by the side
+D1;Mesosternal process’ horizontal length measured from the secant point of the tangents of its sides with the horizontal line used to measure D1. 
+D2;Mesosternal process’ vertical length measured from the tip of the mesosternal process down to the line that joins the two lowest curves at the sides of the mesosternal process base
+D3;Horizontal width of the dark middle line measured from its two lower ends
+D4;Vertical length from the tip of the mesosternal process down to the lowest point of the black patch in the middle of the mesosternal process
+E1;Horizontal top width of the prosternal plate 
+E2;Horizontal bottom width of the prosternal plate 
+F1;Vertical length of the foremost ventral plate
+F2;Vertical length of the second foremost ventral plate
+F3;Vertical length of the third foremost ventral plate
+F4;Vertical length of the fourth foremost ventral plate 
+F5;Vertical length of the fifth foremost ventral plate

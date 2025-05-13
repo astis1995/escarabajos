@@ -1,0 +1,7 @@
+C. resplendens V. Tenorio (original)
+
+Normalizacion con espejo sin filtros 10X A1, 43ms lampara en 11.5
+
+resplendensCVGtotal-> total sin filtros
+resplendensCVGLCP-> filtro LCP
+resplendensCVGRCP-> filtro RCP

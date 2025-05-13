@@ -1,0 +1,118 @@
+MONTEVERDE BEETLES. MAY 2024. 
+DORSAL MEASUREMENTS
+
+CODE	SPECIES
+CICIMAUCR0225-1	C. resplendens, F Dorsal
+CICIMAUCR0250-1	C. resplendens, M Dorsal
+CICIMAUCR0251-1	C. resplendens, F Dorsal
+CICIMAUCR0225-2	C. resplendens, F Dorsal
+CICIMAUCR0250-2	C. resplendens, M Dorsal
+CICIMAUCR0251-2	C. resplendens, F Dorsal
+CICIMAUCR0225-3	C. resplendens, F Dorsal
+CICIMAUCR0250-3	C. resplendens, M Dorsal
+CICIMAUCR0251-3	C. resplendens, F Dorsal
+
+CICIMAUCR0201-1	C. cupreomarginata. Sex F. Dorsal
+CICIMAUCR0204-1	C. cupreomarginata. Sex M. Dorsal
+CICIMAUCR0205-1	C. cupreomarginata. Sex F. Dorsal
+CICIMAUCR0201-2	C. cupreomarginata. Sex F. Dorsal
+CICIMAUCR0204-2	C. cupreomarginata. Sex M. Dorsal
+CICIMAUCR0205-2	C. cupreomarginata. Sex F. Dorsal
+CICIMAUCR0201-3	C. cupreomarginata. Sex F. Dorsal
+CICIMAUCR0204-3	C. cupreomarginata. Sex M. Dorsal
+CICIMAUCR0205-3	C. cupreomarginata. Sex F. Dorsal
+
+
+
+CICIMAUCR0209-1	C. cupreomarginata. Sex F. Dorsal 48.9
+CICIMAUCR0210-1	C. resplendens. Sex F. Dorsal
+CICIMAUCR0212-1	C. resplendens. Sex F. Dorsal
+CICIMAUCR0209-2	C. cupreomarginata. Sex F. Dorsal
+CICIMAUCR0210-2	C. resplendens. Sex F. Dorsal
+CICIMAUCR0212-2	C. resplendens. Sex F. Dorsal
+CICIMAUCR0209-3	C. cupreomarginata. Sex F. Dorsal
+CICIMAUCR0210-3	C. resplendens. Sex F. Dorsal
+CICIMAUCR0212-3	C. resplendens. Sex F. Dorsal
+a
+CICIMAUCR0213-1	C. resplendens. Sex M. Dorsal. 71.4%
+CICIMAUCR0214-1	C. cupreomarginata. Sex M. Dorsal.50.9
+CICIMAUCR0215-1	C. cupreomarginata. Sex M. Dorsal.53.1
+CICIMAUCR0213-2	C. resplendens. Sex M. Dorsal.
+CICIMAUCR0214-2	C. cupreomarginata. Sex M. Dorsal.53.9
+CICIMAUCR0215-2	C. cupreomarginata. Sex M. Dorsal.51.7
+CICIMAUCR0213-3	C. resplendens. Sex M. Dorsal.70.44
+CICIMAUCR0214-3	C. cupreomarginata. Sex M. Dorsal.54.3
+CICIMAUCR0215-3	C. cupreomarginata. Sex M. Dorsal.50.5
+
+CICIMAUCR0223-1	C. resplendens. Sex M. Dorsal. 73.8
+CICIMAUCR0232-1	C. resplendens. Sex M. Dorsal. 73.6
+CICIMAUCR0233-1	C. resplendens. Sex F. Dorsal. 72.4
+CICIMAUCR0223-2	C. resplendens. Sex M. Dorsal. 73.2
+CICIMAUCR0232-2	C. resplendens. Sex M. Dorsal. 73.5
+CICIMAUCR0233-2	C. resplendens. Sex F. Dorsal. 71.6
+CICIMAUCR0223-3	C. resplendens. Sex M. Dorsal. 72.8
+CICIMAUCR0232-3	C. resplendens. Sex M. Dorsal. 74.6
+CICIMAUCR0233-3	C. resplendens. Sex F. Dorsal. 70.9
+
+CICIMAUCR0234-1	C. resplendens. Sex M. Dorsal. 
+CICIMAUCR0235-1	C. resplendens. Sex M. Dorsal. 
+CICIMAUCR0236-1	C. resplendens. Sex M. Dorsal.
+CICIMAUCR0234-2	C. resplendens. Sex M. Dorsal. 
+CICIMAUCR0235-2	C. resplendens. Sex M. Dorsal. 
+CICIMAUCR0236-2	C. resplendens. Sex M. Dorsal. 71.1
+CICIMAUCR0234-3	C. resplendens. Sex M. Dorsal. 70.3
+CICIMAUCR0235-3	C. resplendens. Sex M. Dorsal. 70.6
+CICIMAUCR0236-3	C. resplendens. Sex M. Dorsal. 70.2
+CICIMAUCR0236-4	C. resplendens. Sex M. Dorsal. 71.3
+CICIMAUCR0236-5	C. resplendens. Sex M. Dorsal. 72.1
+
+CICIMAUCR0238-1	C. cupreomarginata. Sex M. Dorsal.57.5
+CICIMAUCR0239-1	C. cupreomarginata. Sex M. Dorsal.48.1
+CICIMAUCR0240-1	C. resplendens. Sex M. Dorsal.73.00
+CICIMAUCR0238-2	C. cupreomarginata. Sex M. Dorsal.58.6
+CICIMAUCR0239-2	C. cupreomarginata. Sex M. Dorsal.49.1
+CICIMAUCR0240-2	C. resplendens. Sex M. Dorsal.72.7
+CICIMAUCR0238-3	C. cupreomarginata. Sex M. Dorsal.58.2
+CICIMAUCR0239-3	C. cupreomarginata. Sex M. Dorsal.49.2
+CICIMAUCR0240-3	C. resplendens. Sex M. Dorsal.72.5
+
+CICIMAUCR0242-1	C. cupreomarginata. Sex M 54.2
+CICIMAUCR0244-1	C. cupreomarginata. Sex M 55.1
+CICIMAUCR0245-1	C. resplendens. Sex M	71.0
+CICIMAUCR0242-2	C. cupreomarginata. Sex M 56.2
+CICIMAUCR0244-2	C. cupreomarginata. Sex M 56.0
+CICIMAUCR0245-2	C. resplendens. Sex M 72.5
+CICIMAUCR0242-3	C. cupreomarginata. Sex M 55.2
+CICIMAUCR0244-3	C. cupreomarginata. Sex M 56.3
+CICIMAUCR0245-3	C. resplendens. Sex M 70.6
+a
+CICIMAUCR0247-1	C. resplendens. Sex M.Dorsal. 74.4
+CICIMAUCR0248-1	C. resplendens. Sex F.Dorsal. 71.5
+CICIMAUCR0252-1	C. resplendens. Sex F.Dorsal. 70.4
+CICIMAUCR0247-2	C. resplendens. Sex M.Dorsal. 73.2
+CICIMAUCR0248-2	C. resplendens. Sex F.Dorsal. 72.3 
+CICIMAUCR0252-2	C. resplendens. Sex F.Dorsal. 
+CICIMAUCR0247-3	C. resplendens. Sex M.Dorsal. 
+CICIMAUCR0248-3	C. resplendens. Sex F.Dorsal.  
+CICIMAUCR0252-3	C. resplendens. Sex F.Dorsal. 70.8
+a
+
+CICIMAUCR0253-1	C. resplendens. Sex M. Dorsal.73.2
+CICIMAUCR0254-1	C. resplendens. Sex F. Dorsal.72.7
+CICIMAUCR0257-1	C. resplendens. Sex F. Dorsal.74.6
+CICIMAUCR0253-2	C. resplendens. Sex M. Dorsal.73.3
+CICIMAUCR0254-2	C. resplendens. Sex F. Dorsal.71.2
+CICIMAUCR0257-2	C. resplendens. Sex F. Dorsal.74.0
+CICIMAUCR0253-3	C. resplendens. Sex M. Dorsal.72.2
+CICIMAUCR0254-3	C. resplendens. Sex F. Dorsal.72.1
+CICIMAUCR0257-3	C. resplendens. Sex F. Dorsal.74.0
+
+CICIMAUCR0258-1	C. resplendens. Sex M. Dorsal.74.8
+CICIMAUCR0260-1	C. resplendens. Sex F. Dorsal.70.6
+CICIMAUCR0261-1	C. resplendens. Sex M. Dorsal.70.3
+CICIMAUCR0258-2	C. resplendens. Sex M. Dorsal.72.2
+CICIMAUCR0260-2	C. resplendens. Sex F. Dorsal.70.7
+CICIMAUCR0261-2	C. resplendens. Sex M. Dorsal.72.1
+CICIMAUCR0258-3	C. resplendens. Sex M. Dorsal.71.4
+CICIMAUCR0260-3	C. resplendens. Sex F. Dorsal.69.8
+CICIMAUCR0261-3	C. resplendens. Sex M. Dorsal.72.5
