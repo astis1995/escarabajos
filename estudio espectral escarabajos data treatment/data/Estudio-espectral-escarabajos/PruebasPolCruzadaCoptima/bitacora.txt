@@ -1,0 +1,29 @@
+Pruebas polarizacion cruzada C.optima
+Referencia con espejo sin filtros 10X 43ms lampara 11.5 A1
+
+
+
+polarizadorfuente-bolita -> atenuacion polarizador fuente en "bolita" "EW"
+polarizadorfuente-palito -> atenuacion polarizador fuente en "palito" "NS"
+fuente-bolita-analizadorl-90
+fuente-palito-analizadorl-0
+fuente-bolita-analizadorLCP
+fuente-bolita-analizadorRCP
+fuente-palito-analizadorLCP
+fuente-palito-analizadorRCP
+
+sinfiltroCoptima  
+
+fuente-bolita-analizadorl-0-Coptima
+fuente-bolita-analizadorl-90-Coptima
+fuente-palito-analizadorl-0-Coptima
+fuente-palito-analizadorl-90-Coptima
+fuente-bolita-analizadorLCP-Coptima
+fuente-bolita-analizadorRCP-Coptima
+fuente-palito-analizadorLCP-Coptima
+fuente-palito-analizadorRCP-Coptima
+
+
+
+
+
