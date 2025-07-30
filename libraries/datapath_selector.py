@@ -1,11 +1,3 @@
-"""
-HOW TO USE:
-
-import datapath_selector.py
-use get_paths to obtain the paths to use
-paths = get_paths(name = None)
-"""
-
 import os
 from pathlib import Path
 import socket
@@ -26,7 +18,7 @@ def get_paths(name = None):
     base_folders = {
         "anaconda_cloud":trim_before_escarabajos(path),
         "colaboratory": "/content/drive/My Drive/CICIMA/escarabajos_files/L1050_data",
-        "Shannon": r"C:\Users\esteb\escarabajos",
+        "Shannon": r"C:\Users\esteb\cicima\escarabajos",
         "CICIMA-EVSM": r"C:\Users\EstebanSoto\Jupyter\escarabajos",
         "cicima_laptop": "/home/vinicio/escarabajos"
     }
