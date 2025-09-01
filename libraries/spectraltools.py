@@ -62,12 +62,7 @@ regex_dict = {
     "resplendens-CVG": "resplendensCVG([LOTR](total)*)CP.csv", #location, polarization,
     }
 
-#log
-import logging
 
-# Configure logging
-logging.basicConfig(filename='../../error.log', level=logging.ERROR , #escarabajos/libraries/spectraltools.py
-                    format='%(asctime)s - %(levelname)s - %(message)s')
 #COLECCIONS
 
 #plot rainbow
