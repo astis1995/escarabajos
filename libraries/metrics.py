@@ -1,25 +1,27 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
 import pandas as pd
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
 import os
+import warnings
+import configparser
+DEBUG = True
 from spectraltools import Specimen_Collection, Spectrum, create_path_if_not_exists
 
+
 class Metric():
-    """This is an abstract class that represents every metric, allows it to be compared, have a description and a name.
-    This is useful when using it in the report methods """
+    """Abstract class for metrics. Supports comparison, naming, and string representation."""
+    debug = True
     name = "Metric"
-    
+
     def get_metric_value(self):
-        return (self.metric_value)
+        return self.metric_value
 
     def set_metric_value(self):
         return 0.0
-        
+
     @classmethod
     def get_name(cls):
         return cls.name
@@ -33,611 +35,549 @@ class Metric():
 
     def __repr__(self):
         return f'{self.name} value: {self.metric_value:.4f} for {self.spectrum.genus} {self.spectrum.species}. File: {self.spectrum.filename}'
-    
 
-# In[2]:
-# In[ ]:
 
+# -------------------------------------------------------------------------
+# Metrics (examples modified to read config_file)
+# -------------------------------------------------------------------------
 
 class Gamma_First_Two_Peaks(Metric):
-    """This gamma metric calculates the ratio between the second and first peak."""
     name = "Gamma_First_Two_Peaks"
-
-    def __init__(self, spectrum):
+    debug = True
+    def __init__(self, spectrum, config_file: str):
         self.spectrum = spectrum
+        self._load_config(config_file)
         self.metric_value = self.set_metric_value(spectrum)
-        
-    def set_metric_value(self, spectrum):
-        #get list of maxima and minima
+
+    def _load_config(self, config_file):
+        config = configparser.ConfigParser()
+        #("config_file",config_file)
+        config.read(config_file)
+        #print("Available sections:", config.sections())
+        if self.name not in config:
+            warnings.warn(f"Config missing [{self.name}] section, using defaults.", UserWarning)
+            cfg = {}
+        else:
+            cfg = config[self.name]
+            print("cfg",cfg)
+
+    def set_metric_value(self, spectrum, debug=False):
         max_i, max_x, max_y = spectrum.get_maxima()
-        #Divide second peak over first peak
-        metric_value = max_y[1]/max_y[0]
-        return metric_value
+        if len(max_y) >= 2 and max_y[0] != 0:
+            value = max_y[1] / max_y[0]
+            if debug:
+                df = spectrum.get_normalized_spectrum()
+                x = df["wavelength"].values
+                y = df[spectrum.metadata["measuring_mode"]].values
+                plt.figure(figsize=(10, 6))
+                plt.plot(x, y, label="Normalized Spectrum")
+                plt.axvline(max_x[0], color="r", linestyle="--", label="First Peak")
+                plt.axvline(max_x[1], color="g", linestyle="--", label="Second Peak")
+                plt.title(f"{spectrum.genus} {spectrum.species} (code: {spectrum.code})")
+                plt.xlabel("Wavelength (nm)")
+                plt.ylabel(spectrum.metadata["measuring_mode"])
+                plt.legend()
+                plt.show()
+            return value
+        return np.nan
 
-    @staticmethod
-    def description():
-        return f"""This algorithm calculates the ratio between the second and first reflectance peak."""
 
-    def __repr__(self):
-        return f'Gamma first two peaks {self.metric_value:.4f} for {self.spectrum.genus} {self.spectrum.species} in {self.spectrum.filename}'
-
-
-class Gamma_Arbitrary_Limits(Metric):
-    """This gamma metric calculates the ratio between the maximum in the IR range and the maximum in the visible range. Ranges are static."""
-    uv_vis_min_wavelength, uv_vis_max_wavelength = 450.00, 800.00
-    ir_min_wavelength = uv_vis_max_wavelength
-    ir_max_wavelength = 1500.00
+class Gamma_Arbitrary_Limits_Silver(Metric):
+    """This gamma metric calculates the ratio between the maximum in the IR range
+    and the maximum in the visible range. Wavelength ranges are loaded from the 
+    [Gamma_Arbitrary_Limits] section of the config file."""
+    debug = True
     name = "Gamma_Arbitrary_Limits"
-       
+
+    def __init__(self, spectrum, config_file: str):
+        self.spectrum = spectrum
+        self._load_config(config_file)
+        self.metric_value = self.set_metric_value(spectrum)
+
+    def _load_config(self, config_file):
+        debug = True
         
-    def set_metric_value(self, spectrum):
-        
+        config = configparser.ConfigParser()
+        config.read(config_file)
+        if debug:
+            #print("Available sections:", config.sections())
+            pass
+        if self.name not in config:
+            warnings.warn(f"Config missing [{self.name}] section, using defaults.", UserWarning)
+            cfg = {}
+        else:
+            cfg = config[self.name]
+            print("cfg",cfg)
+
+        # Read values, fallback to defaults if missing
+        self.uv_vis_min_wavelength = float(cfg.get("uv_vis_min_wavelength", 450))
+        self.uv_vis_max_wavelength = float(cfg.get("uv_vis_max_wavelength", 800))
+        self.ir_min_wavelength = float(cfg.get("ir_min_wavelength", self.uv_vis_max_wavelength))
+        self.ir_max_wavelength = float(cfg.get("ir_max_wavelength", 1500))
+
+    def set_metric_value(self, spectrum, debug=False):
+        debug = True
         def get_maximum_in_range(spectrum, min_wavelength, max_wavelength):
             measuring_mode = spectrum.metadata["measuring_mode"]
             df = spectrum.data
-            max_value = df[(df["wavelength"] > min_wavelength) & (df["wavelength"]  < max_wavelength) ].max()
-            #print(f"max value \n {max_value}")
-            wavelength, measure = max_value["wavelength"], max_value[measuring_mode]
-            return wavelength, measure
-
-        uv_vis_wavelength, uv_vis_max = get_maximum_in_range(spectrum, Gamma_Arbitrary_Limits.uv_vis_min_wavelength, Gamma_Arbitrary_Limits.uv_vis_max_wavelength)
-        ir_wavelength, ir_max = get_maximum_in_range(spectrum, Gamma_Arbitrary_Limits.ir_min_wavelength, Gamma_Arbitrary_Limits.ir_max_wavelength)
-        metric_value_return = (uv_vis_max / ir_max)*1.00
-        #print(metric_value_return)
-        return metric_value_return
-
-    def __init__(self, spectrum):
-        self.spectrum = spectrum
-        self.metric_value = self.set_metric_value(spectrum)
+            subset = df[(df["wavelength"] > min_wavelength) & (df["wavelength"] < max_wavelength)]
+            if subset.empty:
+                return None, 0.0
+            idx = subset[measuring_mode].idxmax()
+            return df.loc[idx, "wavelength"], df.loc[idx, measuring_mode]
         
-    
+        print("UV VIS MIN",self.uv_vis_min_wavelength, "UV VIS MAX:", self.uv_vis_max_wavelength )
+        uv_vis_x, uv_vis_max = get_maximum_in_range(spectrum, self.uv_vis_min_wavelength, self.uv_vis_max_wavelength)
+        print("POINT:", uv_vis_x, uv_vis_max)
+        print("ir_min_wavelength",self.uv_vis_min_wavelength, "ir_max_wavelength:", self.uv_vis_max_wavelength )
+        ir_x, ir_max = get_maximum_in_range(spectrum, self.ir_min_wavelength, self.ir_max_wavelength)
+        print("POINT:", ir_x, ir_max)
+        if debug and uv_vis_x and ir_x:
+            df = spectrum.get_normalized_spectrum()
+            plt.figure(figsize=(10, 6))
+            plt.plot(df["wavelength"], df[spectrum.metadata["measuring_mode"]], label="Normalized Spectrum")
+            plt.axvline(uv_vis_x, color="b", linestyle="--", label="Visible Peak")
+            plt.axvline(ir_x, color="m", linestyle="--", label="IR Peak")
+            plt.legend(); plt.show()
+
+        if ir_max == 0:
+            return np.nan
+        return uv_vis_max / ir_max
+
+
     @staticmethod
     def description():
-        return f"""This algorithm calculates the ratio between the highest reflectance peak in the visible range (Between {Gamma_Arbitrary_Limits.uv_vis_min_wavelength} nm and {Gamma_Arbitrary_Limits.uv_vis_max_wavelength} nm) and the maximum peak in the IR range up to {Gamma_Arbitrary_Limits.ir_max_wavelength} nm. Beyond {Gamma_Arbitrary_Limits.ir_max_wavelength} nm the internal structure's reflectance generates unwanted noise."""
-    def __repr__(self):
-        return  f'Gamma arbitrary limits, value: {self.metric_value:.4f} for {self.spectrum.genus} {self.spectrum.species}. File: {self.spectrum.filename}'
+        return (
+            "This algorithm calculates the ratio between the highest reflectance "
+            "peak in the visible range (uv_vis_min_wavelength–uv_vis_max_wavelength) "
+            "and the maximum peak in the IR range (ir_min_wavelength–ir_max_wavelength)."
+        )
 
+class Gamma_Arbitrary_Limits(Metric):
+    """This gamma metric calculates the ratio between the maximum in the IR range
+    and the maximum in the visible range. Wavelength ranges are loaded from the 
+    [Gamma_Arbitrary_Limits] section of the config file."""
+    debug = True
+    name = "Gamma_Arbitrary_Limits"
 
-# In[3]:
+    def __init__(self, spectrum, config_file: str):
+        self.spectrum = spectrum
+        self._load_config(config_file)
+        self.metric_value = self.set_metric_value(spectrum)
 
-
-def feature_and_label_extractor(Metric, spectra):
-    features = []
-    labels = []
-    codes = []
-    #get code, label and feature for each spectrum
-    for spectrum in spectra:
-        #spectrum.plot()
-        metric = Metric(spectrum)
-        feature = metric.get_metric_value()
-        label = spectrum.get_species()
-        code = spectrum.code
-        codes.append(code)
-        features.append(feature)
-        labels.append(label)
+    def _load_config(self, config_file):
+        debug = True
         
-    data = [codes, features, labels]
-    
-    return data
-    
+        config = configparser.ConfigParser()
+        config.read(config_file)
+        if debug:
+            #print("Available sections:", config.sections())
+            pass
+        if self.name not in config:
+            warnings.warn(f"Config missing [{self.name}] section, using defaults.", UserWarning)
+            cfg = {}
+        else:
+            cfg = config[self.name]
+            print("cfg",cfg)
+
+        # Read values, fallback to defaults if missing
+        self.uv_vis_min_wavelength = float(cfg.get("uv_vis_min_wavelength", 450))
+        self.uv_vis_max_wavelength = float(cfg.get("uv_vis_max_wavelength", 800))
+        self.ir_min_wavelength = float(cfg.get("ir_min_wavelength", self.uv_vis_max_wavelength))
+        self.ir_max_wavelength = float(cfg.get("ir_max_wavelength", 1500))
+
+    def set_metric_value(self, spectrum, debug=False):
+        debug = True
+        def get_maximum_in_range(spectrum, min_wavelength, max_wavelength):
+            measuring_mode = spectrum.metadata["measuring_mode"]
+            df = spectrum.data
+            subset = df[(df["wavelength"] > min_wavelength) & (df["wavelength"] < max_wavelength)]
+            if subset.empty:
+                return None, 0.0
+            idx = subset[measuring_mode].idxmax()
+            return df.loc[idx, "wavelength"], df.loc[idx, measuring_mode]
+        
+        print("UV VIS MIN",self.uv_vis_min_wavelength, "UV VIS MAX:", self.uv_vis_max_wavelength )
+        uv_vis_x, uv_vis_max = get_maximum_in_range(spectrum, self.uv_vis_min_wavelength, self.uv_vis_max_wavelength)
+        print("POINT:", uv_vis_x, uv_vis_max)
+        print("ir_min_wavelength",self.uv_vis_min_wavelength, "ir_max_wavelength:", self.uv_vis_max_wavelength )
+        ir_x, ir_max = get_maximum_in_range(spectrum, self.ir_min_wavelength, self.ir_max_wavelength)
+        print("POINT:", ir_x, ir_max)
+        if debug and uv_vis_x and ir_x:
+            df = spectrum.get_normalized_spectrum()
+            plt.figure(figsize=(10, 6))
+            plt.plot(df["wavelength"], df[spectrum.metadata["measuring_mode"]], label="Normalized Spectrum")
+            plt.axvline(uv_vis_x, color="b", linestyle="--", label="Visible Peak")
+            plt.axvline(ir_x, color="m", linestyle="--", label="IR Peak")
+            plt.legend(); plt.show()
+
+        if ir_max == 0:
+            return np.nan
+        return uv_vis_max / ir_max
 
 
-# In[4]:
+    @staticmethod
+    def description():
+        return (
+            "This algorithm calculates the ratio between the highest reflectance "
+            "peak in the visible range (uv_vis_min_wavelength–uv_vis_max_wavelength) "
+            "and the maximum peak in the IR range (ir_min_wavelength–ir_max_wavelength)."
+        )
+
 
 
 class Gamma_Area_Under_Curve_Naive(Metric):
-    """This method calculates the ratio between the area under the curve for the spectrum between {Gamma_Area_Under_Curve_Naive.visible_start_wavelength} 
-        and {Gamma_Area_Under_Curve_Naive.visible_end_wavelength} nm (visible range) and between {Gamma_Area_Under_Curve_Naive.ir_start_wavelength} nm and 
-        {GammaAreaUnderCurveNaive.ir_end_wavelength} nm (infrared range)."""
-    visible_start_wavelength = 450
-    visible_end_wavelength = ir_start_wavelength = 800
-    ir_end_wavelength = 1500
     name = "Gamma_Area_Under_Curve_Naive"
-    
-    def __init__(self, spectrum):
+    debug = True
+    def __init__(self, spectrum, config_file: str):
         self.spectrum = spectrum
+        self._load_config(config_file)
         self.metric_value = self.set_metric_value(spectrum)
-   
-    def description():
-        return f"""This method calculates the ratio between the area under the curve for the spectrum between {Gamma_Area_Under_Curve_Naive.visible_start_wavelength} 
-        and {Gamma_Area_Under_Curve_Naive.visible_end_wavelength} nm (visible range) and between {Gamma_Area_Under_Curve_Naive.ir_start_wavelength} nm and 
-        {GammaAreaUnderCurveNaive.ir_end_wavelength} nm (infrared range)."""
 
+    def _load_config(self, config_file):
+        config = configparser.ConfigParser()
+        config.read(config_file)
+        print("Available sections:", config.sections())
+        if self.name not in config:
+            warnings.warn(f"Config missing [{self.name}] section, using defaults.", UserWarning)
+            cfg = {}
+        else:
+            cfg = config[self.name] 
+            print("cfg",cfg)
+        self.visible_start_wavelength = cfg.getfloat("visible_start_wavelength", fallback=450)
+        self.visible_end_wavelength = cfg.getfloat("visible_end_wavelength", fallback=800)
+        self.ir_start_wavelength = cfg.getfloat("ir_start_wavelength", fallback=800)
+        self.ir_end_wavelength = cfg.getfloat("ir_end_wavelength", fallback=1500)
 
-    def set_metric_value(self, spectrum):
-
-        def get_area_under_curve(spectrum, start_wavelength, finish_wavelength):
-            # Subset the DataFrame to the range of interest
-            subset_df = df[(df['wavelength'] >= start_wavelength) & (df['wavelength'] <= finish_wavelength)]
-
-            # Extract the wavelengths and heights as arrays
-            wavelengths = subset_df['wavelength'].values
-            heights = subset_df[spectrum.measuring_mode].values
-
-            # Calculate the area under the curve using the trapezoidal rule
-            area_under_curve = np.trapz(heights, wavelengths)
-
-            #print("Area under the curve:", area_under_curve)
-            return area_under_curve
-
-        import numpy as np
+    def set_metric_value(self, spectrum, debug=False):
+        debug = True
         df = spectrum.get_normalized_spectrum()
-        area_uv_visible = get_area_under_curve(spectrum, Gamma_Area_Under_Curve_Naive.visible_start_wavelength, Gamma_Area_Under_Curve_Naive.visible_end_wavelength)
-        area_ir = get_area_under_curve(spectrum, Gamma_Area_Under_Curve_Naive.ir_start_wavelength, Gamma_Area_Under_Curve_Naive.ir_end_wavelength)
-        metric = area_ir/area_uv_visible
-        return metric
+
+        def get_area_under_curve(start, finish):
+            subset = df[(df["wavelength"] >= start) & (df["wavelength"] <= finish)]
+            wavelengths = subset["wavelength"].values
+            heights = subset[spectrum.measuring_mode].values
+            return np.trapz(heights, wavelengths), subset
+
+        area_uv, subset_uv = get_area_under_curve(self.visible_start_wavelength, self.visible_end_wavelength)
+        area_ir, subset_ir = get_area_under_curve(self.ir_start_wavelength, self.ir_end_wavelength)
+
+        if debug:
+            plt.figure(figsize=(10, 6))
+            plt.plot(df["wavelength"], df[spectrum.measuring_mode], label="Normalized Spectrum")
+            plt.fill_between(subset_uv["wavelength"], subset_uv[spectrum.measuring_mode], alpha=0.5, color="skyblue", label="Visible Area")
+            plt.fill_between(subset_ir["wavelength"], subset_ir[spectrum.measuring_mode], alpha=0.5, color="orange", label="IR Area")
+            plt.legend(); plt.show()
+
+        return area_ir / area_uv if area_uv != 0 else np.nan
 
 
-# In[5]:
 
-
-class  Gamma_Area_Under_Curve_First_Min_Cut(Metric):
-    """This method calculates the area for the visible region (starting at {Gamma_Area_First_Min_Cut.visible_range_start_wavelength} 
-        and ending in the first minima between the maximum in the visible range and the maximum in the IR range. 
-        Then calculates the area of the IR range up to the second minumum. The ratio between these two areas is the gamma value."""
-    visible_range_start_wavelength = 450
+class Gamma_Area_Under_Curve_First_Min_Cut(Metric):
     name = "Gamma_Area_Under_Curve_First_Min_Cut"
+    debug = True
 
-    def __init__(self, spectrum):
+    def __init__(self, spectrum, config_file: str):
         self.spectrum = spectrum
+        self._load_config(config_file)
         self.metric_value = self.set_metric_value(spectrum)
         
-    def description():
-        return f"""This algorithm calculates the area for the visible region (starting at {Gamma_Area_First_Min_Cut.visible_range_start_wavelength} 
-        and ending in the first minima between the maximum in the visible range and the maximum in the IR range. 
-        Then calculates the area of the IR range up to the second minumum. The ratio between these two areas is the gamma value."""
+        #apply configuration to spectrum
+        self.apply_configuration_to_spectrum()
 
-    def set_metric_value(self, spectrum):
-
-        def get_area_under_curve(spectrum, start_wavelength, finish_wavelength):
-           
-            # Subset the DataFrame to the range of interest
-            subset_df = df[(df['wavelength'] >= start_wavelength) & (df['wavelength'] <= finish_wavelength)]
-
-            # Extract the wavelengths and heights as arrays
-            wavelengths = subset_df['wavelength'].values
-            heights = subset_df[spectrum.measuring_mode].values
-
-            # Calculate the area under the curve using the trapezoidal rule
-            area_under_curve = np.trapz(heights, wavelengths)
-
-            # print("Area under the curve:", area_under_curve)
-            return area_under_curve
-
-        import numpy as np
-
-        #test_spectrum = filtered_spectra[0]
-        #get the highest data recorded
-        max_value = spectrum.data[spectrum.measuring_mode].max()
-        #get maxima and minima
-        x = spectrum.data["wavelength"].values
-        y = spectrum.data[spectrum.measuring_mode].values
-
-        #get x and y positions of maxima and minima
-        max_i, max_xs, max_ys = spectrum.get_maxima()
-        min_i, min_xs, min_ys= spectrum.get_minima()
-
-        #get x locations of first and second maxima and the minimum in between
-        first_max_x = max_xs[0]
-        try:
-            second_max_x = max_xs[1]
-        except Exception as e:
-            second_max_x = x.max()
-            print(e)
-        try:
-            second_max_y = max_ys[1]
-        except Exception as e:
-            second_max_y = 0
-            print(e)
-
-        min_in_between_i = 0
-        min_in_between_x =0
-        min_in_between_y =0
+    def apply_configuration_to_spectrum(self):
+        self.spectrum.set_parameters( 
+        prominence_threshold_min=self.prominence_threshold_min, 
+        prominence_threshold_max=self.prominence_threshold_max,
+        min_height_threshold_denominator=self.min_height_threshold_denominator, 
+        max_height_threshold_denominator=self.max_height_threshold_denominator,
+        min_distance_between_peaks=self.min_distance_between_peaks, 
+        max_distance_between_peaks=self.max_distance_between_peaks)
         
-        #get the location of the minimum in between
-        for index in min_i:
-            #print("index")
-            if first_max_x <= x[index] <= second_max_x:
-                min_in_between_i = index
-                min_in_between_x = x[index]
-                min_in_between_y = y[index]
-                break
-                
-        #If we cant find a first minimum (it could be because there is a small minimum not large enough to be detected.
-        #we are going to find the next one 
-        if min_in_between_i ==0:
-            print("No min was detected in the first run")
-            for index in min_i:
-                #print("index")
-                if second_max_x <= x[index] :
-                    min_in_between_i = index
-                    min_in_between_x = x[index]
-                    min_in_between_y = y[index]
-                    break
-        if min_in_between_i ==0:
-            print("No min was detected in the second run")
-        #second minimum
-        #get the location of the second minimum
-        min_after_second_max_i = 0
-        min_after_second_max_x = 0
-        min_after_second_max_y = 0
-        for index in min_i:
-           
-            #check if the second min is greater than the first min_in_between too
-            if (second_max_x  <= x[index]) & (x[min_in_between_i]  < x[index]): 
-                min_after_second_max_i = index
-                min_after_second_max_x = x[index]
-                min_after_second_max_y = y[index]
-                break
- 
-        x_values = [first_max_x, min_in_between_x, second_max_x, min_after_second_max_x]
-        y_values = [max_ys[0]/max_value, min_in_between_y/max_value, second_max_y/max_value, min_after_second_max_y/max_value]
-        #get the normalized spectrum
-        df = spectrum.get_normalized_spectrum()
-        #plot
-        x = df["wavelength"].values
-        y =df[spectrum.measuring_mode].values
-
-        #modify y to have last value equal to first one
-        y_mod = y
-        y_mod[-1] = y_mod[0]
-        
-        #split x, y LEFT
-        #print(f"fmi: {min_in_between_i}")
-        x_left = x[:min_in_between_i]
-        y_left = y[:min_in_between_i]
-        #print(f"{spectrum}")
-        #print(f"{y=}")
-        #print(f"{y_left=}")
-
-        #if y_left has no elements it means there is no area before the first min
-        if len(y_left) == 0:
-            print(f"No area before first minimum for {spectrum.get_name()}")
+    def _load_config(self, config_file):
+        config = configparser.ConfigParser()
+        config.read(config_file)
+        print("Available sections:", config.sections())
+        if self.name not in config:
+            warnings.warn(f"Config missing [{self.name}] section, using defaults.", UserWarning)
+            cfg = {}
+        else:
+            cfg = config[self.name] 
+            print("cfg",cfg)
             
-        #set last one to zero for picture to be displayed properly
-        try:
-            y_left[-1] = y_left[0]
-        except Exception as e:
-           
-            print(e)
-        
-        #split x, y RIGHT
-        #print(f"min_after_second_max_i: {min_after_second_max_i}")
-        x_right = x[min_in_between_i:min_after_second_max_i]
-        y_right = y[min_in_between_i:min_after_second_max_i]
-        #print(f"{y_right=}")
-        #set last one to zero for picture to be displaye properly
-        if ( (y_right.size !=0) and ( y_left.size !=0)): 
-            y_right[0] = y_right[-1] = y_left[0]
-        
-        #show figure
+        # wavelength ranges
+        self.visible_range_start_wavelength = cfg.getfloat("visible_range_start_wavelength", fallback=450.0)
+        self.start_wavelength = cfg.getfloat("start_wavelength", fallback=None)
+        self.end_wavelength = cfg.getfloat("end_wavelength", fallback=None)
 
-        area_uv_visible = get_area_under_curve(spectrum, Gamma_Area_Under_Curve_First_Min_Cut.visible_range_start_wavelength, min_in_between_x)
-        area_ir = get_area_under_curve(spectrum, min_in_between_x, min_after_second_max_x)
-        gamma = area_ir/area_uv_visible
-        #print(f"gamma: {gamma}")
+        # thresholds for prominence and height
+        self.prominence_threshold_min = cfg.getfloat("prominence_threshold_min", fallback=None)
+        self.prominence_threshold_max = cfg.getfloat("prominence_threshold_max", fallback=None)
+        self.min_height_threshold_denominator = cfg.getfloat("min_height_threshold_denominator", fallback=None)
+        self.max_height_threshold_denominator = cfg.getfloat("max_height_threshold_denominator", fallback=None)
+
+        # distance between peaks
+        self.min_distance_between_peaks = cfg.getfloat("min_distance_between_peaks", fallback=None)
+        self.max_distance_between_peaks = cfg.getfloat("max_distance_between_peaks", fallback=None)
+
+    def set_metric_value(self, spectrum, start_wavelength=None, end_wavelength=None, debug=False):
+        debug = True
+        df = spectrum.get_normalized_spectrum()
+        x = df["wavelength"].values
+        y = df["%R"].values 
+        
+        if not start_wavelength:
+            start_wavelength = self.visible_range_start_wavelength
+        subset_df = df[df["wavelength"] >= start_wavelength] if not end_wavelength else df[
+            (df["wavelength"] >= start_wavelength) & (df["wavelength"] <= end_wavelength)
+        ]
+        if subset_df.empty:
+            return np.nan
+
+        max_i, max_xs, _ = spectrum.get_maxima()
+        min_i, min_xs, _ = spectrum.get_minima()
+        if len(max_xs) < 1:
+            return np.nan
+
+        first_max_x = max_xs[0]
+        second_max_x = max_xs[1] if len(max_xs) > 1 else x.max()
+
+        min_in_between_x = next((m for m in min_xs if first_max_x <= m <= second_max_x), None)
+        if not min_in_between_x:
+            min_in_between_x = next((m for m in min_xs if m > second_max_x), None)
+        if not min_in_between_x:
+            return np.nan
+        if min_in_between_x <= self.visible_range_start_wavelength:
+            min_in_between_x = start_wavelength
+
+        min_after_second_max_x = next((m for m in min_xs if m > min_in_between_x and m > second_max_x), None)
+        if not min_after_second_max_x:
+            return np.nan
+
+        def get_area(start, end):
+            subset = df[(df["wavelength"] >= start) & (df["wavelength"] <= end)]
+            return np.trapz(subset[spectrum.metadata["measuring_mode"]], subset["wavelength"]) if not subset.empty else 0
+
+        area_uv = get_area(self.visible_range_start_wavelength, min_in_between_x)
+        area_ir = get_area(min_in_between_x, min_after_second_max_x)
+        gamma = area_ir / area_uv if area_uv != 0 else np.nan
+        
+        if debug:
+            print("PLOTTING")
+            # Optional plotting for debugging
+            plt.figure(figsize=(10, 6))
+            plt.plot(x, y, label="Normalized Spectrum")
+            plt.axvline(x=first_max_x, color='r', linestyle='--', label='First Max')
+            plt.axvline(x=second_max_x, color='g', linestyle='--', label='Second Max')
+            plt.axvline(x=min_in_between_x, color='b', linestyle='--', label='First Min')
+            plt.axvline(x=min_after_second_max_x, color='m', linestyle='--', label='Second Min')
+            plt.title(f"Spectrum {spectrum.get_filename()}")
+            plt.xlabel("Wavelength (nm)")
+            plt.ylabel(spectrum.metadata["measuring_mode"])
+            plt.legend()
+            plt.show()
+            plt.fill_between(df["wavelength"], y, where=(df["wavelength"] >= self.visible_range_start_wavelength) & (df["wavelength"] <= min_in_between_x),
+                 alpha=0.5, color="skyblue", label="Visible Area")
+            plt.fill_between(df["wavelength"], y, where=(df["wavelength"] >= min_in_between_x) & (df["wavelength"] <= min_after_second_max_x),
+                             alpha=0.5, color="orange", label="IR Area")
+
+            
         return gamma
 
 
-# In[6]:
-
+# -------------------------------------------------------------------------
+# Metrics without wavelength parameters (but still accept config_file)
+# -------------------------------------------------------------------------
 
 class Gamma_Vector_Relative_Reflectance(Metric):
-    """This gamma metric calculates a vector with all the relative heights with respect to the first peak."""
     name = "Gamma_Vector_Relative_Reflectance"
 
-    def __init__(self, spectrum):
+    def __init__(self, spectrum, config_file: str):
         self.spectrum = spectrum
         self.metric_value = self.set_metric_value(spectrum)
-        
+
     def set_metric_value(self, spectrum):
-        #get list of maxima and minima
-        max_i, max_x, max_y = spectrum.get_maxima()
-        
-        #Divide every peak over first peak
-        metric_value = list(max_y/max_y[0])
-        return np.array(metric_value)
-
-    @staticmethod
-    def description():
-        return f"""This gamma metric calculates a vector with all the relative heights with respect to the first peak"""
-
-    def __repr__(self):
-        return f'Gamma vector relative reflectance: {self.metric_value} for {self.spectrum.genus} {self.spectrum.species} in {self.spectrum.filename}'
+        _, _, max_y = spectrum.get_maxima()
+        return np.array(list(max_y / max_y[0]))
 
 
-# In[7]:
 
 
 class Wavelength_Vector(Metric):
-    """This gamma metric calculates a vector with each peak's wavelength."""
     name = "Wavelength_Vector"
 
-    def __init__(self, spectrum):
+    def __init__(self, spectrum, config_file: str):
         self.spectrum = spectrum
         self.metric_value = self.set_metric_value(spectrum)
-        
+
     def set_metric_value(self, spectrum):
-        #get list of maxima and minima
-        max_i, max_x, max_y = spectrum.get_maxima()
-        
-        #Divide every peak over first peak
-        metric_value = list(max_x)
-        return np.array(metric_value)
-
-    @staticmethod
-    def description():
-        return f"""This metric calculates a vector with each peak's wavelength."""
-
-    def __repr__(self):
-        return f'Vector wavelength : {self.metric_value} for {self.spectrum.genus} {self.spectrum.species} in {self.spectrum.filename}'
-
-
-# In[8]:
+        _, max_x, _ = spectrum.get_maxima()
+        return np.array(list(max_x))
 
 
 class Critical_Points(Metric):
-    """This metric returns a vector with each critical point wavelength and relative reflectance."""
     name = "Critical_Points"
-
-    def __init__(self, spectrum):
+    
+    def __init__(self, spectrum, config_file: str):
         self.spectrum = spectrum
         self.metric_value = self.set_metric_value(spectrum)
-        
+
     def set_metric_value(self, spectrum):
-       
-        min_i, min_x, min_y = spectrum.get_minima() 
-
-        max_i, max_x, max_y = spectrum.get_maxima() 
-        #print(max_x, max_y, min_x, min_y)
-        metric_value = [np.concatenate((min_x, max_x)), np.concatenate((min_y ,max_y))]
-        
-        return np.array(metric_value)
-     
-
-    @staticmethod
-    def description():
-        return f"""This metric returns a vector with each critical point wavelength and relative reflectance."""
-
-    def __repr__(self):
-        return f'Critical_Points : {self.metric_value} for {self.spectrum.genus} {self.spectrum.species} in {self.spectrum.filename}'
-
-
-# In[9]:
+        debug = True
+        _, min_x, min_y = spectrum.get_minima()
+        _, max_x, max_y = spectrum.get_maxima()
+        if debug:
+            df = spectrum.get_normalized_spectrum()
+            plt.figure(figsize=(10, 6))
+            plt.plot(df["wavelength"], df[spectrum.metadata["measuring_mode"]], label="Spectrum")
+            for x in max_x: plt.axvline(x, color="r", linestyle="--", alpha=0.7)
+            for x in min_x: plt.axvline(x, color="b", linestyle="--", alpha=0.7)
+            plt.legend(); plt.show()
+        return np.array([np.concatenate((min_x, max_x)), np.concatenate((min_y, max_y))])
 
 
 class Minimum_Points(Metric):
-    """This metric returns a vector with each minimum wavelength and absolute reflectance."""
     name = "Minimum_Points"
 
-    def __init__(self, spectrum):
+    def __init__(self, spectrum, config_file: str):
         self.spectrum = spectrum
         self.metric_value = self.set_metric_value(spectrum)
-        
+
     def set_metric_value(self, spectrum):
-       
-        #get list of maxima and minima
-        min_i, min_x, min_y = spectrum.get_minima() 
-        
-        metric_value = [min_x, min_y]
-        
-        return np.array(metric_value)
-
-    @staticmethod
-    def description():
-        return f"""This metric returns a vector with each minimum's wavelength and reflectance."""
-
-    def __repr__(self):
-        return f'Minimum_Points : {self.metric_value} for {self.spectrum.genus} {self.spectrum.species} in {self.spectrum.filename}'
-
-
-# In[10]:
+        debug = True
+        _, min_x, min_y = spectrum.get_minima()
+        if debug:
+            df = spectrum.get_normalized_spectrum()
+            plt.figure(figsize=(10, 6))
+            plt.plot(df["wavelength"], df[spectrum.metadata["measuring_mode"]], label="Spectrum")
+            for x in max_x: plt.axvline(x, color="r", linestyle="--", alpha=0.7)
+            for x in min_x: plt.axvline(x, color="b", linestyle="--", alpha=0.7)
+            plt.legend(); plt.show()
+        return np.array([min_x, min_y])
 
 
 class Maximum_Points(Metric):
-    """This metric returns a vector with each minimum wavelength and absolute reflectance."""
     name = "Maximum_Points"
 
-    def __init__(self, spectrum):
+    def __init__(self, spectrum, config_file: str):
         self.spectrum = spectrum
         self.metric_value = self.set_metric_value(spectrum)
-        
+
     def set_metric_value(self, spectrum):
-       
-        #get list of maxima and minima
-        max_i, max_x, max_y = spectrum.get_maxima() 
-        
-        metric_value = [max_x, max_y]
-        
-        #first maximum is metric_value[0][1]
-        return np.array(metric_value)
-
-    @staticmethod
-    def description():
-        return f"""This metric returns a vector with each maximum's wavelength and reflectance."""
-
-    def __repr__(self):
-        return f'Maximum_Points : {self.metric_value} for {self.spectrum.genus} {self.spectrum.species} in {self.spectrum.filename}'
-
-
-# In[11]:
+        debug = True
+        _, max_x, max_y = spectrum.get_maxima()
+        if debug:
+            df = spectrum.get_normalized_spectrum()
+            plt.figure(figsize=(10, 6))
+            plt.plot(df["wavelength"], df[spectrum.metadata["measuring_mode"]], label="Spectrum")
+            for x in max_x: plt.axvline(x, color="r", linestyle="--", alpha=0.7)
+            
+            plt.legend(); plt.show()
+        return np.array([max_x, max_y])
 
 
 class Minimum_Points_Normalized(Metric):
-    """This metric returns a vector with each minimum wavelength and relative reflectance."""
     name = "Minimum_Points_Normalized"
 
-    def __init__(self, spectrum):
+    def __init__(self, spectrum, config_file: str):
         self.spectrum = spectrum
         self.metric_value = self.set_metric_value(spectrum)
-        
+
     def set_metric_value(self, spectrum):
-       
-        #get list of maxima and minima
-        min_i, min_x, min_y = spectrum.get_minima() 
-
-        min_y = min_y/min_y[0]
-        
-        metric_value = [min_x, min_y]
-        
-        return np.array(metric_value)
-
-
-    @staticmethod
-    def description():
-        return f"""This metric returns a vector with each minimum's wavelength and relative reflectance."""
-
-    def __repr__(self):
-        return f'Minimum_Points_Normalized : {self.metric_value} for {self.spectrum.genus} {self.spectrum.species} in {self.spectrum.filename}'
-
-
-# In[12]:
+        _, min_x, min_y = spectrum.get_minima()
+        return np.array([min_x, min_y / min_y[0]])
 
 
 class Maximum_Points_Normalized(Metric):
-    """This metric returns a vector with each minimum wavelength and relative reflectance."""
     name = "Maximum_Points_Normalized"
 
-    def __init__(self, spectrum):
+    def __init__(self, spectrum, config_file: str):
         self.spectrum = spectrum
         self.metric_value = self.set_metric_value(spectrum)
-        
+
     def set_metric_value(self, spectrum):
-       
-        #get list of maxima and minima
-        max_i, max_x, max_y = spectrum.get_maxima() 
-
-        max_y = max_y/max_y[0]
-        
-        metric_value = [max_x, max_y]
-        
-        return np.array(metric_value)
-
-    @staticmethod
-    def description():
-        return f"""This metric returns a vector with each maximum's wavelength and relative reflectance."""
-
-    def __repr__(self):
-        return f'Maximum_Points_Normalized : {self.metric_value} for {self.spectrum.genus} {self.spectrum.species} in {self.spectrum.filename}'
+        _, max_x, max_y = spectrum.get_maxima()
+        return np.array([max_x, max_y / max_y[0]])
 
 
-
+# -------------------------------------------------------------------------
+# Testbench and helpers (now also pass config_file)
+# -------------------------------------------------------------------------
 
 class Metric_Testbench():
-    """This class tests the metrics for the selected spectra and creates a boxplot for the species selected.
-    Returns the path to the boxplot image"""
-    
-    #Calculate gammas
-    
-    def __init__(self, Metric, filtered_spectra):
-        if not filtered_spectra:
+    """Test metrics on selected spectra and generate a boxplot."""
+
+    def __init__(self, Metric, config_file: str, spectra):
+        if not spectra:
             raise ValueError("No spectra to evaluate")
         self.metric_class = Metric
-        self.spectra = filtered_spectra
+        self.config_file = config_file
+        self.spectra = spectra
         self.test_df, self.boxplot_path = self.get_boxplot()
-        
-    def get_boxplot(self):
-        
-        filtered_spectra = self.spectra
-        Metric = self.metric_class
-        
-        metric_list = []
 
-        for spectrum in filtered_spectra:
-            #print(spectrum.get_normalized_spectrum())
+    def get_boxplot(self):
+        metric_list = []
+        for spectrum in self.spectra:
             try:
-                metric = Metric(spectrum)
+                metric = self.metric_class(spectrum, self.config_file)
                 metric_list.append(metric)
             except Exception as e:
                 print(e)
-        sorted(metric_list)
 
-        metric_df = pd.DataFrame(columns=["species", "genus", "gamma", "code", "filename"])
-
-        #add specimen information to the gammas
+        metric_df = pd.DataFrame(columns=["species", "genus", "metric", "code", "filename"])
         for index, metric in enumerate(metric_list):
-            metric_df.loc[index,"species"] = metric.spectrum.species
-            metric_df.loc[index,"genus"] = metric.spectrum.genus
-            metric_df.loc[index,"metric"] = metric.metric_value
-            metric_df.loc[index,"code"] = metric.spectrum.code
-            metric_df.loc[index,"filename"] = metric.spectrum.filename
+            metric_df.loc[index, "species"] = metric.spectrum.species
+            metric_df.loc[index, "genus"] = metric.spectrum.genus
+            metric_df.loc[index, "metric"] = metric.metric_value
+            metric_df.loc[index, "code"] = metric.spectrum.code
+            metric_df.loc[index, "filename"] = metric.spectrum.filename
 
-        #print(gamma_df)
-        
-        #finally, information is presented as a boxplot and saved
-        ax = metric_df.boxplot(column=["metric"], by=["species"], ax=None, fontsize=None, rot=90, grid=True, figsize=(4*3, 4*3), layout=None, return_type=None, backend=None, showfliers=False)
+        ax = metric_df.boxplot(column=["metric"], by=["species"], rot=90, grid=True, figsize=(12, 12), showfliers=False)
         fig = ax.figure
-        plt.title(f" Metric: {Metric.get_name() }. Collections: {collection_names}. \n Metric values for C. resplendens, C. kalinini and C. cupreomarginata.")
-        
-        path= os.path.join(report_location, "report_images", "gamma_image")
+        plt.title(f" Metric: {self.metric_class.get_name()} ")
+        path = os.path.join("report_location", "report_images", "gamma_image")
         create_path_if_not_exists(path)
-        filename = os.path.join(path, f"{Metric.get_name()} "+ collection_names + f"-{current_date}" +".jpeg") 
+        filename = os.path.join(path, f"{self.metric_class.get_name()}.jpeg")
         fig.savefig(filename)
-        
+
         return metric_df, filename
 
-def get_aggregated_data(metric_class,filtered_spectra):
-    #Calculate gammas
-    metric_list = []
 
+def get_aggregated_data(metric_class, config_file: str, filtered_spectra):
+    metric_list = []
     for spectrum in filtered_spectra:
-        
         try:
-            metric = metric_class(spectrum)
+            metric = metric_class(spectrum, config_file)
             metric_list.append(metric)
-            #print(metric_list)
         except Exception as e:
             print(e)
-            
-    #Order the list
-    sorted(metric_list)
-    
-    #Create a dataframe
-    metric_df = pd.DataFrame(columns=["species", "genus", "gamma", "code", "filename"])
 
-    #add specimen information to the metric
+    metric_df = pd.DataFrame(columns=["species", "genus", "metric", "code", "filename"])
     for index, metric in enumerate(metric_list):
-        metric_df.loc[index,"species"] = metric.spectrum.species
-        metric_df.loc[index,"metric"] = metric.metric_value
+        metric_df.loc[index, "species"] = metric.spectrum.species
+        metric_df.loc[index, "metric"] = metric.metric_value
 
-    #get info on df
-    grouped_stats = metric_df.groupby('species')['metric'].agg(['mean', 'std'])
-    #print(grouped_stats)
-    grouped_stats = grouped_stats
-    #print(grouped_stats)
-    return grouped_stats
-    
-def save_aggregated_data(metric_class,filtered_spectra, agregated_data_location):
+    return metric_df.groupby('species')['metric'].agg(['mean', 'std'])
 
-    #calculate aggregated data 
-    grouped_stats = get_aggregated_data(metric_class,filtered_spectra)
-    
-    #save information
+
+def save_aggregated_data(metric_class, config_file: str, filtered_spectra, agregated_data_location):
+    grouped_stats = get_aggregated_data(metric_class, config_file, filtered_spectra)
     path_location = os.path.join(agregated_data_location, "metric_avg_std")
     create_path_if_not_exists(path_location)
-    path_and_filename = os.path.join( path_location, f'{metric_class.get_name()}')
-    grouped_stats.to_csv( path_and_filename, index=True, sep = "\t")
-    
-    #return path
+    path_and_filename = os.path.join(path_location, f'{metric_class.get_name()}')
+    grouped_stats.to_csv(path_and_filename, index=True, sep="\t")
     return path_and_filename
 
-def read_aggregated_data(agregated_data_location):
 
-    folder_path = agregated_data_location
-
-    # Get a list of all files in the folder
-    file_list = os.listdir(folder_path)
-
-    #print(file_list)
-    
-    # Print the list of files
-    dataframes = {}
-    
-    for file_name in file_list:
-        full_path = os.path.join(folder_path, file_name)
-        
-        df = pd.read_csv(full_path, sep="\t", header = 0)
-        dataframes[file_name]= df
-        
-    #return path
-    return dataframes
+def feature_and_label_extractor(Metric, config_file: str, spectra, debug=DEBUG):
+    debug = False
+    features, labels, codes = [], [], []
+    for spectrum in spectra:
+        if debug:
+            #spectrum.plot()
+            pass
+        metric = Metric(spectrum, config_file)
+        features.append(metric.get_metric_value())
+        labels.append(spectrum.get_species())
+        codes.append(spectrum.code)
+    return [codes, features, labels]
