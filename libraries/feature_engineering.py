@@ -1,283 +1,160 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import warnings
+import os
 from pathlib import Path
 
-def pad_arrays(arrays, max_length=None, pad_value=0.0):
-    """
-    Pad a list of numpy arrays to the maximum length in the list (or specified max_length) with pad_value.
-    
-    Parameters:
-    - arrays: List of numpy arrays (1D or 2D).
-    - max_length: Maximum length to pad to (default: None, uses max length in arrays).
-    - pad_value: Value to use for padding (default: 0.0).
-    
-    Returns:
-    - Padded list of arrays.
-    """
-    if not arrays:
-        return []
-    
-    # Determine if arrays are 1D (vectorial) or 2D (matricial)
-    is_2d = any(arr.ndim == 2 for arr in arrays if isinstance(arr, np.ndarray))
-    
-    if is_2d:
-        # For 2D arrays, find max rows and cols
-        max_rows = max_length[0] if max_length and isinstance(max_length, (list, tuple)) else max(arr.shape[0] for arr in arrays if isinstance(arr, np.ndarray))
-        max_cols = max_length[1] if max_length and isinstance(max_length, (list, tuple)) and len(max_length) > 1 else max(arr.shape[1] for arr in arrays if isinstance(arr, np.ndarray))
-        padded = []
-        for arr in arrays:
-            if not isinstance(arr, np.ndarray):
-                padded.append(np.full((max_rows, max_cols), pad_value))
-                continue
-            rows, cols = arr.shape
-            padded_arr = np.full((max_rows, max_cols), pad_value)
-            padded_arr[:rows, :cols] = arr
-            padded.append(padded_arr)
-    else:
-        # For 1D arrays
-        max_len = max_length if max_length and isinstance(max_length, (int)) else max(len(arr) for arr in arrays if isinstance(arr, np.ndarray))
-        padded = []
-        for arr in arrays:
-            if not isinstance(arr, np.ndarray):
-                padded.append(np.full(max_len, pad_value))
-                continue
-            padded_arr = np.full(max_len, pad_value)
-            padded_arr[:len(arr)] = arr
-            padded.append(padded_arr)
-    
-    return padded
+# ---------- Helpers ----------
+def create_path_if_not_exists(path):
+    Path(path).mkdir(parents=True, exist_ok=True)
 
-def get_aggregated_data(Metric, all_spectra, params = None, debug=False):
-    """
-    Compute aggregated statistics and visualizations for a given Metric across a list of spectra, grouped by species.
-    Handles scalar, vectorial, and matricial metrics.
-    
-    Parameters:
-    - Metric: A class with a name attribute and get_metric_value() method (returns scalar, 1D array, or 2D array).
-    - all_spectra: List of Spectrum objects.
-    - debug: Boolean to enable debug output (default: False).
-    
-    Returns:
-    - stats_df: pandas DataFrame with per-species statistics (mean, std, median, min, max, count, IQR, CV).
-    """
-    # Initialize data storage
+def compute_outliers(series):
+    """Return outliers using IQR rule."""
+    q1, q3 = np.percentile(series, [25, 75])
+    iqr = q3 - q1
+    lower, upper = q1 - 1.5 * iqr, q3 + 1.5 * iqr
+    return series[(series < lower) | (series > upper)]
+
+
+# ---------- Scalar case ----------
+def handle_scalar(df, Metric, save_path=None, debug=False):
+    # Drop missing metric values
+    df = df.dropna(subset=["metric_value"])
+    if df.empty:
+        print(f"⚠️ {Metric.name}: No valid metric values after dropping NaNs.")
+        return pd.DataFrame(columns=["mean", "std", "median", "min", "max", "count", "iqr", "cv"]), None
+
+    # --- Statistics ---
+    stats_df = df.groupby("species")["metric_value"].agg(
+        ["mean", "std", "median", "min", "max", "count"]
+    )
+    stats_df["iqr"] = df.groupby("species")["metric_value"].apply(
+        lambda x: np.percentile(x, 75) - np.percentile(x, 25)
+    )
+    stats_df["cv"] = stats_df["std"] / stats_df["mean"]
+
+    # --- Boxplot + individual points ---
+    filename = None
+    if not df.empty and df["species"].nunique() > 0:
+        plt.figure(figsize=(10, 7))
+        try:
+            ax = sns.boxplot(x="species", y="metric_value", data=df, showfliers=False, palette="Set3")
+            sns.stripplot(
+                x="species", y="metric_value", data=df,
+                jitter=True, dodge=True, alpha=0.7, color="black", size=5
+            )
+            plt.xticks(rotation=90)
+            plt.title(f"Boxplot of {Metric.name} with individual points")
+            plt.grid(axis="y", linestyle="--", alpha=0.7)
+
+            if save_path:
+                create_path_if_not_exists(save_path)
+                filename = os.path.join(save_path, f"{Metric.name}.jpeg")
+                plt.savefig(filename, bbox_inches="tight")
+            plt.show()
+        except ValueError as e:
+            print(f"⚠️ Skipping boxplot due to error: {e}")
+
+    # --- Outliers (optional debug) ---
+    if debug:
+        for species in df["species"].dropna().unique():
+            subset = df[df["species"] == species]["metric_value"].dropna()
+            outs = compute_outliers(subset)
+            if not outs.empty:
+                print(f"Outliers for {species}:", outs.tolist())
+
+    return stats_df.round(4), filename
+
+
+# ---------- Vector case ----------
+def handle_vector(df, Metric, save_path=None, debug=False):
+    stats_dict = {}
+    df = df.copy()
+    df["metric_value"] = df["metric_value"].apply(lambda v: np.array(v, dtype=float))
+
+    # Pad arrays globally
+    max_len = max(len(arr) for arr in df["metric_value"])
+    padded_all = np.array([np.pad(arr, (0, max_len - len(arr)), constant_values=np.nan) for arr in df["metric_value"]])
+    padded_df = pd.DataFrame(padded_all, columns=[f"elem_{i}" for i in range(max_len)])
+    padded_df["species"] = df["species"].values
+
+    # Stats per species
+    for species, group in df.groupby("species"):
+        values = group["metric_value"].tolist()
+        padded = np.array([np.pad(arr, (0, max_len - len(arr)), constant_values=np.nan) for arr in values])
+        value_df = pd.DataFrame(padded, columns=[f"elem_{i}" for i in range(max_len)])
+        stats = value_df.agg(["mean", "std", "median", "min", "max"])
+        stats.loc["iqr"] = np.nanpercentile(value_df, 75, axis=0) - np.nanpercentile(value_df, 25, axis=0)
+        stats.loc["cv"] = stats.loc["std"] / stats.loc["mean"]
+        stats_dict[species] = stats
+
+    stats_df = pd.concat(stats_dict, axis=1)
+    stats_df.columns.names = ["species", "metric"]
+
+    # Boxplot for first 3 elements
+    melted = padded_df.melt(id_vars="species", var_name="element", value_name="value")
+    subset = melted[melted["element"].isin(["elem_0", "elem_1", "elem_2"])]
+
+    plt.figure(figsize=(12, 7))
+    sns.boxplot(x="species", y="value", hue="element", data=subset, showfliers=False)
+    sns.stripplot(x="species", y="value", hue="element", data=subset, dodge=True, alpha=0.6, size=3, marker="o")
+    plt.title(f"{Metric.name} (first 3 elements) with individual points")
+    plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
+
+    filename = None
+    if save_path:
+        create_path_if_not_exists(save_path)
+        filename = os.path.join(save_path, f"{Metric.name}_vector.jpeg")
+        plt.savefig(filename, bbox_inches="tight")
+    plt.show()
+
+    return stats_df.round(4), filename
+
+
+# ---------- Matrix case ----------
+def handle_matrix(df, Metric, save_path=None, debug=False):
+    df = df.copy()
+    df["metric_value"] = df["metric_value"].apply(
+        lambda m: np.array(m).flatten() if m is not None else np.array([])
+    )
+
+    max_len = max(len(arr) for arr in df["metric_value"])
+    padded_all = np.array([np.pad(arr, (0, max_len - len(arr)), constant_values=np.nan) for arr in df["metric_value"]])
+    df["metric_value"] = list(padded_all)
+
+    return handle_vector(df, Metric, save_path=save_path, debug=debug)
+
+
+# ---------- Main wrapper ----------
+def get_aggregated_data(Metric, spectra, config_file, collection_list, plot=False, save_path="report_location/report_images"):
+    """Dispatch scalar / vector / matrix metric aggregation with plotting and saving."""
+    debug = False
     data = []
-    
-    # Compute metric values for each spectrum
-    for spectrum in all_spectra:
+    for spectrum in spectra:
         try:
             species = spectrum.get_species()
             if species == "na":
-                if debug:
-                    warnings.warn(
-                        f"Skipping spectrum {spectrum.get_filename()}: No species defined.",
-                        UserWarning
-                    )
                 continue
-            metric = Metric(spectrum, params)
+            metric = Metric(spectrum, config_file, collection_list, plot=plot)
             value = metric.get_metric_value()
-            
-            # Determine metric type
-            if isinstance(value, (int, float)) and np.isfinite(value):
-                # Scalar
-                data.append({"species": species, "metric_value": value, "filename": spectrum.get_filename()})
-            elif isinstance(value, np.ndarray):
-                if value.ndim == 1:
-                    # Vectorial
-                    data.append({"species": species, "metric_value": value, "filename": spectrum.get_filename()})
-                elif value.ndim == 2:
-                    # Matricial
-                    data.append({"species": species, "metric_value": value.flatten(), "filename": spectrum.get_filename()})
-                else:
-                    if debug:
-                        warnings.warn(
-                            f"Invalid metric value shape {value.shape} for {spectrum.get_filename()} "
-                            f"(species: {species}). Skipping.",
-                            UserWarning
-                        )
-                    continue
-            else:
-                if debug:
-                    warnings.warn(
-                        f"Invalid metric value type {type(value)} for {spectrum.get_filename()} "
-                        f"(species: {species}). Skipping.",
-                        UserWarning
-                    )
-                continue
+            data.append({"species": species, "metric_value": value, "filename": spectrum.get_filename()})
         except Exception as e:
-            if debug:
-                warnings.warn(
-                    f"Error computing metric for {spectrum.get_filename()}: {e}",
-                    UserWarning
-                )
-    
+            if debug: warnings.warn(f"Error computing metric for {spectrum.get_filename()}: {e}")
+
     if not data:
-        warnings.warn("No valid metric values computed. Returning empty DataFrame.", UserWarning)
-        return pd.DataFrame()
-    
-    # Create DataFrame
+        return pd.DataFrame(), None
+
     df = pd.DataFrame(data)
-    
-    # Determine metric type based on first valid metric_value
-    first_value = df["metric_value"].iloc[0]
-    is_scalar = isinstance(first_value, (int, float))
-    is_vectorial = isinstance(first_value, np.ndarray) and first_value.ndim == 1
-    is_matricial = isinstance(first_value, np.ndarray) and first_value.ndim > 1
-    
-    # Aggregate statistics
-    if is_scalar:
-        # Scalar: Compute statistics directly
-        stats_df = df.groupby("species")["metric_value"].agg([
-            "mean", "std", "median", "min", "max", "count",
-            lambda x: np.percentile(x, 75) - np.percentile(x, 25)  # IQR
-        ]).rename(columns={"<lambda_0>": "iqr"})
-        stats_df["cv"] = stats_df["std"] / stats_df["mean"]
+    first_val = df["metric_value"].iloc[0]
+
+    if np.isscalar(first_val):
+        return handle_scalar(df, Metric, save_path, debug)
+    elif isinstance(first_val, np.ndarray) and first_val.ndim == 1:
+        return handle_vector(df, Metric, save_path, debug)
+    elif isinstance(first_val, np.ndarray) and first_val.ndim == 2:
+        return handle_matrix(df, Metric, save_path, debug)
     else:
-        # Vectorial or matricial: Pad arrays and compute statistics per element
-        grouped = df.groupby("species")
-        stats_dict = {}
-        for species, group in grouped:
-            values = group["metric_value"].tolist()
-            # Find max length for padding (per species)
-            max_length = max(len(v) for v in values if isinstance(v, np.ndarray))
-            padded_values = pad_arrays(values, max_length=max_length, pad_value=0.0)
-            # Convert to DataFrame for statistics
-            value_df = pd.DataFrame(padded_values, columns=[f"elem_{i}" for i in range(max_length)])
-            stats = value_df.agg([
-                "mean", "std", "median", "min", "max", "count",
-                lambda x: np.percentile(x, 75) - np.percentile(x, 25)
-            ]).rename({"<lambda_0>": "iqr"})
-            stats["cv"] = stats["std"] / stats["mean"]
-            stats_dict[species] = stats
-        # Combine statistics into a MultiIndex DataFrame
-        stats_df = pd.concat(stats_dict, axis=1)
-        stats_df.columns.names = ["species", "metric"]
-    
-    # Round numeric columns
-    stats_df = stats_df.round(4)
-    
-    # Debug output
-    if debug:
-        print("Aggregated Statistics:")
-        print(stats_df)
-        print(f"Unique species: {list(df['species'].unique())}")
-        print(f"Total valid spectra processed: {len(df)}")
-    
-    # Visualizations
-    if is_scalar:
-        # Scalar: Single boxplot and histogram
-        plt.figure(figsize=(12, 6))
-        sns.boxplot(x="species", y="metric_value", data=df)
-        plt.title(f"Boxplot of {Metric.name} by Species")
-        plt.xticks(rotation=45)
-        plt.xlabel("Species")
-        plt.ylabel(f"{Metric.name} Value")
-        plt.tight_layout()
-        plt.show()
-        
-        # Histograms per species
-        unique_species = df["species"].unique()
-        n_species = len(unique_species)
-        plt.figure(figsize=(12, 4 * n_species))
-        for i, species in enumerate(unique_species, 1):
-            plt.subplot(n_species, 1, i)
-            sns.histplot(df[df["species"] == species]["metric_value"], kde=True)
-            plt.title(f"Histogram of {Metric.name} for {species}")
-            plt.xlabel(f"{Metric.name} Value")
-            plt.ylabel("Frequency")
-        plt.tight_layout()
-        plt.show()
-        
-        # Outlier detection
-        outliers = []
-        for species in unique_species:
-            species_data = df[df["species"] == species]["metric_value"]
-            q1 = np.percentile(species_data, 25)
-            q3 = np.percentile(species_data, 75)
-            iqr = q3 - q1
-            lower_bound = q1 - 1.5 * iqr
-            upper_bound = q3 + 1.5 * iqr
-            species_outliers = species_data[(species_data < lower_bound) | (species_data > upper_bound)]
-            for value in species_outliers:
-                outlier_file = df[(df["species"] == species) & (df["metric_value"] == value)]["filename"].iloc[0]
-                outliers.append({"species": species, "metric_value": value, "filename": outlier_file})
-    else:
-        # Vectorial or matricial: Boxplot per element, histogram for first few elements
-        max_elements = 3  # Limit to 3 elements to match example outputs
-        unique_species = df["species"].unique()
-        max_length = max(len(v) for v in df["metric_value"] if isinstance(v, np.ndarray))
-        # Create DataFrame with padded values
-        padded_df = pd.DataFrame()
-        for species in unique_species:
-            species_values = df[df["species"] == species]["metric_value"].tolist()
-            padded_values = pad_arrays(species_values, max_length=max_length, pad_value=0.0)
-            temp_df = pd.DataFrame(padded_values, columns=[f"elem_{i}" for i in range(max_length)])
-            temp_df["species"] = species
-            padded_df = pd.concat([padded_df, temp_df], ignore_index=True)
-        
-        # Boxplot per element
-        plt.figure(figsize=(12, 6))
-        sns.boxplot(x="species", y="value", hue="variable",
-                    data=pd.melt(padded_df, id_vars=["species"], value_vars=[f"elem_{i}" for i in range(min(max_length, max_elements))]))
-        plt.title(f"Boxplot of {Metric.name} Elements by Species")
-        plt.xticks(rotation=45)
-        plt.xlabel("Species")
-        plt.ylabel(f"{Metric.name} Element Value")
-        plt.legend(title="Element")
-        plt.tight_layout()
-        plt.show()
-        
-        # Histograms for first few elements
-        plt.figure(figsize=(12, 4 * min(max_length, max_elements)))
-        for i in range(min(max_length, max_elements)):
-            plt.subplot(min(max_length, max_elements), 1, i + 1)
-            for species in unique_species:
-                sns.histplot(padded_df[padded_df["species"] == species][f"elem_{i}"], kde=True, label=species, stat="density")
-            plt.title(f"Histogram of {Metric.name} Element {i} by Species")
-            plt.xlabel(f"Element {i} Value")
-            plt.ylabel("Density")
-            plt.legend()
-        plt.tight_layout()
-        plt.show()
-        
-        # Outlier detection for each element
-        outliers = []
-        for i in range(max_length):
-            for species in unique_species:
-                species_data = padded_df[padded_df["species"] == species][f"elem_{i}"].dropna()
-                if species_data.empty:
-                    continue
-                q1 = np.percentile(species_data, 25)
-                q3 = np.percentile(species_data, 75)
-                iqr = q3 - q1
-                lower_bound = q1 - 1.5 * iqr
-                upper_bound = q3 + 1.5 * iqr
-                species_outliers = species_data[(species_data < lower_bound) | (species_data > upper_bound)]
-                for value in species_outliers:
-                    idx = padded_df[(padded_df["species"] == species) & (padded_df[f"elem_{i}"] == value)].index[0]
-                    outlier_file = df.iloc[idx]["filename"]
-                    outliers.append({"species": species, "element": i, "metric_value": value, "filename": outlier_file})
-        
-        # Heatmap for matricial metrics (mean values)
-        if is_matricial:
-            plt.figure(figsize=(12, 6))
-            for species in unique_species:
-                species_values = df[df["species"] == species]["metric_value"].tolist()
-                mean_matrix = np.mean(pad_arrays(species_values, max_length=(max_length // max_length, max_length), pad_value=0.0), axis=0)
-                plt.subplot(1, len(unique_species), list(unique_species).index(species) + 1)
-                sns.heatmap(mean_matrix, annot=True, cmap="viridis")
-                plt.title(f"Mean {Metric.name} Matrix for {species}")
-                plt.xlabel("Column")
-                plt.ylabel("Row")
-            plt.tight_layout()
-            plt.show()
-    
-    if outliers and debug:
-        print("Outliers Detected:")
-        outliers_df = pd.DataFrame(outliers)
-        print(outliers_df.round(4))
-    
-    return stats_df
+        warnings.warn("Unsupported metric value type")
+        return pd.DataFrame(), None

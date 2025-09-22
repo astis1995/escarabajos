@@ -4,7 +4,7 @@ import re
 import scipy 
 import configparser
 from .utils import read_spectrum_file, get_genus, get_species, plot_wrapper
-
+import numpy as np
 class Peak:
     def __init__(self, x, y):
         self.x_value = x
@@ -26,48 +26,49 @@ class Peak:
         return self.y_value
 
 class PeakList:
-    def set_parameters(self, prominence_threshold_min=None, prominence_threshold_max=None,
-                      min_height_threshold_denominator=None, max_height_threshold_denominator=None,
-                      min_distance_between_peaks=None, max_distance_between_peaks=None):
-        if prominence_threshold_min is not None:
-            self.prominence_threshold_min = prominence_threshold_min
-        if prominence_threshold_max is not None:
-            self.prominence_threshold_max = prominence_threshold_max
-        if min_height_threshold_denominator is not None:
-            self.min_height_threshold_denominator = min_height_threshold_denominator
-        if max_height_threshold_denominator is not None:
-            self.max_height_threshold_denominator = max_height_threshold_denominator
-        if min_distance_between_peaks is not None:
-            self.min_distance_between_peaks = min_distance_between_peaks
-        if max_distance_between_peaks is not None:
-            self.max_distance_between_peaks = max_distance_between_peaks
+    
 
-    def __init__(self, spectrum, prominence_threshold_min=0.15, prominence_threshold_max=0.40,
-                 min_height_threshold_denominator=3.0, max_height_threshold_denominator=3.3,
-                 min_distance_between_peaks=160, max_distance_between_peaks=160,
-                 min_wavelength=None, max_wavelength=None): #todo delete unnecesary inputs
-        self.prominence_threshold_min = spectrum.prominence_threshold_min
-        self.prominence_threshold_max = spectrum.prominence_threshold_max
-        self.min_height_threshold_denominator = spectrum.min_height_threshold_denominator
-        self.max_height_threshold_denominator = spectrum.max_height_threshold_denominator
-        self.min_distance_between_peaks = spectrum.min_distance_between_peaks
-        self.max_distance_between_peaks = spectrum.max_distance_between_peaks
+    def __init__(self, spectrum): #todo delete unnecesary inputs
+        
         self.spectrum = spectrum
+
 
     def get_spectrum(self):
         return self.spectrum
 
-    def get_peaks(self, spectrum=None, min_wavelength=None, max_wavelength=None):
+    def get_peaks(self, spectrum=None, min_wavelength=None, max_wavelength=None, debug=False):
         if spectrum is None:
             spectrum = self.spectrum
+
+        # Get raw peaks
         peaks = spectrum.get_peaks_as_object(min_wavelength, max_wavelength)
-        x = []
-        y = []
-        for peak in peaks:
-            if not (855 < peak.get_x() < 869):
-                x.append(peak.get_x())
-                y.append(peak.get_y())
+
+        # Collect x, y values
+        x = [peak.get_x() for peak in peaks]
+        y = [peak.get_y() for peak in peaks]
+
+        # --- Filtro adicional personalizado (ejemplo que ya tenías) ---
+        # Elimina picos en un rango "prohibido" (855–869 nm)
+        mask = [(not (855 < xi < 869)) for xi in x]
+        x = np.array(x)[mask]
+        y = np.array(y)[mask]
+
+        # --- Filtro final por min/max rango ---
+        if min_wavelength is not None or max_wavelength is not None:
+            mask = np.ones_like(x, dtype=bool)
+            if min_wavelength is not None:
+                mask &= x >= min_wavelength
+            if max_wavelength is not None:
+                mask &= x <= max_wavelength
+
+            if debug and not np.all(mask):
+                print(f"⚠️ get_peaks: removed {np.sum(~mask)} peaks outside wavelength range.")
+
+            x = x[mask]
+            y = y[mask]
+
         return x, y
+
 
     def plot_settings(self, min_wavelength=None, max_wavelength=None):
         self.spectrum.plot_settings()
@@ -79,50 +80,147 @@ class PeakList:
         plot = self.plot_settings(min_wavelength, max_wavelength)
         return plot
 
-    def get_minima(self, spectrum, min_wavelength=None, max_wavelength=None):
-        df = spectrum.data
-        if min_wavelength and max_wavelength:
-            df = df[(df["wavelength"] < max_wavelength) & (df["wavelength"] > min_wavelength)]
+    def get_minima(self, spectrum,
+                   height_bottom_threshold_for_minimum,
+                   min_wavelength=None, 
+                   max_wavelength=None, 
+                   height_top_threshold_for_minimum=None,
+                   smallest_distance_between_peaks_for_min=None,
+                   prominence_threshold_for_min=None,
+                   debug=False):
+        debug=True
+        df_unfiltered = spectrum.data
+        #print("Spectrum get minima ", df.info)
+        # --- Filtrado por rango ---
+        if debug:
+            print("min wav", min_wavelength, "max_wav", max_wavelength)
+        if (min_wavelength) and (max_wavelength):
+            df = df_unfiltered[(df_unfiltered["wavelength"] < max_wavelength) & (df_unfiltered["wavelength"] > min_wavelength)]
         elif min_wavelength:
-            df = df[df["wavelength"] > min_wavelength]
+            df = df_unfiltered[df_unfiltered["wavelength"] > min_wavelength]
         elif max_wavelength:
-            df = df[df["wavelength"] < max_wavelength]
+            df = df_unfiltered[df_unfiltered["wavelength"] < max_wavelength]
+        else:
+            df = df_unfiltered.copy()
+
         x = df["wavelength"].values
         y = df[spectrum.metadata["measuring_mode"]].values
+
+        # --- Verificación de vacíos ---
+        if y.size == 0:
+            if debug:
+                print("⚠️ get_minima: no data points after filtering.")
+            return np.array([]), np.array([]), np.array([])
+
+        # --- Invertir señal ---
         y_max = y.max()
         y_inverted = -y + y_max
-        maximum_height = y_inverted.max() * 0.60
-        minimum_height = 0
-        peaks_funct = scipy.signal.find_peaks(y_inverted, distance=self.min_distance_between_peaks,
-                                              prominence=self.prominence_threshold_min,
-                                              height=(minimum_height, maximum_height))
-        peaks_index = peaks_funct[0]
+
+        # --- Calcular thresholds ---
+        max_val = y_inverted.max()
+        maximum_height = max_val * height_top_threshold_for_minimum if height_top_threshold_for_minimum else max_val
+        minimum_height = max_val * height_bottom_threshold_for_minimum if height_bottom_threshold_for_minimum else 0.0
+
+        if debug:
+            print(f"""get_minima: max_val={max_val}, 
+                  bottom_thr={minimum_height}, top_thr={maximum_height}, 
+                  {prominence_threshold_for_min=}{min_wavelength=}{max_wavelength=}""")
+            
+        # --- Encontrar mínimos (picos de y_inverted) ---
+        peaks_index, properties = scipy.signal.find_peaks(
+            y_inverted,
+            distance=smallest_distance_between_peaks_for_min,
+            prominence=prominence_threshold_for_min,
+            height=(minimum_height, maximum_height)
+        )
+
+        # --- Si no hay picos ---
+        if peaks_index.size == 0:
+            if debug:
+                print("⚠️ get_minima: no minima found.")
+            return np.array([]), np.array([]), np.array([])
+
+        # --- Resultados ---
         x_values = x[peaks_index]
-        y_values = y[peaks_index]
+        y_values = y[peaks_index]   # Nota: devuelvo los valores originales (no invertidos)
+        
+         # --- Filtro final: descartar puntos fuera del rango ---
+        if min_wavelength is not None or max_wavelength is not None:
+            mask = np.ones_like(x_values, dtype=bool)
+            if min_wavelength is not None:
+                mask &= x_values >= min_wavelength
+            if max_wavelength is not None:
+                mask &= x_values <= max_wavelength
+
+            x_values = x_values[mask]
+            y_values = y_values[mask]
+
+            if debug and not np.all(mask):
+                print(f"⚠️ get_minima: removed {np.sum(~mask)} minima outside wavelength range.")
         return peaks_index, x_values, y_values
 
-    def get_maxima(self, spectrum, min_wavelength=None, max_wavelength=None):
+
+    def get_maxima(self, spectrum,
+                   height_bottom_threshold_for_maximum,
+                   min_wavelength=None, 
+                   max_wavelength=None,                                   
+                   height_top_threshold_for_maximum=None, 
+                   smallest_distance_between_peaks_for_max=None,
+                   prominence_threshold_for_max=None):
+        debug = False
         df = spectrum.data
-        if min_wavelength and max_wavelength:
+        if debug:
+            print("df peaklist get max", df)
+            print("min", min_wavelength, "max", max_wavelength)
+        # --- Filtrado por rango de longitud de onda ---
+        if (min_wavelength) and (max_wavelength):
             df2 = df[(df["wavelength"] < max_wavelength) & (df["wavelength"] > min_wavelength)]
         elif min_wavelength:
             df2 = df[df["wavelength"] > min_wavelength]
         elif max_wavelength:
             df2 = df[df["wavelength"] < max_wavelength]
         else:
-            df2 = df
+            df2 = df.copy()
+
+        if debug:
+            print("after filtering get_maxima: Dataframe summary:\n", df2.info())
+
+        # --- Extraer arrays ---
         x = df2["wavelength"].values
         y = df2[spectrum.metadata["measuring_mode"]].values
-        min_height = y.max() / self.min_height_threshold_denominator
-        min_distance = 50
-        max_distance = 100.00
-        width_t = 50.00
-        peaks_funct = scipy.signal.find_peaks(y, height=min_height, distance=self.max_distance_between_peaks,
-                                              prominence=self.prominence_threshold_max)
-        peaks_index = peaks_funct[0]
+
+        # --- Verificación de vacíos ---
+        if y.size == 0:
+            if debug:
+                print("⚠️ get_maxima: no data points after filtering.")
+            # Devuelve arrays vacíos en vez de fallar
+            return np.array([]), np.array([]), np.array([])
+
+        # --- Umbral de altura ---
+        min_height = y.max() * height_bottom_threshold_for_maximum
+        if debug:
+            print("Spectrum/get_maxima/height_bottom_threshold_for_maximum:",
+                  height_bottom_threshold_for_maximum,
+                  "→ min_height =", min_height)
+
+        # --- Encontrar picos ---
+        peaks_index, properties = scipy.signal.find_peaks(
+            y,
+            height=min_height,
+            distance=smallest_distance_between_peaks_for_max,
+            prominence=prominence_threshold_for_max
+        )
+
+        if peaks_index.size == 0:
+            if debug:
+                print("⚠️ get_maxima: no peaks found.")
+            return np.array([]), np.array([]), np.array([])
+
         x_values = x[peaks_index]
         y_values = y[peaks_index]
+
         return peaks_index, x_values, y_values
+
         
 class Spectrum:
     """
@@ -131,12 +229,12 @@ class Spectrum:
     Parameters are now loaded from a `.config` file instead of being passed directly.
     The configuration file must contain a `[Spectrum]` section with the following fields:
 
-    - prominence_threshold_min (float)
-    - prominence_threshold_max (float)
-    - min_height_threshold_denominator (float)
-    - max_height_threshold_denominator (float)
-    - min_distance_between_peaks (int)
-    - max_distance_between_peaks (int)
+    - prominence_threshold_for_min (float)
+    - prominence_threshold_for_max (float)
+    - height_bottom_threshold_for_minimum (float)
+    - height_bottom_threshold_for_maximum (float)
+    - smallest_distance_between_peaks_for_min (int)
+    - smallest_distance_between_peaks_for_max (int)
     - min_wavelength (float or None)
     - max_wavelength (float or None)
     - equipment (str, optional)
@@ -157,11 +255,11 @@ class Spectrum:
         return self.filename
     
     def __init__(self, file_location, config_file: str, collection = None):
-        debug = True
+        debug = False
         #Load
         self.file_location = file_location
         self.collection = collection
-        self.metadata, self.data = read_spectrum_file(file_location, debug = True)
+        self.metadata, self.data = read_spectrum_file(file_location)
         self.code = self.metadata.get("code", "na")
         self.genus = get_genus(self.code, collection)
         self.species = get_species(self.code, collection)
@@ -169,79 +267,44 @@ class Spectrum:
         self.polarization = self.metadata.get("polarization", "na")
         self.filename = self.metadata.get("filename", "na")
         
-        # Load config
-        config = configparser.ConfigParser()
-        config.read(config_file)
-
-        if "Spectrum" not in config:
-            raise ValueError("Config file must contain a [Spectrum] section.")
-
-        cfg = config["Spectrum"]
-        
-        if debug:
-            print("Spectrum config:", cfg)
-        # Parse values with fallback
-        
-        self.prominence_threshold_min = cfg.getfloat("prominence_threshold_min", 0.15)
-        self.prominence_threshold_max = cfg.getfloat("prominence_threshold_max", 0.40)
-        self.min_height_threshold_denominator = cfg.getfloat("min_height_threshold_denominator", 3.0)
-        self.max_height_threshold_denominator = cfg.getfloat("max_height_threshold_denominator", 3.3)
-        self.min_distance_between_peaks = cfg.getint("min_distance_between_peaks", 160)
-        self.max_distance_between_peaks = cfg.getint("max_distance_between_peaks", 160)
-        self.min_wavelength = cfg.getfloat("min_wavelength", fallback=450)
-        self.max_wavelength = cfg.getfloat("max_wavelength", fallback=1100)
-        self.equipment = cfg.get("equipment", None)
-        
-        print("min_wavelength", self.min_wavelength, "max_wavelength", self.max_wavelength, "code:", self.code)
         # PeakList initialization
-        self.peaklist = PeakList(
-            self,
-            self.prominence_threshold_min,
-            self.prominence_threshold_max,
-            self.min_height_threshold_denominator,
-            self.max_height_threshold_denominator,
-            self.min_distance_between_peaks,
-            self.max_distance_between_peaks,
-            self.min_wavelength,
-            self.max_wavelength,
-        )
+        self.peaklist = PeakList(spectrum = self)
         
-    def set_parameters(self, prominence_threshold_min=None, prominence_threshold_max=None,
-                      min_height_threshold_denominator=None, max_height_threshold_denominator=None,
-                      min_distance_between_peaks=None, max_distance_between_peaks=None):
-        if prominence_threshold_min is not None:
-            self.prominence_threshold_min = prominence_threshold_min
-        if prominence_threshold_max is not None:
-            self.prominence_threshold_max = prominence_threshold_max
-        if min_height_threshold_denominator is not None:
-            self.min_height_threshold_denominator = min_height_threshold_denominator
-        if max_height_threshold_denominator is not None:
-            self.max_height_threshold_denominator = max_height_threshold_denominator
-        if min_distance_between_peaks is not None:
-            self.min_distance_between_peaks = min_distance_between_peaks
-        if max_distance_between_peaks is not None:
-            self.max_distance_between_peaks = max_distance_between_peaks
         
-        # PeakList initialization
-        self.peaklist.set_parameters(
-        prominence_threshold_min, 
-        prominence_threshold_max,
-        min_height_threshold_denominator, 
-        max_height_threshold_denominator,
-        min_distance_between_peaks, 
-        max_distance_between_peaks)
+    
+    def print_parameters(self):
+        debug = False
+        params = [
+            "prominence_threshold_for_min",
+            "prominence_threshold_for_max",
+            "height_bottom_threshold_for_minimum",
+            "height_bottom_threshold_for_maximum",
+            "smallest_distance_between_peaks_for_min",
+            "smallest_distance_between_peaks_for_max",
+        ]
+
+        for param in params:
+            if hasattr(self, param):
+                value = getattr(self, param)
+                if debug:
+                    print(f"{param}: {value}")
+            else:
+                if debug:
+                    print(f"{param}: (not set)")
+                
+    
         
-    def filter_wavelengths(self, df):
-        debug = True
+    def filter_wavelengths(self, df, min_wavelength, max_wavelength):
+        debug = False
         if debug:
             print("Filtering wavelengths")
             
-        if self.min_wavelength:
-            df = df[df["wavelength"] > self.min_wavelength]
-        if self.max_wavelength:
-            df = df[df["wavelength"] < self.max_wavelength]
-        if self.min_wavelength and self.max_wavelength:
-            df = df[(df["wavelength"] < self.max_wavelength)&(df["wavelength"] > self.min_wavelength)]
+        if min_wavelength:
+            df = df[df["wavelength"] > min_wavelength]
+        if max_wavelength:
+            df = df[df["wavelength"] < max_wavelength]
+        if min_wavelength and max_wavelength:
+            df = df[(df["wavelength"] < max_wavelength)&(df["wavelength"] > min_wavelength)]
         return df
 
     def plot_settings(self):
@@ -278,10 +341,13 @@ class Spectrum:
         min_i, x_values, y_values = self.peaklist.get_minima(self, self.min_wavelength, self.max_wavelength)
         return plt.scatter(x_values, y_values, color="r")
 
-    def get_normalized_spectrum(self):
+    def get_normalized_spectrum(self, min_wavelength, max_wavelength):
         df_unfiltered = self.data[["wavelength", self.measuring_mode]].copy()  # Explicit copy
         #limit to valid range
-        df = self.filter_wavelengths(df_unfiltered)
+        if min_wavelength or max_wavelength:
+            df = self.filter_wavelengths(df_unfiltered, min_wavelength, max_wavelength)
+        else:
+            df = df_unfiltered.copy()
         max_value = df[self.measuring_mode].max()
         if max_value == 0:
             warnings.warn(
@@ -292,21 +358,54 @@ class Spectrum:
         df[self.measuring_mode] = df[self.measuring_mode] / max_value
         return df
 
-    def get_maxima(self, min_wavelength=None, max_wavelength=None):
-        return self.peaklist.get_maxima(self, self.min_wavelength, self.max_wavelength)
+    def get_maxima(self, min_wavelength, 
+                        max_wavelength, 
+                        height_bottom_threshold_for_maximum, 
+                        height_top_threshold_for_maximum, 
+                        smallest_distance_between_peaks_for_max): 
+        return self.peaklist.get_maxima(self, min_wavelength= min_wavelength, 
+                                        max_wavelength= max_wavelength, 
+                                        height_bottom_threshold_for_maximum = height_bottom_threshold_for_maximum, 
+                                        height_top_threshold_for_maximum = height_top_threshold_for_maximum, 
+                                        smallest_distance_between_peaks_for_max= smallest_distance_between_peaks_for_max,
+                                        )
 
-    def get_minima(self, min_wavelength=None, max_wavelength=None):
-        return self.peaklist.get_minima(self, self.min_wavelength, self.max_wavelength)
+    def get_minima(self, min_wavelength, 
+                        max_wavelength, 
+                        height_bottom_threshold_for_minimum , 
+                        height_top_threshold_for_minimum , 
+                        smallest_distance_between_peaks_for_min):
+                            return self.peaklist.get_minima(self, min_wavelength= min_wavelength, 
+                                                            max_wavelength= max_wavelength, 
+                                                            height_bottom_threshold_for_minimum=height_bottom_threshold_for_minimum, 
+                                                            height_top_threshold_for_minimum=height_top_threshold_for_minimum, 
+                                                            smallest_distance_between_peaks_for_min=smallest_distance_between_peaks_for_min)
 
-    def get_critical_points(self, min_wavelength=None, max_wavelength=None):
-        return self.peaklist.get_peaks(self, self.min_wavelength, self.max_wavelength)
+    def get_critical_points(self, min_wavelength=None, max_wavelength=None, 
+                                                    height_bottom_threshold_for_maximum = None, 
+                                                    height_top_threshold_for_maximum = None, 
+                                                    height_bottom_threshold_for_minimum = None, 
+                                                    height_top_threshold_for_minimum = None):
+        return self.peaklist.get_peaks(self, min_wavelength, max_wavelength, height_bottom_threshold_for_maximum, 
+                                                                             height_top_threshold_for_maximum, 
+                                                                             height_bottom_threshold_for_minimum, 
+                                                                             height_top_threshold_for_minimum)
 
     def set_dataframe(self, df):
         self.data = df
 
     def get_dataframe(self):
         return self.data
-
+    
+    def get_equipment(self):
+        print("Getting equipment. Spectrum")
+        try:
+            equip = self.metadata["equipment"]
+        except Exception as e: 
+            print(e)
+            equip = "na"
+        return equip
+        
     def get_data(self):
         return self.data
 
@@ -330,19 +429,21 @@ class Spectrum:
             return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s)]
         return alphanum_key(self.code) < alphanum_key(other.code)
 
-    def get_peaks_as_object(self, get_maxima=True, get_minima=True, min_wavelength=None, max_wavelength=None):
+    def get_peaks_as_object(self, get_maxima=True, get_minima=True, min_wavelength=None, max_wavelength=None, height_bottom_threshold_for_maximum =None, top_height_threshold_maximum=None):
         import scipy
         x = self.data["wavelength"].values
         y = self.data[self.metadata["measuring_mode"]].values
-        min_height = y.max() / self.max_height_threshold_denominator
+        
         
         peaks = []
         if get_maxima:
-            max_i, max_x_values, max_y_values = self.peaklist.get_maxima(self, min_wavelength, max_wavelength)
+            min_height = y.max() * self.height_bottom_threshold_for_maximum
+            max_i, max_x_values, max_y_values = self.peaklist.get_maxima(self, height_bottom_threshold_for_maximum, top_height_threshold_maximum)
             for x_val, y_val in zip(max_x_values, max_y_values):
                 peaks.append(Peak(x_val, y_val))
         if get_minima:
-            min_i, min_x_values, min_y_values = self.peaklist.get_minima(self, min_wavelength, max_wavelength)
+            min_height = y.max() * self.height_bottom_threshold_for_minimum
+            min_i, min_x_values, min_y_values = self.peaklist.get_minima(self, bottom_height_threshold_minimum, top_height_threshold_minimum)
             for x_val, y_val in zip(min_x_values, min_y_values):
                 peaks.append(Peak(x_val, y_val))
         return sorted(peaks)

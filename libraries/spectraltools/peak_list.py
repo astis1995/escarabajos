@@ -6,32 +6,32 @@ from .peak import Peak
 
 
 class PeakList:
-    def set_parameters(self, prominence_threshold_min=None, prominence_threshold_max=None,
-                      min_height_threshold_denominator=None, max_height_threshold_denominator=None,
-                      min_distance_between_peaks=None, max_distance_between_peaks=None):
-        if prominence_threshold_min is not None:
-            self.prominence_threshold_min = prominence_threshold_min
-        if prominence_threshold_max is not None:
-            self.prominence_threshold_max = prominence_threshold_max
-        if min_height_threshold_denominator is not None:
-            self.min_height_threshold_denominator = min_height_threshold_denominator
-        if max_height_threshold_denominator is not None:
-            self.max_height_threshold_denominator = max_height_threshold_denominator
-        if min_distance_between_peaks is not None:
-            self.min_distance_between_peaks = min_distance_between_peaks
-        if max_distance_between_peaks is not None:
-            self.max_distance_between_peaks = max_distance_between_peaks
+    def set_parameters(self, prominence_threshold_for_min=None, prominence_threshold_for_max=None,
+                      height_bottom_threshold_for_minimun=None, height_bottom_threshold_for_maximum=None,
+                      smallest_distance_between_peaks_for_min=None, smallest_distance_between_peaks_for_max=None):
+        if prominence_threshold_for_min is not None:
+            self.prominence_threshold_for_min = prominence_threshold_for_min
+        if prominence_threshold_for_max is not None:
+            self.prominence_threshold_for_max = prominence_threshold_for_max
+        if height_bottom_threshold_for_minimun is not None:
+            self.height_bottom_threshold_for_minimun = height_bottom_threshold_for_minimun
+        if height_bottom_threshold_for_maximum is not None:
+            self.height_bottom_threshold_for_maximum = height_bottom_threshold_for_maximum
+        if smallest_distance_between_peaks_for_min is not None:
+            self.smallest_distance_between_peaks_for_min = smallest_distance_between_peaks_for_min
+        if smallest_distance_between_peaks_for_max is not None:
+            self.smallest_distance_between_peaks_for_max = smallest_distance_between_peaks_for_max
 
-    def __init__(self, spectrum, prominence_threshold_min=0.15, prominence_threshold_max=0.40,
-                 min_height_threshold_denominator=3.0, max_height_threshold_denominator=3.3,
-                 min_distance_between_peaks=160, max_distance_between_peaks=160,
+    def __init__(self, spectrum, prominence_threshold_for_min=0.15, prominence_threshold_for_max=0.40,
+                 height_bottom_threshold_for_minimun=3.0, height_bottom_threshold_for_maximum=3.3,
+                 smallest_distance_between_peaks_for_min=160, smallest_distance_between_peaks_for_max=160,
                  min_wavelength=None, max_wavelength=None):
-        self.prominence_threshold_min = prominence_threshold_min
-        self.prominence_threshold_max = prominence_threshold_max
-        self.min_height_threshold_denominator = min_height_threshold_denominator
-        self.max_height_threshold_denominator = max_height_threshold_denominator
-        self.min_distance_between_peaks = min_distance_between_peaks
-        self.max_distance_between_peaks = max_distance_between_peaks
+        self.prominence_threshold_for_min = prominence_threshold_for_min
+        self.prominence_threshold_for_max = prominence_threshold_for_max
+        self.height_bottom_threshold_for_minimun = height_bottom_threshold_for_minimun
+        self.height_bottom_threshold_for_maximum = height_bottom_threshold_for_maximum
+        self.smallest_distance_between_peaks_for_min = smallest_distance_between_peaks_for_min
+        self.smallest_distance_between_peaks_for_max = smallest_distance_between_peaks_for_max
         self.spectrum = spectrum
 
     def get_spectrum(self):
@@ -60,7 +60,7 @@ class PeakList:
         return plot
 
     def get_minima(self, spectrum, min_wavelength=None, max_wavelength=None):
-        debug = True
+        debug = False
         df = spectrum.data
         if debug:
             print("min", min_wavelength, "max", max_wavelength)
@@ -79,8 +79,8 @@ class PeakList:
         y_inverted = -y + y_max
         maximum_height = y_inverted.max() #* 0.60
         minimum_height = 0
-        peaks_funct = scipy.signal.find_peaks(y_inverted, distance=self.min_distance_between_peaks,
-                                              prominence=self.prominence_threshold_min,
+        peaks_funct = scipy.signal.find_peaks(y_inverted, distance=self.smallest_distance_between_peaks_for_min,
+                                              prominence=self.prominence_threshold_for_min,
                                               height=(minimum_height, maximum_height))
         peaks_index = peaks_funct[0]
         x_values = x[peaks_index]
@@ -88,7 +88,7 @@ class PeakList:
         return peaks_index, x_values, y_values
 
     def get_maxima(self, spectrum, min_wavelength=None, max_wavelength=None):
-        debug = True
+        debug = False
         if debug:
             print("min", min_wavelength, "max", max_wavelength)
         df = spectrum.data
@@ -102,12 +102,12 @@ class PeakList:
             df2 = df
         x = df2["wavelength"].values
         y = df2[spectrum.metadata["measuring_mode"]].values
-        min_height = y.max() / self.min_height_threshold_denominator
+        min_height = y.max() / self.height_bottom_threshold_for_minimun
         min_distance = 50
         max_distance = 100.00
         width_t = 50.00
-        peaks_funct = scipy.signal.find_peaks(y, height=min_height, distance=self.max_distance_between_peaks,
-                                              prominence=self.prominence_threshold_max)
+        peaks_funct = scipy.signal.find_peaks(y, height=min_height, distance=self.smallest_distance_between_peaks_for_max,
+                                              prominence=self.prominence_threshold_for_max)
         peaks_index = peaks_funct[0]
         x_values = x[peaks_index]
         y_values = y[peaks_index]

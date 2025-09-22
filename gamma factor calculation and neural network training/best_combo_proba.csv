@@ -1,0 +1,16 @@
+true_label_id,true_label,p(chrysargyrea),p(optima),pred_label_id,pred_label,pred_confidence,correct
+1,optima,0.64756566,0.35243434,0,chrysargyrea,0.64756566,False
+0,chrysargyrea,0.6571584,0.34284166,0,chrysargyrea,0.6571584,True
+1,optima,0.6957236,0.3042764,0,chrysargyrea,0.6957236,False
+0,chrysargyrea,0.643594,0.35640594,0,chrysargyrea,0.643594,True
+0,chrysargyrea,0.668709,0.33129102,0,chrysargyrea,0.668709,True
+0,chrysargyrea,0.63844097,0.36155903,0,chrysargyrea,0.63844097,True
+1,optima,0.78596944,0.21403049,0,chrysargyrea,0.78596944,False
+0,chrysargyrea,0.65561783,0.3443821,0,chrysargyrea,0.65561783,True
+1,optima,0.64511883,0.3548812,0,chrysargyrea,0.64511883,False
+0,chrysargyrea,0.713859,0.28614095,0,chrysargyrea,0.713859,True
+0,chrysargyrea,0.70785564,0.29214442,0,chrysargyrea,0.70785564,True
+0,chrysargyrea,0.6875484,0.31245163,0,chrysargyrea,0.6875484,True
+1,optima,0.6825164,0.31748363,0,chrysargyrea,0.6825164,False
+0,chrysargyrea,0.680572,0.3194281,0,chrysargyrea,0.680572,True
+1,optima,0.67397827,0.3260217,0,chrysargyrea,0.67397827,False

@@ -35,7 +35,8 @@ regex_dict = {
     "cupreomarginata-3": r"cupreoT-averageL.csv",
     "cupreomarginata-4": r"(ojo)-ccupreomarginata-izquierdo-([LRTO]).csv",
     "resplendens-CVG": r"resplendensCVG([LOTR](total)*)CP.csv",
-    "avantes_avalight_filename_regex": r"([a-zA-Z\d\s]+)_([TBM])_(\d+SP)\.TXT"
+    "avantes_avalight_filename_regex": r"([a-zA-Z\d\s]+)_([TBM])_(\d+SP)\.TXT",
+    "avantes_avalight_filename_regex_complete_beetle": r"^(CICIMAUCR\d+)(?:\s+MAX\d*)?_(\d+SP)\.TXT$",
 }
 
 def integer_generator(start=0):
@@ -117,16 +118,31 @@ def check_l1050_file(file):
         match = re.search(regex, first_line)
         return bool(match)
 
-def check_avantes_avalight_file(file):
-    if Path(file).name.startswith("."):
+import re
+from pathlib import Path
+
+def check_avantes_avalight_file(file ):
+    """
+    Checks whether a given file matches any 'avantes_avalight' regex in regex_dict.
+    Returns True if a match is found, False otherwise.
+    """
+    
+    filename = Path(file).name
+
+    # Exclude hidden files and non-TXT files
+    if filename.startswith("."):
         return False
-    if not Path(file).name.endswith(".TXT"):
+    if not filename.upper().endswith(".TXT"):
         return False
-    with open(file) as f:
-        first_line = f.readline()
-        if not re.match(r"[a-zA-Z\d\s]+(_[TBM])?(_\d+SP)?\.TXT", Path(file).name):
-            return False
-        return True
+
+    # Check against all regexes containing 'avantes_avalight'
+    for key, pattern in regex_dict.items():
+        if "avantes_avalight" in key:
+            p = re.compile(pattern, re.IGNORECASE)
+            if p.fullmatch(filename):
+                return True
+
+    return False
 
 def check_empty_CRAIC_file(f):
     try:
@@ -169,7 +185,11 @@ def read_fluorometer_file(file):
 def read_avantes_avalight_file(file):
     return get_metadata_and_dataframe_avantes_avalight(file)
 
-def read_spectrum_file(file, debug = False):
+def read_spectrum_file(file):
+    debug = False
+    if debug:
+        print("read_spectrum_file: ",file)
+        
     if check_l1050_file(file):
         return read_l1050_file(file)
     elif check_CRAIC_file(file):
@@ -242,6 +262,10 @@ def get_CRAIC_info_from_filename(file):
     return get_info_from_format(basename)
 
 def get_info_from_format(string_line):
+    debug = False
+    if debug:
+        print("Get info from format")
+        print("String: ", string_line) 
     format_type = get_format(string_line)
     info = {
         "code": None,
@@ -375,6 +399,22 @@ def get_info_from_format(string_line):
             info["polarization"] = "T"
             info["original"] = True
             return info
+    if format_type == "avantes_avalight_filename_regex_complete_beetle":
+        if debug:
+            print("Regex match: avantes_avalight_filename_regex_complete_beetle")
+        p = re.compile(regex_dict[format_type])
+        m = p.fullmatch(string_line)
+        if m:
+            info["code"] = m.group(1)                 # specimen code, e.g. CICIMAUCR0016
+            info["spectrometer_name"] = m.group(2)    # spectrometer, e.g. 7314920SP
+            info["measuring_location"] = None         # not available in this filename
+            info["polarization"] = "T"                # default assumption
+            info["original"] = True
+            
+            if debug:
+                print("Info: ", info)
+            return info
+
     return info
 
 def get_code_from_format(string_line):
@@ -516,6 +556,7 @@ def get_metadata_and_dataframe_l1050(file_location):
     metadata["genus"] = "na"
     metadata["species"] = "na"
     metadata["polarization"] = "T"
+    metadata["equipment"] = "L1050"
     df = pd.read_csv(file_location, sep="\t", decimal=",", names=["wavelength", metadata["measuring_mode"]], skiprows=90, encoding="latin1").dropna()
     df["wavelength"], df[metadata["measuring_mode"]] = df["wavelength"].astype(float), df[metadata["measuring_mode"]].astype(float)
     df = df[df["wavelength"] < 2000].reset_index(drop=True)
@@ -546,6 +587,7 @@ def get_metadata_and_dataframe_fluorometer(file_location):
         lines = myfile.readlines()[0:51]
     metadata["header"] = "".join(lines)
     metadata["measuring_mode"] = "F"
+    metadata["equipment"] = "Fluorometer"
     with open(file_location, encoding="latin1") as f:
         for index, row in enumerate(f):
             row_str = row.strip()
@@ -643,7 +685,7 @@ def get_genus(code, collection):
     collection_metadata = collection.get_metadata()
     specimen = collection_metadata.loc[collection_metadata["code"].astype(str) == str(code), "genus"]
     if specimen.empty:
-        print(f"No genus data for {code} in collection {collection_name}")
+        print(f"Utils: No genus data for {code} in collection {collection_name}")
         return ""
     return str(specimen.iloc[0])
 

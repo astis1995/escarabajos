@@ -138,7 +138,20 @@ class Specimen_Collection:
                 return collection
         print(f"The provided code ({code}) is not in the collection list.")
         return None
-
+        
+    def sex_lookup(self, code, collection_list):
+        for collection in collection_list:
+            codes = list(collection.get_codes())
+            if code in codes:
+                metadata = collection.get_metadata()
+                try:
+                    sex_code = list(metadata.loc[metadata["code"].astype(str) == code, "sex_code"].values)[0]
+                    return sex_code
+                except Exception as e:
+                    print(f"Error retrieving species: {e}")
+                    return "na"
+        print(f"The provided code ({code}) is not in the collection list.")
+        return "na"
     def __str__(self):
         return self.name if self.name else "None"
 
